@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <com.zegocloud.uikit.components.audiovideo.ZegoAudioVideoView
+    android:id="@+id/audio_video_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+
+  <com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraFacingButton
+    android:id="@+id/camera_switch"
+    android:layout_width="42dp"
+    android:layout_height="42dp"
+    android:layout_marginTop="24dp"
+    android:layout_marginEnd="12dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <com.zegocloud.uikit.components.internal.RippleIconView
+    android:id="@+id/call_user_icon"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="136dp"
+    app:drawRipple="false"
+    app:circleRadius="50dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <TextView
+    android:id="@+id/call_user_name"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="37dp"
+    android:layout_marginTop="5dp"
+    android:layout_marginEnd="37dp"
+    android:ellipsize="end"
+    android:gravity="center"
+    android:maxLines="1"
+    android:singleLine="true"
+    android:text="User name"
+    android:textColor="#FFFFFF"
+    android:textSize="21sp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/call_user_icon" />
+
+  <TextView
+    android:id="@+id/call_state_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="24dp"
+    android:text="@string/calling"
+    android:textColor="#B2FFFFFF"
+    android:textSize="16sp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/call_user_name" />
+
+  <com.zegocloud.uikit.components.invite.ZegoCancelInvitationButton
+    android:id="@+id/call_waiting_cancel"
+    android:layout_width="60dp"
+    android:layout_height="60dp"
+    android:layout_marginBottom="52dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

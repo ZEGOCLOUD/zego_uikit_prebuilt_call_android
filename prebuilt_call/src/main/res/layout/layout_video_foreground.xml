@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="wrap_content"
+  android:layout_height="23dp"
+  android:background="@drawable/background_video_foreground"
+  android:gravity="center_vertical"
+  android:orientation="horizontal"
+  android:paddingStart="5dp"
+  android:paddingEnd="5dp">
+
+  <TextView
+    android:id="@+id/foreground_textview"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:ellipsize="end"
+    android:maxLines="1"
+    android:singleLine="true"
+    android:textColor="@android:color/white"
+    android:textSize="12sp" />
+
+  <com.zegocloud.uikit.components.audiovideo.ZegoCameraStateView
+    android:id="@+id/foreground_camera"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+
+  <com.zegocloud.uikit.components.audiovideo.ZegoMicrophoneStateView
+    android:id="@+id/foreground_mic"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+</LinearLayout>
