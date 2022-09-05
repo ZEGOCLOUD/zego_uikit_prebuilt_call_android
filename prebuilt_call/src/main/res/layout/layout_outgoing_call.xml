@@ -9,7 +9,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
 
-  <com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraFacingButton
+  <com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraButton
     android:id="@+id/camera_switch"
     android:layout_width="42dp"
     android:layout_height="42dp"

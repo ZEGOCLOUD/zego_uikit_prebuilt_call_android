@@ -25,6 +25,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.permissionx.guolindev.PermissionX;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.components.audiovideo.ZegoViewProvider;
+import com.zegocloud.uikit.components.audiovideocontainer.ZegoAudioVideoViewConfig;
 import com.zegocloud.uikit.prebuilt.call.databinding.FragmentCallBinding;
 import com.zegocloud.uikit.prebuilt.call.internal.CallViewModel;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoVideoForegroundView;
@@ -175,47 +176,32 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         mViewModel.getConfigLiveData().observe(getViewLifecycleOwner(), new Observer<ZegoUIKitPrebuiltCallConfig>() {
             @Override
             public void onChanged(ZegoUIKitPrebuiltCallConfig config) {
-                if (config.menuBarButtonsMaxCount != 0) {
-                    binding.bottomMenuBar.setLimitedCount(config.menuBarButtonsMaxCount);
+                if (config.bottomMenuBarConfig.maxCount != 0) {
+                    binding.bottomMenuBar.setLimitedCount(config.bottomMenuBarConfig.maxCount);
                 }
-                binding.bottomMenuBar.setButtons(config.menuBarButtons);
-                binding.bottomMenuBar.setOnClickListener(ZegoMenuBarButtonName.HANG_UP_BUTTON, new OnClickListener() {
-                    @Override
-
-                    public void onClick(View v) {
-                        if (hangupListener != null) {
-                            hangupListener.onHangUp();
-                        } else {
-                            requireActivity().finish();
-                        }
-                    }
-                });
-                binding.bottomMenuBar.setOnClickListener(ZegoMenuBarButtonName.HANG_UP_BUTTON, new OnClickListener() {
-                    @Override
-
-                    public void onClick(View v) {
-                        InvitationServiceImpl.getInstance().setCallState(
-                            InvitationServiceImpl.NONE_HANG_UP);
-                        if (hangupListener != null) {
-                            hangupListener.onHangUp();
-                        } else {
-                            requireActivity().finish();
-                        }
+                binding.bottomMenuBar.setButtons(config.bottomMenuBarConfig.menuBarButtons);
+                binding.bottomMenuBar.setHangUpConfirmDialogInfo(config.hangUpConfirmDialogInfo);
+                binding.bottomMenuBar.setHangUpListener(() -> {
+                    InvitationServiceImpl.getInstance().setCallState(InvitationServiceImpl.NONE_HANG_UP);
+                    if (hangupListener != null) {
+                        hangupListener.onHangUp();
+                    } else {
+                        requireActivity().finish();
                     }
                 });
 
                 ZegoUIKit.turnCameraOn(userID, config.turnOnCameraWhenJoining);
                 ZegoUIKit.turnMicrophoneOn(userID, config.turnOnMicrophoneWhenJoining);
                 ZegoUIKit.setAudioOutputToSpeaker(config.useSpeakerWhenJoining);
-                showBars(config.hideMenuBarAutomatically);
+                showBars(config.bottomMenuBarConfig.hideAutomatically);
                 setForegroundViewProvider(new ZegoViewProvider() {
                     @Override
                     public View getForegroundView(ZegoUIKitUser userInfo) {
                         ZegoVideoForegroundView foregroundView = new ZegoVideoForegroundView(getContext(),
                             userInfo);
-                        foregroundView.showMicrophone(config.showMicrophoneStateOnView);
-                        foregroundView.showCamera(config.showCameraStateOnView);
-                        foregroundView.showUserName(config.showUserNameOnView);
+                        foregroundView.showMicrophone(config.audioVideoViewConfig.showMicrophoneStateOnView);
+                        foregroundView.showCamera(config.audioVideoViewConfig.showCameraStateOnView);
+                        foregroundView.showUserName(config.audioVideoViewConfig.showUserNameOnView);
                         return foregroundView;
                     }
                 });
@@ -223,28 +209,29 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                     binding.bottomMenuBar.addButtons(menuBarExtendedButtons);
                 }
                 binding.avcontainer.setLayout(config.layout);
+                ZegoAudioVideoViewConfig audioVideoViewConfig = new ZegoAudioVideoViewConfig();
+                audioVideoViewConfig.showSoundWavesInAudioMode = config.audioVideoViewConfig.showSoundWavesInAudioMode;
+                audioVideoViewConfig.useVideoViewAspectFill = config.audioVideoViewConfig.useVideoViewAspectFill;
+                binding.avcontainer.setAudioVideoConfig(audioVideoViewConfig);
             }
         });
         binding.getRoot().setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (binding.bottomMenuBar.getVisibility() == View.VISIBLE) {
-                    if (config.hideMenuBardByClick) {
+                    if (config.bottomMenuBarConfig.hideByClick) {
                         hideBarInner();
                     }
                 } else {
-                    showBars(config.hideMenuBarAutomatically);
+                    showBars(config.bottomMenuBarConfig.hideAutomatically);
                 }
             }
         });
-        ZegoUIKit.addOnOnlySelfInRoomListener(new OnlySelfInRoomListener() {
-            @Override
-            public void onOnlySelfInRoom() {
-                if (onlySelfInRoomListener != null) {
-                    onlySelfInRoomListener.onOnlySelfInRoom();
-                } else {
-                    requireActivity().finish();
-                }
+        ZegoUIKit.addOnOnlySelfInRoomListener(() -> {
+            if (onlySelfInRoomListener != null) {
+                onlySelfInRoomListener.onOnlySelfInRoom();
+            } else {
+                requireActivity().finish();
             }
         });
         boolean permissionGranted =
@@ -272,7 +259,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         }
     }
 
-    private void showQuitDialog(String title, String message, String positiveText, String negativeText) {
+    private void
+    showQuitDialog(String title, String message, String positiveText, String negativeText) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext());
         builder.setTitle(title);
         builder.setMessage(message);
@@ -357,7 +345,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         return result;
     }
 
-    public void addButtonToMenuBar(List<View> viewList) {
+    public void addButtonToBottomMenuBar(List<View> viewList) {
         menuBarExtendedButtons.addAll(viewList);
         if (binding != null) {
             binding.bottomMenuBar.addButtons(viewList);
