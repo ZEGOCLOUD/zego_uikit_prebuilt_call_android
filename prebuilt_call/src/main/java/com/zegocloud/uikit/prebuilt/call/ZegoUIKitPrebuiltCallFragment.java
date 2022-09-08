@@ -179,7 +179,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 if (config.bottomMenuBarConfig.maxCount != 0) {
                     binding.bottomMenuBar.setLimitedCount(config.bottomMenuBarConfig.maxCount);
                 }
-                binding.bottomMenuBar.setButtons(config.bottomMenuBarConfig.menuBarButtons);
+                binding.bottomMenuBar.setButtons(config.bottomMenuBarConfig.buttons);
                 binding.bottomMenuBar.setHangUpConfirmDialogInfo(config.hangUpConfirmDialogInfo);
                 binding.bottomMenuBar.setHangUpListener(() -> {
                     InvitationServiceImpl.getInstance().setCallState(InvitationServiceImpl.NONE_HANG_UP);
