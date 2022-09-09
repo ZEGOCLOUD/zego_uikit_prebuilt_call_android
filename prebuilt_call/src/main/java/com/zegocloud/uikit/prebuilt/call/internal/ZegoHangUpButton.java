@@ -35,7 +35,6 @@ public class ZegoHangUpButton extends ZegoLeaveButton {
         if (isActivity && hangUpConfirmDialogInfo != null) {
             showQuitDialog(hangUpConfirmDialogInfo);
         } else {
-            super.invokedWhenClick();
             if (hangUpListener != null) {
                 hangUpListener.onHangUp();
             }
@@ -53,7 +52,6 @@ public class ZegoHangUpButton extends ZegoLeaveButton {
         builder.setPositiveButton(dialogInfo.confirmButtonName, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                ZegoUIKit.leaveRoom();
                 if (hangUpListener != null) {
                     hangUpListener.onHangUp();
                 }

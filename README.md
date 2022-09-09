@@ -30,7 +30,7 @@ allprojects {
 ```groovy
 dependencies {
     ...
-    implementation 'com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android:1.0.0'    // add this line in your module-level build.gradle file's dependencies, usually named [app].
+    implementation 'com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android:1.0.2'    // add this line in your module-level build.gradle file's dependencies, usually named [app].
 }
 ```  
 

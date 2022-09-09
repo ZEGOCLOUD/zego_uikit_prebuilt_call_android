@@ -3,10 +3,7 @@ package com.zegocloud.uikit.prebuilt.call;
 import android.Manifest;
 import android.Manifest.permission;
 import android.app.Application;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Resources;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -139,7 +136,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(CallViewModel.class);
         binding.avcontainer.setForegroundViewProvider(provider);
-        hideSystemNavigationBar();
         String callID = getArguments().getString("callID");
         if (!TextUtils.isEmpty(callID)) {
             ZegoUIKit.joinRoom(callID, new ZegoUIKitCallback() {
@@ -153,16 +149,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 }
             });
         }
-    }
-
-    private void hideSystemNavigationBar() {
-        int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        binding.getRoot().setSystemUiVisibility(uiOptions);
-
-        int statusBarHeight = getInternalDimensionSize(getContext(), "status_bar_height");
-        binding.getRoot().setPadding(0, statusBarHeight, 0, 0);
     }
 
     private void onRoomJoinFailed() {
@@ -186,6 +172,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                     if (hangupListener != null) {
                         hangupListener.onHangUp();
                     } else {
+                        ZegoUIKit.leaveRoom();
                         requireActivity().finish();
                     }
                 });
@@ -319,30 +306,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
     public void setOnHangUpListener(HangUpListener listener) {
         this.hangupListener = listener;
-    }
-
-    static int getInternalDimensionSize(Context context, String key) {
-        int result = 0;
-        try {
-            int resourceId = Resources.getSystem().getIdentifier(key, "dimen", "android");
-            if (resourceId > 0) {
-                int sizeOne = context.getResources().getDimensionPixelSize(resourceId);
-                int sizeTwo = Resources.getSystem().getDimensionPixelSize(resourceId);
-
-                if (sizeTwo >= sizeOne && !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                    !key.equals("status_bar_height"))) {
-                    return sizeTwo;
-                } else {
-                    float densityOne = context.getResources().getDisplayMetrics().density;
-                    float densityTwo = Resources.getSystem().getDisplayMetrics().density;
-                    float f = sizeOne * densityTwo / densityOne;
-                    return (int) ((f >= 0) ? (f + 0.5f) : (f - 0.5f));
-                }
-            }
-        } catch (Resources.NotFoundException ignored) {
-            return 0;
-        }
-        return result;
     }
 
     public void addButtonToBottomMenuBar(List<View> viewList) {
