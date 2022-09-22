@@ -1,4 +1,4 @@
-package com.zegocloud.uikit.prebuilt.callinvite.internal;
+package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -20,16 +20,16 @@ import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.databinding.LayoutOutgoingCallBinding;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 
-public class PrebuiltCallWaitingFragment extends Fragment {
+public class CallWaitingFragment extends Fragment {
 
     private LayoutOutgoingCallBinding binding;
     private OnBackPressedCallback onBackPressedCallback;
 
-    public PrebuiltCallWaitingFragment() {
+    public CallWaitingFragment() {
     }
 
-    public static PrebuiltCallWaitingFragment newInstance(CallInvitation invitation) {
-        PrebuiltCallWaitingFragment fragment = new PrebuiltCallWaitingFragment();
+    public static CallWaitingFragment newInstance(CallInvitation invitation) {
+        CallWaitingFragment fragment = new CallWaitingFragment();
         Bundle args = new Bundle();
         args.putParcelable("invitation", invitation);
         fragment.setArguments(args);

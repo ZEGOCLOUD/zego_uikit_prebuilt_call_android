@@ -1,4 +1,4 @@
-package com.zegocloud.uikit.prebuilt.callinvite.internal;
+package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
@@ -10,16 +10,16 @@ import androidx.appcompat.app.AlertDialog.Builder;
 import com.zegocloud.uikit.components.invite.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.databinding.ActivityZegoCallInvitationDialogBinding;
-import com.zegocloud.uikit.prebuilt.callinvite.ZegoCallInvitationData;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 
-public class ZegoCallInvitationDialog {
+public class CallInvitationDialog {
 
     private Context context;
     private ZegoCallInvitationData invitationData;
     private ActivityZegoCallInvitationDialogBinding binding;
     private AlertDialog alertDialog;
 
-    public ZegoCallInvitationDialog(Context context, ZegoCallInvitationData invitationData) {
+    public CallInvitationDialog(Context context, ZegoCallInvitationData invitationData) {
         this.context = context;
         this.invitationData = invitationData;
         binding = ActivityZegoCallInvitationDialogBinding.inflate(LayoutInflater.from(context));
@@ -45,7 +45,7 @@ public class ZegoCallInvitationDialog {
         binding.dialogCallAccept.setOnClickListener(v -> {
             hide();
             CallInvitation invitation = CallInvitation.getFromZegoCallInvitationData(invitationData);
-            UIKitPrebuiltCallInviteActivity.startActivity(context, invitation, false);
+            CallInviteActivity.startActivity(context, invitation, false);
             RingtoneManager.stopRingTone();
             InvitationServiceImpl.getInstance().setCallState(InvitationServiceImpl.CONNECTED);
         });

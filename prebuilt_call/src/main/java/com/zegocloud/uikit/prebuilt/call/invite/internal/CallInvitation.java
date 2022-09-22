@@ -1,8 +1,8 @@
-package com.zegocloud.uikit.prebuilt.callinvite.internal;
+package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import com.zegocloud.uikit.prebuilt.callinvite.ZegoCallInvitationData;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.List;
 
@@ -23,17 +23,18 @@ public class CallInvitation implements Parcelable {
         this.inviteUser = inviteUser;
     }
 
-    public static ZegoCallInvitationData convertToZegoCallInvitationData(CallInvitation zegoInvitation) {
+    public static ZegoCallInvitationData convertToZegoCallInvitationData(
+        CallInvitation zegoInvitation) {
         ZegoCallInvitationData invitationData = new ZegoCallInvitationData();
         invitationData.invitees = zegoInvitation.invitees;
         invitationData.inviter = zegoInvitation.inviteUser;
         invitationData.type = zegoInvitation.type;
-        invitationData.roomID = zegoInvitation.roomID;
+        invitationData.conferenceID = zegoInvitation.roomID;
         return invitationData;
     }
 
     public static CallInvitation getFromZegoCallInvitationData(ZegoCallInvitationData zegoInvitation) {
-        CallInvitation invitationData = new CallInvitation(zegoInvitation.roomID, zegoInvitation.type,
+        CallInvitation invitationData = new CallInvitation(zegoInvitation.conferenceID, zegoInvitation.type,
             zegoInvitation.invitees, 60, zegoInvitation.inviter);
         return invitationData;
     }

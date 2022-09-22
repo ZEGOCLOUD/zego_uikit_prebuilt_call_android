@@ -1,4 +1,4 @@
-package com.zegocloud.uikit.prebuilt.callinvite.internal;
+package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,25 +9,25 @@ import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
-import com.zegocloud.uikit.prebuilt.callinvite.ZegoCallInvitationData;
-import com.zegocloud.uikit.service.defines.InvitationListener;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
+import com.zegocloud.uikit.service.defines.ZegoInvitationListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.List;
 
-public class UIKitPrebuiltCallInviteActivity extends AppCompatActivity {
+public class CallInviteActivity extends AppCompatActivity {
 
     private CallInvitation zegoInvitation;
 
     public static void startActivity(Context context, CallInvitation invitation, boolean waitingPage) {
         Log.d(Constants.TAG, "startActivity() called with: context = [" + context + "], invitation = [" + invitation
             + "], waitingPage = [" + waitingPage + "]");
-        Intent intent = new Intent(context, UIKitPrebuiltCallInviteActivity.class);
+        Intent intent = new Intent(context, CallInviteActivity.class);
         intent.putExtra("invitation", invitation);
         intent.putExtra("waitingPage", waitingPage);
         context.startActivity(intent);
     }
 
-    private InvitationListener invitationListener = new InvitationListener() {
+    private ZegoInvitationListener invitationListener = new ZegoInvitationListener() {
         @Override
         public void onInvitationReceived(ZegoUIKitUser inviter, int type, String data) {
 
@@ -90,7 +90,7 @@ public class UIKitPrebuiltCallInviteActivity extends AppCompatActivity {
     }
 
     private void showWaitingFragment() {
-        PrebuiltCallWaitingFragment fragment = PrebuiltCallWaitingFragment.newInstance(zegoInvitation);
+        CallWaitingFragment fragment = CallWaitingFragment.newInstance(zegoInvitation);
         getSupportFragmentManager().beginTransaction()
             .replace(R.id.call_fragment_container, fragment)
             .commitNow();

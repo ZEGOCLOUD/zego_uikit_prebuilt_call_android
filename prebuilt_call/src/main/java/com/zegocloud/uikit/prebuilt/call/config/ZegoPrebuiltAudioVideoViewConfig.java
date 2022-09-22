@@ -1,4 +1,4 @@
-package com.zegocloud.uikit.prebuilt.call;
+package com.zegocloud.uikit.prebuilt.call.config;
 
 import java.io.Serializable;
 
@@ -7,5 +7,5 @@ public class ZegoPrebuiltAudioVideoViewConfig implements Serializable {
     public boolean showCameraStateOnView = false;
     public boolean showUserNameOnView = true;
     public boolean showSoundWavesInAudioMode = true;
-    public boolean useVideoViewAspectFill = true;
+    public boolean useVideoViewAspectFill = false;
 }

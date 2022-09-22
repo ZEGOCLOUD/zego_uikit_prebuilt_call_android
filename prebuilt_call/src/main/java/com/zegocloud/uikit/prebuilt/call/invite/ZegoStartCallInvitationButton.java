@@ -1,4 +1,4 @@
-package com.zegocloud.uikit.prebuilt.callinvite;
+package com.zegocloud.uikit.prebuilt.call.invite;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -7,10 +7,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.zegocloud.uikit.components.invite.ZegoInvitationType;
 import com.zegocloud.uikit.components.invite.ZegoStartInvitationButton;
-import com.zegocloud.uikit.prebuilt.callinvite.internal.CallInvitation;
-import com.zegocloud.uikit.prebuilt.callinvite.internal.Constants;
-import com.zegocloud.uikit.prebuilt.callinvite.internal.InvitationServiceImpl;
-import com.zegocloud.uikit.prebuilt.callinvite.internal.UIKitPrebuiltCallInviteActivity;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.Constants;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.InvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitation;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import com.zegocloud.uikit.service.internal.UIKitCore;
 import com.zegocloud.uikit.service.internal.UIKitCoreUser;
@@ -80,7 +80,7 @@ public class ZegoStartCallInvitationButton extends ZegoStartInvitationButton {
         if (localCoreUser != null) {
             CallInvitation invitation = new CallInvitation(roomID, type, invitees, timeout,
                 localCoreUser.getUIKitUser());
-            UIKitPrebuiltCallInviteActivity.startActivity(getContext(), invitation, true);
+            CallInviteActivity.startActivity(getContext(), invitation, true);
         } else {
             Log.e(Constants.TAG, "please call ZegoUIKit.login(String,String) first");
         }

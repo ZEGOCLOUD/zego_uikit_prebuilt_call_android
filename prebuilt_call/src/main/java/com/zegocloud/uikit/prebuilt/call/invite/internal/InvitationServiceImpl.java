@@ -1,11 +1,11 @@
-package com.zegocloud.uikit.prebuilt.callinvite.internal;
+package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
 import android.app.Activity;
 import android.app.Application;
 import com.zegocloud.uikit.ZegoUIKit;
-import com.zegocloud.uikit.prebuilt.callinvite.ZegoCallInvitationData;
-import com.zegocloud.uikit.prebuilt.callinvite.ZegoUIKitPrebuiltCallConfigProvider;
-import com.zegocloud.uikit.service.defines.InvitationListener;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallConfigProvider;
+import com.zegocloud.uikit.service.defines.ZegoInvitationListener;
 import com.zegocloud.uikit.service.defines.ZegoScenario;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ public class InvitationServiceImpl {
     public String userName;
 
     public AppActivityManager appActivityManager;
-    private ZegoCallInvitationDialog invitationDialog;
+    private CallInvitationDialog invitationDialog;
     private ZegoUIKitPrebuiltCallConfigProvider provider;
     public static final int NONE_CALL_NO_REPLY = -5;
     public static final int NONE_RECEIVE_MISSED = -4;
@@ -47,7 +47,7 @@ public class InvitationServiceImpl {
     public static final int INCOMING = 3;
     private int callState = NONE;
 
-    private InvitationListener invitationListener = new InvitationListener() {
+    private ZegoInvitationListener invitationListener = new ZegoInvitationListener() {
         @Override
         public void onInvitationReceived(ZegoUIKitUser inviter, int type, String data) {
             if (callState > 0) {
@@ -69,11 +69,11 @@ public class InvitationServiceImpl {
                         list.add(new ZegoUIKitUser(user_id, user_name));
                     }
                     ZegoCallInvitationData invitationData = new ZegoCallInvitationData();
-                    invitationData.roomID = jsonObject.getString("call_id");
+                    invitationData.conferenceID = jsonObject.getString("call_id");
                     invitationData.invitees = list;
                     invitationData.inviter = inviter;
                     invitationData.type = type;
-                    invitationDialog = new ZegoCallInvitationDialog(topActivity, invitationData);
+                    invitationDialog = new CallInvitationDialog(topActivity, invitationData);
                     invitationDialog.show();
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -139,7 +139,7 @@ public class InvitationServiceImpl {
         ZegoUIKit.removeInvitationListener(invitationListener);
     }
 
-    public void setPrebuiltCallConfigProvider(ZegoUIKitPrebuiltCallConfigProvider provider) {
+    public void setPrebuiltConfigProvider(ZegoUIKitPrebuiltCallConfigProvider provider) {
         this.provider = provider;
     }
 

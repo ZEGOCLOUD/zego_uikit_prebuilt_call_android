@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content">
+
+  <LinearLayout
+    android:id="@+id/memberlist_layout"
+    android:layout_width="match_parent"
+    android:layout_height="571dp"
+    android:background="@drawable/background_memberlist"
+    android:orientation="vertical">
+
+    <RelativeLayout
+      android:id="@+id/memberlist_title"
+      android:layout_width="match_parent"
+      android:layout_height="49dp">
+
+      <ImageView
+        android:id="@+id/memberlist_down"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="12dp"
+        android:src="@drawable/icon_down" />
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="5dp"
+        android:layout_toEndOf="@id/memberlist_down"
+        android:text="@string/memberlist_title"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+    </RelativeLayout>
+
+    <View
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:background="#26ffffff" />
+
+    <com.zegocloud.uikit.components.common.ZegoMemberList
+      android:id="@+id/memberlist"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_marginTop="12dp" />
+  </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

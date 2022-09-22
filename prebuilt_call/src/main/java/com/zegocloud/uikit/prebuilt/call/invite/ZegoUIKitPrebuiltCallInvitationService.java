@@ -1,7 +1,7 @@
-package com.zegocloud.uikit.prebuilt.callinvite;
+package com.zegocloud.uikit.prebuilt.call.invite;
 
 import android.app.Application;
-import com.zegocloud.uikit.prebuilt.callinvite.internal.InvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.InvitationServiceImpl;
 
 public class ZegoUIKitPrebuiltCallInvitationService {
 
@@ -14,6 +14,6 @@ public class ZegoUIKitPrebuiltCallInvitationService {
     }
 
     public static void setPrebuiltCallConfigProvider(ZegoUIKitPrebuiltCallConfigProvider provider) {
-        InvitationServiceImpl.getInstance().setPrebuiltCallConfigProvider(provider);
+        InvitationServiceImpl.getInstance().setPrebuiltConfigProvider(provider);
     }
 }

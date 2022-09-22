@@ -6,7 +6,7 @@
 
   <application>
     <activity
-      android:name="com.zegocloud.uikit.prebuilt.callinvite.internal.UIKitPrebuiltCallInviteActivity"
+      android:name="com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity"
       android:exported="false" />
   </application>
 

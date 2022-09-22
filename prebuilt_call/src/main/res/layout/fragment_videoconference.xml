@@ -10,7 +10,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
 
-  <com.zegocloud.uikit.prebuilt.call.internal.TopBar
+  <com.zegocloud.uikit.prebuilt.call.internal.TopMenuBar
     android:id="@+id/top_menu_bar"
     android:layout_width="match_parent"
     android:layout_height="44dp"
@@ -19,7 +19,7 @@
   <com.zegocloud.uikit.prebuilt.call.internal.BottomMenuBar
     android:id="@+id/bottom_menu_bar"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="104dp"
     app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

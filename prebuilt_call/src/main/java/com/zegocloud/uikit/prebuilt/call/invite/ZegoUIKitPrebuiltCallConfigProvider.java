@@ -1,4 +1,4 @@
-package com.zegocloud.uikit.prebuilt.callinvite;
+package com.zegocloud.uikit.prebuilt.call.invite;
 
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 

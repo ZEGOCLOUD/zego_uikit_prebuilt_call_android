@@ -7,6 +7,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,28 +17,33 @@ import com.zegocloud.uikit.components.audiovideo.ZegoSwitchAudioOutputButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleMicrophoneButton;
+import com.zegocloud.uikit.components.common.ZegoMemberListItemProvider;
 import com.zegocloud.uikit.prebuilt.call.R;
-import com.zegocloud.uikit.prebuilt.call.ZegoHangUpConfirmDialogInfo;
-import com.zegocloud.uikit.prebuilt.call.ZegoMenuBarButtonName;
-import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.HangUpListener;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCallListener;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoBottomMenuBarConfig;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoMemberListConfig;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
 import com.zegocloud.uikit.utils.Utils;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class BottomMenuBar extends LinearLayout {
 
-    private Map<ZegoMenuBarButtonName, OnClickListener> clickListenerMap = new HashMap();
     private float downY;
     private float currentY;
-    private int limitedCount = 5;
-    private List<ZegoMenuBarButtonName> zegoMenuBarButtons = new ArrayList<>();
     private List<View> showList = new ArrayList<>();
     private List<View> hideList = new ArrayList<>();
     private MoreDialog moreDialog;
     private ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo;
-    private HangUpListener hangUpListener;
+    private LeaveCallListener hangUpListener;
+    private ZegoBottomMenuBarConfig menuBarConfig;
+    private static final long HIDE_DELAY_TIME = 5000;
+    private Runnable runnable;
+    private ZegoCallMemberList memberList;
+    private ZegoMemberListItemProvider memberListItemProvider;
+    private ZegoMemberListConfig memberListConfig;
 
     public BottomMenuBar(@NonNull Context context) {
         super(context);
@@ -58,19 +64,17 @@ public class BottomMenuBar extends LinearLayout {
         setOrientation(LinearLayout.HORIZONTAL);
         setLayoutParams(new LayoutParams(-1, -2));
         setGravity(Gravity.CENTER_HORIZONTAL);
+        runnable = () -> setVisibility(View.GONE);
     }
 
-    public void setButtons(List<ZegoMenuBarButtonName> zegoMenuBarButtons) {
-        this.zegoMenuBarButtons.clear();
-        this.zegoMenuBarButtons.addAll(zegoMenuBarButtons);
-
+    private void applyMenuBarButtons(List<ZegoMenuBarButtonName> zegoMenuBarButtons) {
         showList.clear();
         hideList.clear();
         List<View> menuBarViews = getMenuBarViews(zegoMenuBarButtons);
-        if (zegoMenuBarButtons.size() <= limitedCount) {
+        if (zegoMenuBarButtons.size() <= menuBarConfig.maxCount) {
             showList.addAll(menuBarViews);
         } else {
-            int showChildCount = limitedCount - 1;
+            int showChildCount = menuBarConfig.maxCount - 1;
             if (showChildCount > 0) {
                 showList.addAll(menuBarViews.subList(0, showChildCount));
                 hideList = menuBarViews.subList(showChildCount, menuBarViews.size());
@@ -82,56 +86,29 @@ public class BottomMenuBar extends LinearLayout {
 
     private List<View> getMenuBarViews(List<ZegoMenuBarButtonName> list) {
         List<View> viewList = new ArrayList<>();
-        for (ZegoMenuBarButtonName zegoMenuBarButton : list) {
-            View viewFromType = getViewFromType(zegoMenuBarButton);
-            //            OnClickListener onClickListener = clickListenerMap.get(zegoMenuBarButton);
-            //            if (onClickListener != null) {
-            //                viewFromType.setOnClickListener(new OnClickListener() {
-            //                    @Override
-            //                    public void onClick(View v) {
-            //                        onClickListener.onClick(v);
-            //                    }
-            //                });
-            //            }
-            viewList.add(viewFromType);
+        if (list != null && list.size() > 0) {
+            for (ZegoMenuBarButtonName zegoMenuBarButton : list) {
+                View viewFromType = getViewFromType(zegoMenuBarButton);
+                viewList.add(viewFromType);
+            }
         }
         return viewList;
     }
 
-    private void resetVisibleChildren(List<View> viewList) {
-        removeAllViews();
-        for (int i = 0; i < viewList.size(); i++) {
-            LayoutParams params = generateChildLayoutParams();
-            if (i != 0) {
-                int marginStart = Utils.dp2px(23f, getResources().getDisplayMetrics());
-                if (viewList.size() == 2) {
-                    marginStart = Utils.dp2px(79f, getResources().getDisplayMetrics());
-                } else if (viewList.size() == 3) {
-                    marginStart = Utils.dp2px(59.5f, getResources().getDisplayMetrics());
-                } else if (viewList.size() == 4) {
-                    marginStart = Utils.dp2px(37f, getResources().getDisplayMetrics());
-                }
-                params.setMarginStart(marginStart);
-            }
-            View view = viewList.get(i);
-            addView(view, params);
-        }
-    }
-
-    public void setHangUpListener(HangUpListener listener) {
+    public void setHangUpListener(LeaveCallListener listener) {
         this.hangUpListener = listener;
         boolean find = false;
         for (View view : showList) {
-            if (view instanceof ZegoHangUpButton) {
-                ((ZegoHangUpButton) view).setHangUpListener(hangUpListener);
+            if (view instanceof ZegoLeaveCallButton) {
+                ((ZegoLeaveCallButton) view).setLeaveListener(hangUpListener);
                 find = true;
                 break;
             }
         }
         if (!find) {
             for (View view : hideList) {
-                if (view instanceof ZegoHangUpButton) {
-                    ((ZegoHangUpButton) view).setHangUpListener(hangUpListener);
+                if (view instanceof ZegoLeaveCallButton) {
+                    ((ZegoLeaveCallButton) view).setLeaveListener(hangUpListener);
                     find = true;
                     break;
                 }
@@ -143,48 +120,22 @@ public class BottomMenuBar extends LinearLayout {
         this.hangUpConfirmDialogInfo = dialogInfo;
         boolean find = false;
         for (View view : showList) {
-            if (view instanceof ZegoHangUpButton) {
-                ((ZegoHangUpButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
+            if (view instanceof ZegoLeaveCallButton) {
+                ((ZegoLeaveCallButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
                 find = true;
                 break;
             }
         }
         if (!find) {
             for (View view : hideList) {
-                if (view instanceof ZegoHangUpButton) {
-                    ((ZegoHangUpButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
+                if (view instanceof ZegoLeaveCallButton) {
+                    ((ZegoLeaveCallButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
                     find = true;
                     break;
                 }
             }
         }
     }
-
-    //    public void setOnClickListener(ZegoMenuBarButtonName buttonName, View.OnClickListener onClickListener) {
-    //        clickListenerMap.put(buttonName, onClickListener);
-    //        for (View view : showList) {
-    //            if (Objects.equals(view.getTag(), buttonName)) {
-    //                view.setOnClickListener(new OnClickListener() {
-    //                    @Override
-    //                    public void onClick(View v) {
-    //                        onClickListener.onClick(v);
-    //                    }
-    //                });
-    //                break;
-    //            }
-    //        }
-    //        for (View view : hideList) {
-    //            if (Objects.equals(view.getTag(), buttonName)) {
-    //                view.setOnClickListener(new OnClickListener() {
-    //                    @Override
-    //                    public void onClick(View v) {
-    //                        onClickListener.onClick(v);
-    //                    }
-    //                });
-    //                break;
-    //            }
-    //        }
-    //    }
 
     private LayoutParams generateChildLayoutParams() {
         int size = Utils.dp2px(48f, getResources().getDisplayMetrics());
@@ -209,16 +160,26 @@ public class BottomMenuBar extends LinearLayout {
                 view = new ZegoSwitchCameraButton(getContext());
                 break;
             case HANG_UP_BUTTON:
-                view = new ZegoHangUpButton(getContext());
+                view = new ZegoLeaveCallButton(getContext());
                 if (hangUpConfirmDialogInfo != null) {
-                    ((ZegoHangUpButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
+                    ((ZegoLeaveCallButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
                 }
                 if (hangUpListener != null) {
-                    ((ZegoHangUpButton) view).setHangUpListener(hangUpListener);
+                    ((ZegoLeaveCallButton) view).setLeaveListener(hangUpListener);
                 }
                 break;
             case SWITCH_AUDIO_OUTPUT_BUTTON:
                 view = new ZegoSwitchAudioOutputButton(getContext());
+                break;
+            case SHOW_MEMBER_LIST_BUTTON:
+                view = new ImageView(getContext());
+                ((ImageView) view).setImageResource(R.drawable.icon_member_normal);
+                view.setOnClickListener(v -> {
+                    memberList = new ZegoCallMemberList(getContext());
+                    memberList.setMemberListItemViewProvider(memberListItemProvider);
+                    memberList.setMemberListConfig(memberListConfig);
+                    memberList.show();
+                });
                 break;
         }
         if (view != null) {
@@ -228,11 +189,8 @@ public class BottomMenuBar extends LinearLayout {
     }
 
     public void addButtons(List<View> viewList) {
-        if (viewList.size() == 0) {
-            return;
-        }
         for (View view : viewList) {
-            if (showList.size() < limitedCount) {
+            if (showList.size() < menuBarConfig.maxCount) {
                 showList.add(view);
             } else {
                 View lastView = showList.get(showList.size() - 1);
@@ -258,7 +216,23 @@ public class BottomMenuBar extends LinearLayout {
     }
 
     private void notifyListChanged() {
-        resetVisibleChildren(showList);
+        removeAllViews();
+        for (int i = 0; i < showList.size(); i++) {
+            LayoutParams params = generateChildLayoutParams();
+            if (i != 0) {
+                int marginStart = Utils.dp2px(23f, getResources().getDisplayMetrics());
+                if (showList.size() == 2) {
+                    marginStart = Utils.dp2px(79f, getResources().getDisplayMetrics());
+                } else if (showList.size() == 3) {
+                    marginStart = Utils.dp2px(59.5f, getResources().getDisplayMetrics());
+                } else if (showList.size() == 4) {
+                    marginStart = Utils.dp2px(37f, getResources().getDisplayMetrics());
+                }
+                params.setMarginStart(marginStart);
+            }
+            View view = showList.get(i);
+            addView(view, params);
+        }
         if (moreDialog != null) {
             moreDialog.setHideChildren(hideList);
         }
@@ -282,8 +256,41 @@ public class BottomMenuBar extends LinearLayout {
         return super.onTouchEvent(event);
     }
 
-    public void setLimitedCount(int limitedCount) {
-        this.limitedCount = limitedCount;
+    public void setConfig(ZegoBottomMenuBarConfig bottomMenuBarConfig) {
+        this.menuBarConfig = bottomMenuBarConfig;
+        applyMenuBarStyle(bottomMenuBarConfig.style);
+        applyMenuBarButtons(bottomMenuBarConfig.buttons);
+        getHandler().postDelayed(runnable, HIDE_DELAY_TIME);
+    }
+
+    private void applyMenuBarStyle(ZegoMenuBarStyle style) {
+        if (style == ZegoMenuBarStyle.LIGHT) {
+            setBackground(null);
+        } else {
+            setBackgroundResource(R.drawable.background_bottom_menubar);
+        }
+    }
+
+    public void setOutSideClicked() {
+        if (getVisibility() == View.VISIBLE) {
+            if (menuBarConfig.hideByClick) {
+                setVisibility(View.GONE);
+            }
+        } else {
+            setVisibility(View.VISIBLE);
+            if (menuBarConfig.hideAutomatically) {
+                getHandler().removeCallbacks(runnable);
+                getHandler().postDelayed(runnable, HIDE_DELAY_TIME);
+            }
+        }
+    }
+
+    public void setMemberListItemViewProvider(ZegoMemberListItemProvider memberListItemProvider) {
+        this.memberListItemProvider = memberListItemProvider;
+    }
+
+    public void setMemberListConfig(ZegoMemberListConfig memberListConfig) {
+        this.memberListConfig = memberListConfig;
     }
 
     public class MoreButton extends AppCompatImageView {

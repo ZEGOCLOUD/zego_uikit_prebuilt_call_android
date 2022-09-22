@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="62dp">
+
+  <com.zegocloud.uikit.components.internal.RippleIconView
+    android:id="@+id/member_icon"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="18dp"
+    app:circleRadius="18dp"
+    app:drawRipple="false"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <TextView
+    android:id="@+id/member_name"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="10dp"
+    android:maxLines="1"
+    android:singleLine="true"
+    android:textColor="@android:color/white"
+    android:textSize="16sp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toEndOf="@id/member_icon"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <com.zegocloud.uikit.components.audiovideo.ZegoMicrophoneStateView
+    android:id="@+id/member_mic_state"
+    android:layout_width="22dp"
+    android:layout_height="22dp"
+    android:layout_marginEnd="12dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toStartOf="@+id/member_camera_state"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <com.zegocloud.uikit.components.audiovideo.ZegoCameraStateView
+    android:id="@+id/member_camera_state"
+    android:layout_width="22dp"
+    android:layout_height="22dp"
+    android:layout_marginEnd="17dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

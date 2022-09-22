@@ -1,4 +1,4 @@
-package com.zegocloud.uikit.prebuilt.call;
+package com.zegocloud.uikit.prebuilt.call.config;
 
 import java.io.Serializable;
 

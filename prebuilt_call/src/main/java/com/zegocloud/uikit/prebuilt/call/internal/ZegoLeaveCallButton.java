@@ -7,21 +7,20 @@ import android.util.AttributeSet;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.components.audiovideo.ZegoLeaveButton;
-import com.zegocloud.uikit.prebuilt.call.ZegoHangUpConfirmDialogInfo;
-import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.HangUpListener;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCallListener;
 
-public class ZegoHangUpButton extends ZegoLeaveButton {
+public class ZegoLeaveCallButton extends ZegoLeaveButton {
 
     private ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo;
-    private HangUpListener hangUpListener;
+    private LeaveCallListener leaveCallListener;
 
-    public ZegoHangUpButton(@NonNull Context context) {
+    public ZegoLeaveCallButton(@NonNull Context context) {
         super(context);
     }
 
-    public ZegoHangUpButton(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public ZegoLeaveCallButton(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
@@ -35,14 +34,14 @@ public class ZegoHangUpButton extends ZegoLeaveButton {
         if (isActivity && hangUpConfirmDialogInfo != null) {
             showQuitDialog(hangUpConfirmDialogInfo);
         } else {
-            if (hangUpListener != null) {
-                hangUpListener.onHangUp();
+            if (leaveCallListener != null) {
+                leaveCallListener.onLeaveCall();
             }
         }
     }
 
-    public void setHangUpListener(HangUpListener hangupListener) {
-        this.hangUpListener = hangupListener;
+    public void setLeaveListener(LeaveCallListener listener) {
+        this.leaveCallListener = listener;
     }
 
     private void showQuitDialog(ZegoHangUpConfirmDialogInfo dialogInfo) {
@@ -52,8 +51,8 @@ public class ZegoHangUpButton extends ZegoLeaveButton {
         builder.setPositiveButton(dialogInfo.confirmButtonName, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if (hangUpListener != null) {
-                    hangUpListener.onHangUp();
+                if (leaveCallListener != null) {
+                    leaveCallListener.onLeaveCall();
                 }
             }
         });
