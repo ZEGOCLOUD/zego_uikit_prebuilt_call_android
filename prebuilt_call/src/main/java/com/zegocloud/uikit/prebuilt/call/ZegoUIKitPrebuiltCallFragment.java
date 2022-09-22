@@ -22,7 +22,7 @@ import com.zegocloud.uikit.components.audiovideo.ZegoViewProvider;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoAudioVideoViewConfig;
 import com.zegocloud.uikit.components.common.ZegoMemberListItemProvider;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
-import com.zegocloud.uikit.prebuilt.call.databinding.FragmentVideoconferenceBinding;
+import com.zegocloud.uikit.prebuilt.call.databinding.FragmentCallBinding;
 import com.zegocloud.uikit.prebuilt.call.internal.CallViewModel;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoVideoForegroundView;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
@@ -37,7 +37,7 @@ import java.util.List;
 public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
     private static final String TAG = "CallFragment";
-    private FragmentVideoconferenceBinding binding;
+    private FragmentCallBinding binding;
     private CallViewModel mViewModel;
     private ZegoViewProvider provider;
     private List<View> bottomMenuBarBtns = new ArrayList<>();
@@ -52,7 +52,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         ZegoUIKitPrebuiltCallConfig config) {
         ZegoUIKitPrebuiltCallFragment fragment = new ZegoUIKitPrebuiltCallFragment();
         Bundle bundle = new Bundle();
-        bundle.putString("conferenceID", data.conferenceID);
+        bundle.putString("callID", data.callID);
         bundle.putString("userID", InvitationServiceImpl.getInstance().userID);
         bundle.putSerializable("config", config);
         fragment.setArguments(bundle);
@@ -60,22 +60,22 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     public static ZegoUIKitPrebuiltCallFragment newInstance(long appID, @NonNull String appSign, @NonNull String userID,
-        @NonNull String userName, @NonNull String conferenceID, @NonNull ZegoUIKitPrebuiltCallConfig config) {
+        @NonNull String userName, @NonNull String callID, @NonNull ZegoUIKitPrebuiltCallConfig config) {
         ZegoUIKitPrebuiltCallFragment fragment = new ZegoUIKitPrebuiltCallFragment();
         Bundle bundle = new Bundle();
         bundle.putLong("appID", appID);
         bundle.putString("appSign", appSign);
-        bundle.putString("conferenceID", conferenceID);
         bundle.putString("userID", userID);
         bundle.putString("userName", userName);
+        bundle.putString("callID", callID);
         bundle.putSerializable("config", config);
         fragment.setArguments(bundle);
         return fragment;
     }
 
     public static ZegoUIKitPrebuiltCallFragment newInstance(long appID, @NonNull String appSign, @NonNull String userID,
-        @NonNull String userName, @NonNull String conferenceID) {
-        return newInstance(appID, appSign, conferenceID, userID, userName, new ZegoUIKitPrebuiltCallConfig());
+        @NonNull String userName, @NonNull String callID) {
+        return newInstance(appID, appSign, userID, userName, callID, new ZegoUIKitPrebuiltCallConfig());
     }
 
     public ZegoUIKitPrebuiltCallFragment() {
@@ -139,7 +139,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
         @Nullable Bundle savedInstanceState) {
-        binding = FragmentVideoconferenceBinding.inflate(inflater, container, false);
+        binding = FragmentCallBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
     }
@@ -148,9 +148,9 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(CallViewModel.class);
-        String conferenceID = getArguments().getString("conferenceID");
-        if (!TextUtils.isEmpty(conferenceID)) {
-            ZegoUIKit.joinRoom(conferenceID, new ZegoUIKitCallback() {
+        String callID = getArguments().getString("callID");
+        if (!TextUtils.isEmpty(callID)) {
+            ZegoUIKit.joinRoom(callID, new ZegoUIKitCallback() {
                 @Override
                 public void onResult(int errorCode) {
                     if (errorCode == 0) {

@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ZegoCallInvitationData implements Serializable {
 
-    public String conferenceID;
+    public String callID;
     public int type;
     public List<ZegoUIKitUser> invitees;
     public ZegoUIKitUser inviter;

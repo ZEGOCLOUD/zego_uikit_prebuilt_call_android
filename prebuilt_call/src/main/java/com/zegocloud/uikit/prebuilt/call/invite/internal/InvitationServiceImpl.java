@@ -69,7 +69,7 @@ public class InvitationServiceImpl {
                         list.add(new ZegoUIKitUser(user_id, user_name));
                     }
                     ZegoCallInvitationData invitationData = new ZegoCallInvitationData();
-                    invitationData.conferenceID = jsonObject.getString("call_id");
+                    invitationData.callID = jsonObject.getString("call_id");
                     invitationData.invitees = list;
                     invitationData.inviter = inviter;
                     invitationData.type = type;

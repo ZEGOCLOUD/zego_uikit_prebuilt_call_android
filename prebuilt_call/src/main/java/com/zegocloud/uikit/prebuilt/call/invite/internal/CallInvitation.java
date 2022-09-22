@@ -29,12 +29,12 @@ public class CallInvitation implements Parcelable {
         invitationData.invitees = zegoInvitation.invitees;
         invitationData.inviter = zegoInvitation.inviteUser;
         invitationData.type = zegoInvitation.type;
-        invitationData.conferenceID = zegoInvitation.roomID;
+        invitationData.callID = zegoInvitation.roomID;
         return invitationData;
     }
 
     public static CallInvitation getFromZegoCallInvitationData(ZegoCallInvitationData zegoInvitation) {
-        CallInvitation invitationData = new CallInvitation(zegoInvitation.conferenceID, zegoInvitation.type,
+        CallInvitation invitationData = new CallInvitation(zegoInvitation.callID, zegoInvitation.type,
             zegoInvitation.invitees, 60, zegoInvitation.inviter);
         return invitationData;
     }
