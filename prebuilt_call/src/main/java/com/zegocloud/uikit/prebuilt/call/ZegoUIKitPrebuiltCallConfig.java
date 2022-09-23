@@ -43,6 +43,9 @@ public class ZegoUIKitPrebuiltCallConfig implements Serializable {
             ZegoMenuBarButtonName.SWITCH_CAMERA_BUTTON, ZegoMenuBarButtonName.HANG_UP_BUTTON,
             ZegoMenuBarButtonName.TOGGLE_MICROPHONE_BUTTON, ZegoMenuBarButtonName.SWITCH_AUDIO_OUTPUT_BUTTON);
         config.topMenuBarConfig.buttons = Collections.singletonList(ZegoMenuBarButtonName.SHOW_MEMBER_LIST_BUTTON);
+        config.topMenuBarConfig.isVisible = true;
+        config.bottomMenuBarConfig.style = ZegoMenuBarStyle.DARK;
+        config.audioVideoViewConfig.useVideoViewAspectFill = false;
         return config;
     }
 
@@ -56,6 +59,9 @@ public class ZegoUIKitPrebuiltCallConfig implements Serializable {
         config.bottomMenuBarConfig.buttons = Arrays.asList(ZegoMenuBarButtonName.TOGGLE_MICROPHONE_BUTTON,
             ZegoMenuBarButtonName.HANG_UP_BUTTON, ZegoMenuBarButtonName.SWITCH_AUDIO_OUTPUT_BUTTON);
         config.topMenuBarConfig.buttons = Collections.singletonList(ZegoMenuBarButtonName.SHOW_MEMBER_LIST_BUTTON);
+        config.topMenuBarConfig.isVisible = true;
+        config.bottomMenuBarConfig.style = ZegoMenuBarStyle.DARK;
+        config.audioVideoViewConfig.useVideoViewAspectFill = false;
         return config;
     }
 
