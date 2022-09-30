@@ -32,7 +32,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.5.0'
     implementation 'com.google.android.material:material:1.6.1'
 //    api fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
-// api project(path: ':uikit')
+//    api project(path: ':uikit')
     api 'com.github.ZEGOCLOUD:zego_uikit_android:latest.release'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 }

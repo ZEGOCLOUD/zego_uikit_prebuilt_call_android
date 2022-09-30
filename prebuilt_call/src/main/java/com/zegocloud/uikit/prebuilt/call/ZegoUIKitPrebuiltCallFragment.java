@@ -18,9 +18,9 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.permissionx.guolindev.PermissionX;
 import com.zegocloud.uikit.ZegoUIKit;
-import com.zegocloud.uikit.components.audiovideo.ZegoViewProvider;
+import com.zegocloud.uikit.components.audiovideo.ZegoForegroundViewProvider;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoAudioVideoViewConfig;
-import com.zegocloud.uikit.components.common.ZegoMemberListItemProvider;
+import com.zegocloud.uikit.components.common.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.databinding.FragmentCallBinding;
 import com.zegocloud.uikit.prebuilt.call.internal.CallViewModel;
@@ -39,13 +39,13 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     private static final String TAG = "CallFragment";
     private FragmentCallBinding binding;
     private CallViewModel mViewModel;
-    private ZegoViewProvider provider;
+    private ZegoForegroundViewProvider provider;
     private List<View> bottomMenuBarBtns = new ArrayList<>();
     private List<View> topMenuBarBtns = new ArrayList<>();
     private OnBackPressedCallback onBackPressedCallback;
     private ZegoOnlySelfInRoomListener onlySelfInRoomListener;
     private LeaveCallListener leaveCallLisener;
-    private ZegoMemberListItemProvider memberListItemProvider;
+    private ZegoMemberListItemViewProvider memberListItemProvider;
 
 
     public static ZegoUIKitPrebuiltCallFragment newInstance(ZegoCallInvitationData data,
@@ -195,9 +195,9 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
     private void applyAudioVideoViewConfig(ZegoUIKitPrebuiltCallConfig config) {
         if (provider == null) {
-            binding.avcontainer.setForegroundViewProvider(new ZegoViewProvider() {
+            binding.avcontainer.setForegroundViewProvider(new ZegoForegroundViewProvider() {
                 @Override
-                public View getForegroundView(ZegoUIKitUser userInfo) {
+                public View getForegroundView(ViewGroup parent, ZegoUIKitUser userInfo) {
                     ZegoVideoForegroundView foregroundView = new ZegoVideoForegroundView(getContext(), userInfo);
                     foregroundView.showMicrophone(config.audioVideoViewConfig.showMicrophoneStateOnView);
                     foregroundView.showCamera(config.audioVideoViewConfig.showCameraStateOnView);
@@ -252,7 +252,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             if (leaveCallLisener != null) {
                 leaveCallLisener.onLeaveCall();
             } else {
-                ZegoUIKit.leaveRoom();
+                leaveRoom();
                 requireActivity().finish();
             }
         });
@@ -261,7 +261,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             if (leaveCallLisener != null) {
                 leaveCallLisener.onLeaveCall();
             } else {
-                ZegoUIKit.leaveRoom();
+                leaveRoom();
                 requireActivity().finish();
             }
         });
@@ -318,7 +318,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         ZegoUIKit.leaveRoom();
     }
 
-    public void setForegroundViewProvider(ZegoViewProvider provider) {
+    public void setForegroundViewProvider(ZegoForegroundViewProvider provider) {
         this.provider = provider;
         if (binding != null) {
             binding.avcontainer.setForegroundViewProvider(provider);
@@ -343,7 +343,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         }
     }
 
-    public void setMemberListItemViewProvider(ZegoMemberListItemProvider memberListItemProvider) {
+    public void setMemberListItemViewProvider(ZegoMemberListItemViewProvider memberListItemProvider) {
         this.memberListItemProvider = memberListItemProvider;
         if (binding != null) {
             binding.topMenuBar.setMemberListItemViewProvider(memberListItemProvider);

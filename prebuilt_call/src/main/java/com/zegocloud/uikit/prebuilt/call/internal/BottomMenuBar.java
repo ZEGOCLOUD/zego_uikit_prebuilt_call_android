@@ -17,7 +17,7 @@ import com.zegocloud.uikit.components.audiovideo.ZegoSwitchAudioOutputButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleMicrophoneButton;
-import com.zegocloud.uikit.components.common.ZegoMemberListItemProvider;
+import com.zegocloud.uikit.components.common.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCallListener;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoBottomMenuBarConfig;
@@ -42,7 +42,7 @@ public class BottomMenuBar extends LinearLayout {
     private static final long HIDE_DELAY_TIME = 5000;
     private Runnable runnable;
     private ZegoCallMemberList memberList;
-    private ZegoMemberListItemProvider memberListItemProvider;
+    private ZegoMemberListItemViewProvider memberListItemProvider;
     private ZegoMemberListConfig memberListConfig;
 
     public BottomMenuBar(@NonNull Context context) {
@@ -285,7 +285,7 @@ public class BottomMenuBar extends LinearLayout {
         }
     }
 
-    public void setMemberListItemViewProvider(ZegoMemberListItemProvider memberListItemProvider) {
+    public void setMemberListItemViewProvider(ZegoMemberListItemViewProvider memberListItemProvider) {
         this.memberListItemProvider = memberListItemProvider;
     }
 

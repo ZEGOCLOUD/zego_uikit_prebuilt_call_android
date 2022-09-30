@@ -15,7 +15,7 @@ import android.view.WindowManager.LayoutParams;
 import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.zegocloud.uikit.components.common.ZegoMemberListItemProvider;
+import com.zegocloud.uikit.components.common.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMemberListConfig;
 import com.zegocloud.uikit.prebuilt.call.databinding.LayoutMemberlistBinding;
@@ -23,7 +23,7 @@ import com.zegocloud.uikit.prebuilt.call.databinding.LayoutMemberlistBinding;
 public class ZegoCallMemberList extends BottomSheetDialog {
 
     private LayoutMemberlistBinding binding;
-    private ZegoMemberListItemProvider memberListItemProvider;
+    private ZegoMemberListItemViewProvider memberListItemProvider;
     private ZegoMemberListConfig memberListConfig;
 
     public ZegoCallMemberList(@NonNull Context context) {
@@ -95,7 +95,7 @@ public class ZegoCallMemberList extends BottomSheetDialog {
         return false;
     }
 
-    public void setMemberListItemViewProvider(ZegoMemberListItemProvider memberListItemProvider) {
+    public void setMemberListItemViewProvider(ZegoMemberListItemViewProvider memberListItemProvider) {
         this.memberListItemProvider = memberListItemProvider;
     }
 

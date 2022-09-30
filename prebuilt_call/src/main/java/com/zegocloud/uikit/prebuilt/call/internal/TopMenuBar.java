@@ -16,7 +16,7 @@ import com.zegocloud.uikit.components.audiovideo.ZegoSwitchAudioOutputButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleMicrophoneButton;
-import com.zegocloud.uikit.components.common.ZegoMemberListItemProvider;
+import com.zegocloud.uikit.components.common.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCallListener;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
@@ -33,7 +33,7 @@ public class TopMenuBar extends FrameLayout {
     private Runnable runnable;
     private ZegoHangUpConfirmDialogInfo confirmDialogInfo;
     private LeaveCallListener leaveCallListener;
-    private ZegoMemberListItemProvider memberListItemProvider;
+    private ZegoMemberListItemViewProvider memberListItemProvider;
     private final int maxViewCount = 3;
     private final List<View> showList = new ArrayList<>();
     private ZegoCallMemberList memberList;
@@ -130,14 +130,18 @@ public class TopMenuBar extends FrameLayout {
         switch (menuBar) {
             case TOGGLE_CAMERA_BUTTON:
                 view = new ZegoToggleCameraButton(getContext());
+                ((ZegoToggleCameraButton) view).setIcon(R.drawable.icon_top_camera_normal,
+                    R.drawable.icon_top_camera_off);
                 break;
             case TOGGLE_MICROPHONE_BUTTON:
                 view = new ZegoToggleMicrophoneButton(getContext());
+                ((ZegoToggleMicrophoneButton) view).setIcon(R.drawable.icon_top_mic_normal,
+                    R.drawable.icon_top_mic_off);
                 break;
             case SWITCH_CAMERA_BUTTON:
                 view = new ZegoSwitchCameraButton(getContext());
-                ((ZegoSwitchCameraButton) view).setImageResource(R.drawable.icon_camera_switch_top,
-                    R.drawable.icon_camera_switch_top);
+                ((ZegoSwitchCameraButton) view).setIcon(R.drawable.icon_top_camera_switch,
+                    R.drawable.icon_top_camera_switch);
                 break;
             case HANG_UP_BUTTON:
                 view = new ZegoLeaveCallButton(getContext());
@@ -147,13 +151,14 @@ public class TopMenuBar extends FrameLayout {
                 if (leaveCallListener != null) {
                     ((ZegoLeaveCallButton) view).setLeaveListener(leaveCallListener);
                 }
+                ((ZegoLeaveCallButton) view).setIcon(R.drawable.icon_top_leave);
                 break;
             case SWITCH_AUDIO_OUTPUT_BUTTON:
                 view = new ZegoSwitchAudioOutputButton(getContext());
                 break;
             case SHOW_MEMBER_LIST_BUTTON:
                 view = new ImageView(getContext());
-                ((ImageView) view).setImageResource(R.drawable.icon_member_normal);
+                ((ImageView) view).setImageResource(R.drawable.icon_top_member_normal);
                 view.setOnClickListener(v -> {
                     memberList = new ZegoCallMemberList(getContext());
                     memberList.setMemberListItemViewProvider(memberListItemProvider);
@@ -225,7 +230,7 @@ public class TopMenuBar extends FrameLayout {
         this.leaveCallListener = leaveCallListener;
     }
 
-    public void setMemberListItemViewProvider(ZegoMemberListItemProvider memberListItemProvider) {
+    public void setMemberListItemViewProvider(ZegoMemberListItemViewProvider memberListItemProvider) {
         this.memberListItemProvider = memberListItemProvider;
     }
 
