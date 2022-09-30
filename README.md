@@ -109,7 +109,7 @@ public class CallActivity extends AppCompatActivity {
         ZegoUIKitPrebuiltCallConfig config = new ZegoUIKitPrebuiltCallConfig();
         <div style="background-color:#032A4B; margin: 0px; padding: 2px;">
         ZegoUIKitPrebuiltCallFragment fragment = ZegoUIKitPrebuiltCallFragment.newInstance(
-            appID, appSign, callID, userID, userName,config);
+            appID, appSign, userID, userName,callID,config);
         </div>
         getSupportFragmentManager().beginTransaction()
             .replace(R.id.fragment_container, fragment)
