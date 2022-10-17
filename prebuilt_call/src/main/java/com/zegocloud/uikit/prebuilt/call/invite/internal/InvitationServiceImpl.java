@@ -133,9 +133,9 @@ public class InvitationServiceImpl {
     public void unInit() {
         this.userID = "";
         this.userName = "";
-        this.application = null;
         ZegoUIKit.logout();
         application.unregisterActivityLifecycleCallbacks(appActivityManager);
+        this.application = null;
         ZegoUIKit.removeInvitationListener(invitationListener);
     }
 
