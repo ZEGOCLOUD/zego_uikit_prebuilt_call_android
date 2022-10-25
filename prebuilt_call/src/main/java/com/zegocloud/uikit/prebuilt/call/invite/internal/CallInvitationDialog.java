@@ -7,22 +7,22 @@ import android.view.LayoutInflater;
 import android.view.WindowManager.LayoutParams;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AlertDialog.Builder;
-import com.zegocloud.uikit.components.invite.ZegoInvitationType;
+import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
-import com.zegocloud.uikit.prebuilt.call.databinding.ActivityZegoCallInvitationDialogBinding;
+import com.zegocloud.uikit.prebuilt.call.databinding.DialogCallInvitationBinding;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 
 public class CallInvitationDialog {
 
     private Context context;
     private ZegoCallInvitationData invitationData;
-    private ActivityZegoCallInvitationDialogBinding binding;
+    private DialogCallInvitationBinding binding;
     private AlertDialog alertDialog;
 
     public CallInvitationDialog(Context context, ZegoCallInvitationData invitationData) {
         this.context = context;
         this.invitationData = invitationData;
-        binding = ActivityZegoCallInvitationDialogBinding.inflate(LayoutInflater.from(context));
+        binding = DialogCallInvitationBinding.inflate(LayoutInflater.from(context));
         AlertDialog.Builder builder = new Builder(context);
         builder.setView(binding.getRoot());
         builder.setCancelable(false);
@@ -44,23 +44,32 @@ public class CallInvitationDialog {
         binding.dialogCallAccept.setInviterID(invitationData.inviter.userID);
         binding.dialogCallAccept.setOnClickListener(v -> {
             hide();
-            CallInvitation invitation = CallInvitation.getFromZegoCallInvitationData(invitationData);
-            CallInviteActivity.startActivity(context, invitation, false);
-            RingtoneManager.stopRingTone();
-            InvitationServiceImpl.getInstance().setCallState(InvitationServiceImpl.CONNECTED);
+            CallInviteActivity.startCallPage(context, invitationData.inviter, invitationData.invitees,
+                invitationData.callID, invitationData.type);
         });
         if (invitationData.type == ZegoInvitationType.VOICE_CALL.getValue()) {
             binding.dialogCallAccept.setBackgroundResource(R.drawable.selector_dialog_voice_accept);
-            binding.dialogCallType.setText(R.string.zego_voice_call);
+            if (invitationData.invitees.size() > 1) {
+                binding.dialogCallType.setText(R.string.group_voice_call);
+            } else {
+                binding.dialogCallType.setText(R.string.voice_call);
+            }
         } else {
             binding.dialogCallAccept.setBackgroundResource(R.drawable.selector_dialog_video_accept);
-            binding.dialogCallType.setText(R.string.zego_video_call);
+            if (invitationData.invitees.size() > 1) {
+                binding.dialogCallType.setText(R.string.group_video_call);
+            } else {
+                binding.dialogCallType.setText(R.string.video_call);
+            }
         }
         binding.dialogCallDecline.setInviterID(invitationData.inviter.userID);
         binding.dialogCallDecline.setOnClickListener(v -> {
             hide();
-            RingtoneManager.stopRingTone();
-            InvitationServiceImpl.getInstance().setCallState(InvitationServiceImpl.NONE_REJECTED);
+        });
+        binding.getRoot().setOnClickListener(v -> {
+            hide();
+            CallInviteActivity.startIncomingPage(context, invitationData.inviter, invitationData.invitees,
+                invitationData.callID, invitationData.type);
         });
     }
 
@@ -70,6 +79,6 @@ public class CallInvitationDialog {
     }
 
     public void hide() {
-        alertDialog.hide();
+        alertDialog.dismiss();
     }
 }

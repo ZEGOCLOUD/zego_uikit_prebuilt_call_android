@@ -10,4 +10,14 @@ public class ZegoCallInvitationData implements Serializable {
     public int type;
     public List<ZegoUIKitUser> invitees;
     public ZegoUIKitUser inviter;
+    public String customData;
+
+    public ZegoCallInvitationData(String callID, int type, List<ZegoUIKitUser> invitees, ZegoUIKitUser inviter,
+        String customData) {
+        this.callID = callID;
+        this.type = type;
+        this.invitees = invitees;
+        this.inviter = inviter;
+        this.customData = customData;
+    }
 }

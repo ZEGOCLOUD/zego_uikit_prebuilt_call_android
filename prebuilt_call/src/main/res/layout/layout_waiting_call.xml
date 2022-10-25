@@ -23,8 +23,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginTop="136dp"
-    app:drawRipple="false"
     app:circleRadius="50dp"
+    app:drawRipple="false"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent" />
@@ -59,7 +59,7 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/call_user_name" />
 
-  <com.zegocloud.uikit.components.invite.ZegoCancelInvitationButton
+  <com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoCancelCallInvitationButton
     android:id="@+id/call_waiting_cancel"
     android:layout_width="60dp"
     android:layout_height="60dp"
@@ -67,4 +67,48 @@
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent" />
+
+  <com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoRefuseCallInvitationButton
+    android:id="@+id/call_waiting_refuse"
+    android:layout_width="60dp"
+    android:layout_height="60dp"
+    android:layout_marginBottom="52dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toStartOf="@+id/call_waiting_accept"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toStartOf="parent" />
+
+  <com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoAcceptCallInvitationButton
+    android:id="@+id/call_waiting_accept"
+    android:layout_width="60dp"
+    android:layout_height="60dp"
+    android:layout_marginBottom="52dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/call_waiting_refuse" />
+
+  <TextView
+    android:id="@+id/call_waiting_refuse_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="6dp"
+    android:text="@string/call_page_action_decline"
+    android:textColor="#B3FFFFFF"
+    android:textSize="13sp"
+    app:layout_constraintEnd_toEndOf="@id/call_waiting_refuse"
+    app:layout_constraintStart_toStartOf="@id/call_waiting_refuse"
+    app:layout_constraintTop_toBottomOf="@id/call_waiting_refuse" />
+
+  <TextView
+    android:id="@+id/call_waiting_accept_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="6dp"
+    android:text="@string/call_page_action_accept"
+    android:textColor="#B3FFFFFF"
+    android:textSize="13sp"
+    app:layout_constraintEnd_toEndOf="@id/call_waiting_accept"
+    app:layout_constraintStart_toStartOf="@id/call_waiting_accept"
+    app:layout_constraintTop_toBottomOf="@id/call_waiting_accept" />
 </androidx.constraintlayout.widget.ConstraintLayout>

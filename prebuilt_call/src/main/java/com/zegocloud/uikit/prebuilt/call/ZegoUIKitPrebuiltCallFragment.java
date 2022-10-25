@@ -13,8 +13,6 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.permissionx.guolindev.PermissionX;
 import com.zegocloud.uikit.ZegoUIKit;
@@ -23,37 +21,33 @@ import com.zegocloud.uikit.components.audiovideocontainer.ZegoAudioVideoViewConf
 import com.zegocloud.uikit.components.common.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.databinding.FragmentCallBinding;
-import com.zegocloud.uikit.prebuilt.call.internal.CallViewModel;
+import com.zegocloud.uikit.prebuilt.call.internal.CallConfigGlobal;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoVideoForegroundView;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.InvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoScenario;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
     private static final String TAG = "CallFragment";
     private FragmentCallBinding binding;
-    private CallViewModel mViewModel;
-    private ZegoForegroundViewProvider provider;
     private List<View> bottomMenuBarBtns = new ArrayList<>();
     private List<View> topMenuBarBtns = new ArrayList<>();
     private OnBackPressedCallback onBackPressedCallback;
+    private LeaveCallListener leaveCallListener;
     private ZegoOnlySelfInRoomListener onlySelfInRoomListener;
-    private LeaveCallListener leaveCallLisener;
-    private ZegoMemberListItemViewProvider memberListItemProvider;
-
 
     public static ZegoUIKitPrebuiltCallFragment newInstance(ZegoCallInvitationData data,
         ZegoUIKitPrebuiltCallConfig config) {
         ZegoUIKitPrebuiltCallFragment fragment = new ZegoUIKitPrebuiltCallFragment();
         Bundle bundle = new Bundle();
         bundle.putString("callID", data.callID);
-        bundle.putString("userID", InvitationServiceImpl.getInstance().userID);
         bundle.putSerializable("config", config);
         fragment.setArguments(bundle);
         return fragment;
@@ -87,6 +81,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle arguments = getArguments();
         ZegoUIKitPrebuiltCallConfig config = (ZegoUIKitPrebuiltCallConfig) arguments.getSerializable("config");
+        CallConfigGlobal.getInstance().setConfig(config);
         Application application = requireActivity().getApplication();
         long appID = arguments.getLong("appID");
         String appSign = arguments.getString("appSign");
@@ -147,7 +142,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(CallViewModel.class);
         String callID = getArguments().getString("callID");
         if (!TextUtils.isEmpty(callID)) {
             ZegoUIKit.joinRoom(callID, new ZegoUIKitCallback() {
@@ -168,32 +162,31 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void onRoomJoinSucceed() {
-        String userID = getArguments().getString("userID");
+        String userID = ZegoUIKit.getLocalUser().userID;
         ZegoUIKitPrebuiltCallConfig config = (ZegoUIKitPrebuiltCallConfig) getArguments().getSerializable("config");
-        mViewModel.getConfigLiveData().setValue(config);
-        mViewModel.getConfigLiveData().observe(getViewLifecycleOwner(), new Observer<ZegoUIKitPrebuiltCallConfig>() {
-            @Override
-            public void onChanged(ZegoUIKitPrebuiltCallConfig config) {
-                applyMenuBarConfig(config);
 
-                ZegoUIKit.turnCameraOn(userID, config.turnOnCameraWhenJoining);
-                ZegoUIKit.turnMicrophoneOn(userID, config.turnOnMicrophoneWhenJoining);
-                ZegoUIKit.setAudioOutputToSpeaker(config.useSpeakerWhenJoining);
+        applyMenuBarConfig(config);
 
-                applyAudioVideoViewConfig(config);
-            }
-        });
+        ZegoUIKit.turnCameraOn(userID, config.turnOnCameraWhenJoining);
+        ZegoUIKit.turnMicrophoneOn(userID, config.turnOnMicrophoneWhenJoining);
+        ZegoUIKit.setAudioOutputToSpeaker(config.useSpeakerWhenJoining);
+
+        applyAudioVideoViewConfig(config);
+
+        requestPermissionIfNeeded();
+
         ZegoUIKit.addOnOnlySelfInRoomListener(() -> {
             if (onlySelfInRoomListener != null) {
                 onlySelfInRoomListener.onOnlySelfInRoom();
             } else {
+                leaveRoom();
                 requireActivity().finish();
             }
         });
-        requestPermissionIfNeeded();
     }
 
     private void applyAudioVideoViewConfig(ZegoUIKitPrebuiltCallConfig config) {
+        ZegoForegroundViewProvider provider = CallConfigGlobal.getInstance().getVideoViewForegroundViewProvider();
         if (provider == null) {
             binding.avcontainer.setForegroundViewProvider(new ZegoForegroundViewProvider() {
                 @Override
@@ -219,15 +212,25 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     private void requestPermissionIfNeeded() {
         String userID = getArguments().getString("userID");
         ZegoUIKitPrebuiltCallConfig config = (ZegoUIKitPrebuiltCallConfig) getArguments().getSerializable("config");
-        boolean permissionGranted =
-            PermissionX.isGranted(getContext(), permission.CAMERA) && PermissionX.isGranted(getContext(),
-                permission.RECORD_AUDIO);
+
+        List<String> permissions = Arrays.asList(permission.CAMERA, permission.RECORD_AUDIO);
+        boolean permissionGranted = true;
+        for (String permission : permissions) {
+            if (!PermissionX.isGranted(getContext(), permission)) {
+                permissionGranted = false;
+            }
+            break;
+        }
         if (!permissionGranted) {
-            PermissionX.init(requireActivity()).permissions(permission.CAMERA, permission.RECORD_AUDIO)
-                .onExplainRequestReason((scope, deniedList) -> {
-                    scope.showRequestReasonDialog(deniedList, "We require camera&microphone access to connect a call",
-                        "OK", "Cancel");
-                }).request((allGranted, grantedList, deniedList) -> {
+            PermissionX.init(requireActivity())
+                .permissions(permissions)
+                .onExplainRequestReason((scope, deniedList) ->
+                    scope.showRequestReasonDialog(deniedList, getString(R.string.permission_explain),
+                        getString(R.string.ok)))
+                .onForwardToSettings((scope, deniedList) ->
+                    scope.showForwardToSettingsDialog(deniedList, getString(R.string.permission_explain),
+                        getString(R.string.ok),getString(R.string.cancel)))
+                .request((allGranted, grantedList, deniedList) -> {
                     if (allGranted) {
                         if (config.turnOnCameraWhenJoining) {
                             ZegoUIKit.turnCameraOn(userID, false);
@@ -243,33 +246,25 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void applyMenuBarConfig(ZegoUIKitPrebuiltCallConfig config) {
+        CallConfigGlobal.getInstance().setLeaveCallListener(new LeaveCallListener() {
+            @Override
+            public void onLeaveCall() {
+                CallInvitationServiceImpl.getInstance().leaveRoom();
+                if (leaveCallListener != null) {
+                    leaveCallListener.onLeaveCall();
+                } else {
+                    ZegoUIKit.leaveRoom();
+                    requireActivity().finish();
+                }
+            }
+        });
         binding.bottomMenuBar.setConfig(config.bottomMenuBarConfig);
         binding.topMenuBar.setConfig(config.topMenuBarConfig);
-        binding.bottomMenuBar.setHangUpConfirmDialogInfo(config.hangUpConfirmDialogInfo);
-        binding.topMenuBar.setLeaveConfirmDialogInfo(config.hangUpConfirmDialogInfo);
-        binding.bottomMenuBar.setHangUpListener(() -> {
-            InvitationServiceImpl.getInstance().setCallState(InvitationServiceImpl.NONE_HANG_UP);
-            if (leaveCallLisener != null) {
-                leaveCallLisener.onLeaveCall();
-            } else {
-                leaveRoom();
-                requireActivity().finish();
-            }
-        });
-        binding.topMenuBar.setLeaveCallListener(() -> {
-            InvitationServiceImpl.getInstance().setCallState(InvitationServiceImpl.NONE_HANG_UP);
-            if (leaveCallLisener != null) {
-                leaveCallLisener.onLeaveCall();
-            } else {
-                leaveRoom();
-                requireActivity().finish();
-            }
-        });
         if (bottomMenuBarBtns.size() > 0) {
             binding.bottomMenuBar.addButtons(bottomMenuBarBtns);
         }
         if (topMenuBarBtns.size() > 0) {
-            binding.topMenuBar.addButtons(bottomMenuBarBtns);
+            binding.topMenuBar.addButtons(topMenuBarBtns);
         }
         binding.getRoot().setOnClickListener(new OnClickListener() {
             @Override
@@ -279,12 +274,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             }
         });
         binding.topMenuBar.setTitleText(config.topMenuBarConfig.title);
-        binding.bottomMenuBar.setMemberListConfig(config.memberListConfig);
-        binding.topMenuBar.setMemberListConfig(config.memberListConfig);
-        if (memberListItemProvider != null) {
-            binding.bottomMenuBar.setMemberListItemViewProvider(memberListItemProvider);
-            binding.topMenuBar.setMemberListItemViewProvider(memberListItemProvider);
-        }
     }
 
     private void showQuitDialog(String title, String message, String positiveText, String negativeText) {
@@ -312,21 +301,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void leaveRoom() {
-        if (InvitationServiceImpl.getInstance().getCallState() > 0) {
-            InvitationServiceImpl.getInstance().setCallState(InvitationServiceImpl.NONE);
-        }
+        CallInvitationServiceImpl.getInstance().leaveRoom();
         ZegoUIKit.leaveRoom();
-    }
-
-    public void setForegroundViewProvider(ZegoForegroundViewProvider provider) {
-        this.provider = provider;
-        if (binding != null) {
-            binding.avcontainer.setForegroundViewProvider(provider);
-        }
-    }
-
-    public void setLeaveCallListener(LeaveCallListener listener) {
-        this.leaveCallLisener = listener;
     }
 
     public void addButtonToBottomMenuBar(List<View> viewList) {
@@ -343,11 +319,16 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         }
     }
 
+    public void setForegroundViewProvider(ZegoForegroundViewProvider provider) {
+        CallConfigGlobal.getInstance().setVideoViewForegroundViewProvider(provider);
+    }
+
+    public void setLeaveCallListener(LeaveCallListener listener) {
+        this.leaveCallListener = listener;
+    }
+
     public void setMemberListItemViewProvider(ZegoMemberListItemViewProvider memberListItemProvider) {
-        this.memberListItemProvider = memberListItemProvider;
-        if (binding != null) {
-            binding.topMenuBar.setMemberListItemViewProvider(memberListItemProvider);
-        }
+        CallConfigGlobal.getInstance().setMemberListItemProvider(memberListItemProvider);
     }
 
     public void setOnOnlySelfInRoomListener(ZegoOnlySelfInRoomListener listener) {

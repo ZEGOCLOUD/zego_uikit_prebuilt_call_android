@@ -28,7 +28,6 @@ public class ZegoCallMemberList extends BottomSheetDialog {
 
     public ZegoCallMemberList(@NonNull Context context) {
         super(context, R.style.TransparentDialog);
-        //        super(context);
         Window window = getWindow();
         window.requestFeature(Window.FEATURE_NO_TITLE);
     }
@@ -49,7 +48,7 @@ public class ZegoCallMemberList extends BottomSheetDialog {
         WindowManager.LayoutParams lp = window.getAttributes();
         lp.width = LayoutParams.MATCH_PARENT;
         lp.height = LayoutParams.WRAP_CONTENT;
-        lp.dimAmount = 0.1f;
+        lp.dimAmount = 0.5f;
         lp.gravity = Gravity.BOTTOM;
         window.setAttributes(lp);
         setCanceledOnTouchOutside(true);
@@ -72,18 +71,6 @@ public class ZegoCallMemberList extends BottomSheetDialog {
         getBehavior().setPeekHeight(height);
         CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(-1, height);
         binding.memberlistLayout.setLayoutParams(params);
-    }
-
-    @Override
-    public void show() {
-        super.show();
-        try {
-            // hack bg color of the BottomSheetDialog
-            ViewGroup parent = getDelegate().findViewById(com.google.android.material.R.id.design_bottom_sheet);
-            parent.setBackgroundColor(Color.TRANSPARENT);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

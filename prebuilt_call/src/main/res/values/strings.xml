@@ -1,12 +1,21 @@
 <resources>
 
-  <string name="zego_voice_call">ZEGO Voice Call</string>
-  <string name="zego_video_call">ZEGO Video Call</string>
-  <string name="calling">calling</string>
+  <string name="voice_call">Voice call</string>
+  <string name="video_call">Video call</string>
+  <string name="group_voice_call">Group voice call</string>
+  <string name="group_video_call">Group video call</string>
+  <string name="calling">Calling…</string>
   <string name="memberlist_title">Member</string>
   <string name="leave_title">Leave the call</string>
   <string name="leave_message">Are you sure to leave the call?</string>
   <string name="leava_cancel">Cancel</string>
   <string name="leave_confirm">Confirm</string>
   <string name="top_bar_title">Meeting</string>
+  <string name="ok">OK</string>
+  <string name="cancel">Cancel</string>
+  <string name="call_page_action_accept">Accept</string>
+  <string name="call_page_action_decline">Decline</string>
+  <string name="invite_error">Failed to send a call invitation,code:%1$d,message: %2$s</string>
+  <string name="invite_error_offline">User doesn\'t exist or is offline: </string>
+  <string name="permission_explain">We require camera &amp; microphone access to connect a call</string>
 </resources>

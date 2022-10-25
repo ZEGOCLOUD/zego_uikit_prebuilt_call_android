@@ -30,17 +30,14 @@ import java.util.List;
 
 public class TopMenuBar extends FrameLayout {
 
-    private Runnable runnable;
-    private ZegoHangUpConfirmDialogInfo confirmDialogInfo;
-    private LeaveCallListener leaveCallListener;
-    private ZegoMemberListItemViewProvider memberListItemProvider;
     private final int maxViewCount = 3;
     private final List<View> showList = new ArrayList<>();
-    private ZegoCallMemberList memberList;
     private LinearLayout contentView;
     private TextView titleView;
     private String title;
-    private ZegoMemberListConfig memberListConfig;
+    private Runnable runnable;
+    private static final long HIDE_DELAY_TIME = 5000;
+    private ZegoTopMenuBarConfig menuBarConfig;
 
     public TopMenuBar(Context context) {
         super(context);
@@ -56,9 +53,6 @@ public class TopMenuBar extends FrameLayout {
         super(context, attrs, defStyleAttr);
         initView();
     }
-
-    private ZegoTopMenuBarConfig menuBarConfig;
-    private static final long HIDE_DELAY_TIME = 5000;
 
     private void initView() {
         int paddingEnd = Utils.dp2px(8f, getResources().getDisplayMetrics());
@@ -145,23 +139,27 @@ public class TopMenuBar extends FrameLayout {
                 break;
             case HANG_UP_BUTTON:
                 view = new ZegoLeaveCallButton(getContext());
-                if (confirmDialogInfo != null) {
-                    ((ZegoLeaveCallButton) view).setHangUpConfirmInfo(confirmDialogInfo);
-                }
-                if (leaveCallListener != null) {
-                    ((ZegoLeaveCallButton) view).setLeaveListener(leaveCallListener);
-                }
+                ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo = CallConfigGlobal.getInstance()
+                    .getConfig().hangUpConfirmDialogInfo;
+                ((ZegoLeaveCallButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
+                LeaveCallListener leaveCallListener = CallConfigGlobal.getInstance().getLeaveCallListener();
+                ((ZegoLeaveCallButton) view).setLeaveListener(leaveCallListener);
                 ((ZegoLeaveCallButton) view).setIcon(R.drawable.icon_top_leave);
                 break;
             case SWITCH_AUDIO_OUTPUT_BUTTON:
                 view = new ZegoSwitchAudioOutputButton(getContext());
+                ((ZegoSwitchAudioOutputButton) view).setIcon(R.drawable.icon_top_speaker_normal,
+                    R.drawable.icon_top_speaker_close, R.drawable.icon_top_bluetooth);
                 break;
             case SHOW_MEMBER_LIST_BUTTON:
                 view = new ImageView(getContext());
                 ((ImageView) view).setImageResource(R.drawable.icon_top_member_normal);
                 view.setOnClickListener(v -> {
-                    memberList = new ZegoCallMemberList(getContext());
+                    ZegoCallMemberList memberList = new ZegoCallMemberList(getContext());
+                    ZegoMemberListItemViewProvider memberListItemProvider = CallConfigGlobal.getInstance()
+                        .getMemberListItemProvider();
                     memberList.setMemberListItemViewProvider(memberListItemProvider);
+                    ZegoMemberListConfig memberListConfig = CallConfigGlobal.getInstance().getConfig().memberListConfig;
                     memberList.setMemberListConfig(memberListConfig);
                     memberList.show();
                 });
@@ -220,21 +218,5 @@ public class TopMenuBar extends FrameLayout {
                 getHandler().postDelayed(runnable, HIDE_DELAY_TIME);
             }
         }
-    }
-
-    public void setLeaveConfirmDialogInfo(ZegoHangUpConfirmDialogInfo leaveConfirmDialogInfo) {
-        this.confirmDialogInfo = leaveConfirmDialogInfo;
-    }
-
-    public void setLeaveCallListener(LeaveCallListener leaveCallListener) {
-        this.leaveCallListener = leaveCallListener;
-    }
-
-    public void setMemberListItemViewProvider(ZegoMemberListItemViewProvider memberListItemProvider) {
-        this.memberListItemProvider = memberListItemProvider;
-    }
-
-    public void setMemberListConfig(ZegoMemberListConfig memberListConfig) {
-        this.memberListConfig = memberListConfig;
     }
 }
