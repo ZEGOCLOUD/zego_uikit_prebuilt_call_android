@@ -2,23 +2,27 @@ package com.zegocloud.uikit.prebuilt.call.internal;
 
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.zegocloud.uikit.ZegoUIKit;
+import com.zegocloud.uikit.components.common.ZegoMemberListComparator;
 import com.zegocloud.uikit.components.common.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMemberListConfig;
 import com.zegocloud.uikit.prebuilt.call.databinding.LayoutMemberlistBinding;
+import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class ZegoCallMemberList extends BottomSheetDialog {
 
@@ -64,6 +68,18 @@ public class ZegoCallMemberList extends BottomSheetDialog {
             binding.memberlist.setShowCameraState(memberListConfig.showCameraState);
             binding.memberlist.setShowMicrophoneState(memberListConfig.showMicrophoneState);
         }
+        binding.memberlist.setMemberListComparator(new ZegoMemberListComparator() {
+            @Override
+            public List<ZegoUIKitUser> sortUserList(List<ZegoUIKitUser> userList) {
+                List<ZegoUIKitUser> sortUsers = new ArrayList<>();
+                ZegoUIKitUser self = ZegoUIKit.getLocalUser();
+                userList.remove(self);
+                Collections.reverse(userList);
+                sortUsers.add(self);
+                sortUsers.addAll(userList);
+                return sortUsers;
+            }
+        });
 
         // both need setPeekHeight & setLayoutParams
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();

@@ -57,4 +57,11 @@ public class CallConfigGlobal {
     public void setConfig(ZegoUIKitPrebuiltCallConfig config) {
         this.config = config;
     }
+
+    public void clear() {
+        leaveCallListener = null;
+        memberListItemProvider = null;
+        videoViewForegroundViewProvider = null;
+        config = null;
+    }
 }

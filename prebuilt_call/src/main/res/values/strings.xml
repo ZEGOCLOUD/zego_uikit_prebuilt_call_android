@@ -11,11 +11,18 @@
   <string name="leava_cancel">Cancel</string>
   <string name="leave_confirm">Confirm</string>
   <string name="top_bar_title">Meeting</string>
-  <string name="ok">OK</string>
-  <string name="cancel">Cancel</string>
   <string name="call_page_action_accept">Accept</string>
   <string name="call_page_action_decline">Decline</string>
   <string name="invite_error">Failed to send a call invitation,code:%1$d,message: %2$s</string>
   <string name="invite_error_offline">User doesn\'t exist or is offline: </string>
-  <string name="permission_explain">We require camera &amp; microphone access to connect a call</string>
+
+  <string name="permission_explain_camera">Camera access is required to start a call.</string>
+  <string name="permission_explain_mic">Microphone access is required to start a call.</string>
+  <string name="permission_explain_camera_mic">Camera and microphone access are required to start a call.</string>
+  <string name="settings_camera">Please go to system settings to allow camera access. </string>
+  <string name="settings_mic">Please go to system settings to allow microphone access. </string>
+  <string name="settings_camera_mic">Please go to system settings to allow camera and microphone access.</string>
+  <string name="ok">OK</string>
+  <string name="cancel">Cancel</string>
+  <string name="settings">Settings</string>
 </resources>

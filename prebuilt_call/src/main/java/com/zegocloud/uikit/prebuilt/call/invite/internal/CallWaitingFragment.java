@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.permissionx.guolindev.PermissionX;
+import com.permissionx.guolindev.callback.RequestCallback;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
@@ -87,7 +88,6 @@ public class CallWaitingFragment extends Fragment {
             } else {
                 binding.cameraSwitch.setVisibility(View.VISIBLE);
                 binding.audioVideoView.setVisibility(View.VISIBLE);
-                ZegoUIKit.turnCameraOn(userID, true);
                 binding.audioVideoView.setUserID(userID);
             }
             binding.callWaitingCancel.setVisibility(View.VISIBLE);
@@ -122,34 +122,52 @@ public class CallWaitingFragment extends Fragment {
         });
 
         binding.getRoot().post(() -> {
-            requestPermissionIfNeeded(userID, type);
+            requestPermissionIfNeeded((allGranted, grantedList, deniedList) -> {
+                if (grantedList.contains(permission.CAMERA)) {
+                    if (type == ZegoInvitationType.VIDEO_CALL.getValue()) {
+                        ZegoUIKit.turnCameraOn(userID, true);
+                    }
+                }
+            });
         });
     }
 
-    private void requestPermissionIfNeeded(String userID, int type) {
+    private void requestPermissionIfNeeded(RequestCallback requestCallback) {
         List<String> permissions = Arrays.asList(permission.CAMERA, permission.RECORD_AUDIO);
-        boolean permissionGranted = true;
-        for (String permission : permissions) {
-            if (!PermissionX.isGranted(getContext(), permission)) {
-                permissionGranted = false;
+        PermissionX.init(requireActivity()).permissions(permissions).onExplainRequestReason((scope, deniedList) -> {
+            String message = "";
+            if (deniedList.size() == 1) {
+                if (deniedList.contains(permission.CAMERA)) {
+                    message = getContext().getString(R.string.permission_explain_camera);
+                } else if (deniedList.contains(permission.RECORD_AUDIO)) {
+                    message = getContext().getString(R.string.permission_explain_mic);
+                }
+            } else {
+                message = getContext().getString(R.string.permission_explain_camera_mic);
             }
-            break;
-        }
-        if (!permissionGranted) {
-            PermissionX.init(requireActivity()).permissions(permissions).onExplainRequestReason(
-                    (scope, deniedList) -> scope.showRequestReasonDialog(deniedList, getString(R.string.permission_explain),
-                        getString(R.string.ok))).onForwardToSettings(
-                    (scope, deniedList) -> scope.showForwardToSettingsDialog(deniedList,
-                        getString(R.string.permission_explain), getString(R.string.ok), getString(R.string.cancel)))
-                .request((allGranted, grantedList, deniedList) -> {
-                    if (allGranted) {
-                        if (type == ZegoInvitationType.VIDEO_CALL.getValue()) {
-                            ZegoUIKit.turnCameraOn(userID, false);
-                            ZegoUIKit.turnCameraOn(userID, true);
-                        }
-                    }
-                });
-        }
+            scope.showRequestReasonDialog(deniedList, message, getString(R.string.ok));
+        }).onForwardToSettings((scope, deniedList) -> {
+            String message = "";
+            if (deniedList.size() == 1) {
+                if (deniedList.contains(permission.CAMERA)) {
+                    message = getContext().getString(R.string.settings_camera);
+                } else if (deniedList.contains(permission.RECORD_AUDIO)) {
+                    message = getContext().getString(R.string.settings_mic);
+                }
+            } else {
+                message = getContext().getString(R.string.settings_camera_mic);
+            }
+            scope.showForwardToSettingsDialog(deniedList, message, getString(R.string.settings),
+                getString(R.string.cancel));
+        }).request(new RequestCallback() {
+            @Override
+            public void onResult(boolean allGranted, @NonNull List<String> grantedList,
+                @NonNull List<String> deniedList) {
+                if (requestCallback != null) {
+                    requestCallback.onResult(allGranted, grantedList, deniedList);
+                }
+            }
+        });
     }
 
     private void hideSystemNavigationBar() {
