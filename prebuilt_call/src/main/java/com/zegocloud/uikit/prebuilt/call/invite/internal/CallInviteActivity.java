@@ -63,8 +63,6 @@ public class CallInviteActivity extends AppCompatActivity {
         context.startActivity(intent);
     }
 
-    private static final String TAG = "CallInviteActivity";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

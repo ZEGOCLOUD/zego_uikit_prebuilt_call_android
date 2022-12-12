@@ -1,7 +1,7 @@
 package com.zegocloud.uikit.prebuilt.call.internal;
 
 import com.zegocloud.uikit.components.audiovideo.ZegoForegroundViewProvider;
-import com.zegocloud.uikit.components.common.ZegoMemberListItemViewProvider;
+import com.zegocloud.uikit.components.memberlist.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCallListener;
 

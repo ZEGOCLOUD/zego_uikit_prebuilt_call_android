@@ -5,7 +5,6 @@ import android.app.Application;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,7 +21,7 @@ import com.zegocloud.uikit.components.audiovideo.ZegoForegroundViewProvider;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoAudioVideoComparator;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoAudioVideoViewConfig;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutMode;
-import com.zegocloud.uikit.components.common.ZegoMemberListItemViewProvider;
+import com.zegocloud.uikit.components.memberlist.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.databinding.FragmentCallBinding;
 import com.zegocloud.uikit.prebuilt.call.internal.CallConfigGlobal;
@@ -40,7 +39,6 @@ import java.util.List;
 
 public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
-    private static final String TAG = "CallFragment";
     private FragmentCallBinding binding;
     private List<View> bottomMenuBarBtns = new ArrayList<>();
     private List<View> topMenuBarBtns = new ArrayList<>();
@@ -95,6 +93,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         if (appID != 0) {
             ZegoUIKit.init(application, appID, appSign, ZegoScenario.GENERAL);
             ZegoUIKit.login(userID, userName);
+            ZegoUIKit.getSignalingPlugin().login(userID, userName, null);
         }
         if (config.hangUpConfirmDialogInfo != null) {
             if (TextUtils.isEmpty(config.hangUpConfirmDialogInfo.title)) {

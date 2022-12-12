@@ -7,7 +7,7 @@ import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallConfigProvider;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
-import com.zegocloud.uikit.service.defines.ZegoInvitationListener;
+import com.zegocloud.uikit.service.defines.ZegoUIKitSignalingPluginInvitationListener;
 import com.zegocloud.uikit.service.defines.ZegoScenario;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class CallInvitationServiceImpl {
     private boolean isInit;
     private List<CallStateListener> callStateListeners;
 
-    private ZegoInvitationListener invitationListener = new ZegoInvitationListener() {
+    private ZegoUIKitSignalingPluginInvitationListener invitationListener = new ZegoUIKitSignalingPluginInvitationListener() {
         @Override
         public void onInvitationReceived(ZegoUIKitUser inviter, int type, String data) {
             if (callState > 0) {
@@ -66,7 +66,7 @@ public class CallInvitationServiceImpl {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                ZegoUIKit.refuseInvitation(inviter.userID, jsonObject.toString(), null);
+                ZegoUIKit.getSignalingPlugin().refuseInvitation(inviter.userID, jsonObject.toString(), null);
                 return;
             }
             Activity topActivity = appActivityManager.getTopActivity();
@@ -189,19 +189,21 @@ public class CallInvitationServiceImpl {
         ZegoUIKit.installPlugins(config.plugins);
         ZegoUIKit.init(application, appID, appSign, ZegoScenario.GENERAL);
         ZegoUIKit.login(userID, userName);
-
+        ZegoUIKit.getSignalingPlugin().login(userID, userName, null);
         this.application = application;
 
         appActivityManager = new AppActivityManager();
         this.application.registerActivityLifecycleCallbacks(appActivityManager);
-        ZegoUIKit.addInvitationListener(invitationListener);
+        ZegoUIKit.getSignalingPlugin().addInvitationListener(invitationListener);
     }
 
     public void unInit() {
         ZegoUIKit.logout();
+        ZegoUIKit.getSignalingPlugin().logout();
         this.application.unregisterActivityLifecycleCallbacks(appActivityManager);
         this.application = null;
-        ZegoUIKit.removeInvitationListener(invitationListener);
+        ZegoUIKit.getSignalingPlugin().logout();
+        ZegoUIKit.getSignalingPlugin().removeInvitationListener(invitationListener);
     }
 
     public void setPrebuiltConfigProvider(ZegoUIKitPrebuiltCallConfigProvider provider) {
@@ -272,7 +274,7 @@ public class CallInvitationServiceImpl {
         if (callState > 0) {
             return;
         }
-        ZegoUIKit.sendInvitation(invitees, timeout, type, data, new PluginCallbackListener() {
+        ZegoUIKit.getSignalingPlugin().sendInvitation(invitees, timeout, type, data, new PluginCallbackListener() {
             @Override
             public void callback(Map<String, Object> result) {
                 int code = (int) result.get("code");
@@ -316,7 +318,7 @@ public class CallInvitationServiceImpl {
     }
 
     public void cancelInvitation(List<String> invitees, String data, PluginCallbackListener callbackListener) {
-        ZegoUIKit.cancelInvitation(invitees, data, new PluginCallbackListener() {
+        ZegoUIKit.getSignalingPlugin().cancelInvitation(invitees, data, new PluginCallbackListener() {
             @Override
             public void callback(Map<String, Object> result) {
                 if (callbackListener != null) {
@@ -336,7 +338,7 @@ public class CallInvitationServiceImpl {
     }
 
     public void refuseInvitation(String inviterID, String data, PluginCallbackListener callbackListener) {
-        ZegoUIKit.refuseInvitation(inviterID, data, new PluginCallbackListener() {
+        ZegoUIKit.getSignalingPlugin().refuseInvitation(inviterID, data, new PluginCallbackListener() {
             @Override
             public void callback(Map<String, Object> result) {
                 if (callbackListener != null) {
@@ -349,7 +351,7 @@ public class CallInvitationServiceImpl {
     }
 
     public void acceptInvitation(String inviterID, String data, PluginCallbackListener callbackListener) {
-        ZegoUIKit.acceptInvitation(inviterID, data, new PluginCallbackListener() {
+        ZegoUIKit.getSignalingPlugin().acceptInvitation(inviterID, data, new PluginCallbackListener() {
             @Override
             public void callback(Map<String, Object> result) {
                 if (callbackListener != null) {

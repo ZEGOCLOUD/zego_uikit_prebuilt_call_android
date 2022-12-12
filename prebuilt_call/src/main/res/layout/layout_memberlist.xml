@@ -39,7 +39,7 @@
       android:layout_height="1dp"
       android:background="#26ffffff" />
 
-    <com.zegocloud.uikit.components.common.ZegoMemberList
+    <com.zegocloud.uikit.components.memberlist.ZegoMemberList
       android:id="@+id/memberlist"
       android:layout_width="match_parent"
       android:layout_height="match_parent"

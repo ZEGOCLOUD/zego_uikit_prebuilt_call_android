@@ -15,6 +15,11 @@ public class ZegoUIKitPrebuiltCallInvitationConfig {
         this.plugins = Collections.singletonList(plugin);
     }
 
+    public ZegoUIKitPrebuiltCallInvitationConfig(IZegoUIKitPlugin plugin,ZegoUIKitPrebuiltCallConfigProvider provider) {
+        this.plugins = Collections.singletonList(plugin);
+        this.provider = provider;
+    }
+
     public ZegoUIKitPrebuiltCallInvitationConfig(List<IZegoUIKitPlugin> plugins) {
         this.plugins = plugins;
     }
