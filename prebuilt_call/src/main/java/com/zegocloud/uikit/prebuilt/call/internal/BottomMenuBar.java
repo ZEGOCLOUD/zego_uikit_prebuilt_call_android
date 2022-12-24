@@ -59,7 +59,6 @@ public class BottomMenuBar extends LinearLayout {
         setOrientation(LinearLayout.HORIZONTAL);
         setLayoutParams(new LayoutParams(-1, -2));
         setGravity(Gravity.CENTER_HORIZONTAL);
-        runnable = () -> setVisibility(View.GONE);
     }
 
     private void applyMenuBarButtons(List<ZegoMenuBarButtonName> zegoMenuBarButtons) {
@@ -215,7 +214,9 @@ public class BottomMenuBar extends LinearLayout {
         this.menuBarConfig = bottomMenuBarConfig;
         applyMenuBarStyle(bottomMenuBarConfig.style);
         applyMenuBarButtons(bottomMenuBarConfig.buttons);
-        getHandler().postDelayed(runnable, HIDE_DELAY_TIME);
+        if (menuBarConfig.hideAutomatically) {
+            getHandler().postDelayed(runnable, HIDE_DELAY_TIME);
+        }
     }
 
     private void applyMenuBarStyle(ZegoMenuBarStyle style) {
