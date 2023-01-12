@@ -65,8 +65,8 @@ public class ZegoUIKitPrebuiltCallInvitationService {
         CallInvitationServiceImpl.getInstance().addInvitationCallListener(listener);
     }
 
-    public static void removeInvitationCallListener(ZegoInvitationCallListener listener) {
-        CallInvitationServiceImpl.getInstance().removeInvitationCallListener(listener);
+    public static void removeInvitationCallListener() {
+        CallInvitationServiceImpl.getInstance().removeInvitationCallListener();
     }
 
     public static ZegoUIKitPrebuiltCallFragment getPrebuiltCallFragment() {

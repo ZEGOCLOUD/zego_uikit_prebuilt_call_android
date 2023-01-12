@@ -16,7 +16,7 @@ import com.zegocloud.uikit.service.defines.ZegoSignalingPluginNotificationConfig
 import com.zegocloud.uikit.service.defines.ZegoUIKitSignalingPluginInvitationListener;
 import com.zegocloud.uikit.service.defines.ZegoScenario;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
-import com.zegocloud.uikit.service.internal.NotifyList;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +60,7 @@ public class CallInvitationServiceImpl {
     private Map<ZegoUIKitUser, CallInvitationState> callUserStates = new HashMap<>();
     private boolean isInit;
     private List<CallStateListener> callStateListeners;
-    private NotifyList<ZegoInvitationCallListener> invitationCallListenerList = new NotifyList<>();
+    private ZegoInvitationCallListener invitationCallListenerList;
     private ZegoUIKitPrebuiltCallInvitationConfig config;
     private OutgoingCallButtonListener outgoingCallButtonListener;
     private IncomingCallButtonListener incomingCallButtonListener;
@@ -420,7 +420,7 @@ public class CallInvitationServiceImpl {
     }
 
     public void addInvitationCallListener(ZegoInvitationCallListener listener) {
-        invitationCallListenerList.addListener(listener, false);
+        this.invitationCallListenerList = listener;
     }
 
     public void addZegoUIKitPrebuiltCallFragment(ZegoUIKitPrebuiltCallFragment zegoUIKitPrebuiltCallFragment) {
@@ -431,8 +431,8 @@ public class CallInvitationServiceImpl {
         return zegoUIKitPrebuiltCallFragment;
     }
 
-    public void removeInvitationCallListener(ZegoInvitationCallListener listener) {
-        invitationCallListenerList.removeListener(listener, false);
+    public void removeInvitationCallListener() {
+        this.invitationCallListenerList = null;
     }
 
     public ZegoUIKitPrebuiltCallInvitationConfig getConfig() {
@@ -440,8 +440,7 @@ public class CallInvitationServiceImpl {
     }
 
     public void notifyIncomingCallReceived(ZegoUIKitUser inviter, int type, String extendedData) {
-        invitationCallListenerList.notifyAllListener(invitationListener -> {
-
+        if(invitationCallListenerList != null){
             try {
                 JSONObject jsonObject = new JSONObject(extendedData);
                 JSONArray invitees = jsonObject.getJSONArray("invitees");
@@ -455,61 +454,61 @@ public class CallInvitationServiceImpl {
 
                 ZegoCallType callType = type == ZegoCallType.VIDEO_CALL.value() ? ZegoCallType.VIDEO_CALL : ZegoCallType.VOICE_CALL;
                 ZegoCallUser inviteCaller = new ZegoCallUser(inviter.userID, inviter.userName);
-                invitationListener.onIncomingCallReceived(callID, inviteCaller, callType, list);
+
+                invitationCallListenerList.onIncomingCallReceived(callID, inviteCaller, callType, list);
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-        });
+        }
     }
 
     public void notifyIncomingCallCanceled(ZegoUIKitUser inviter) {
-        invitationCallListenerList.notifyAllListener(invitationListener -> {
+        if(invitationCallListenerList != null){
             ZegoCallUser inviteCaller = new ZegoCallUser(inviter.userID, inviter.userName);
-            invitationListener.onIncomingCallCanceled(callID, inviteCaller);
-        });
+            invitationCallListenerList.onIncomingCallCanceled(callID, inviteCaller);
+        }
     }
 
     public void notifyIncomingCallTimeout(ZegoUIKitUser inviter) {
-        invitationCallListenerList.notifyAllListener(invitationListener -> {
+        if(invitationCallListenerList != null){
             ZegoCallUser inviteCaller = new ZegoCallUser(inviter.userID, inviter.userName);
-            invitationListener.onIncomingCallTimeout(callID, inviteCaller);
-        });
+            invitationCallListenerList.onIncomingCallTimeout(callID, inviteCaller);
+        }
     }
 
     public void notifyOutgoingCallAccepted(ZegoUIKitUser uiKitUser) {
-        invitationCallListenerList.notifyAllListener(invitationListener -> {
+        if(invitationCallListenerList != null){
             ZegoCallUser inviteCaller = new ZegoCallUser(uiKitUser.userID, uiKitUser.userName);
-            invitationListener.onOutgoingCallAccepted(callID, inviteCaller);
-        });
+            invitationCallListenerList.onOutgoingCallAccepted(callID, inviteCaller);
+        }
     }
 
     public void notifyOutgoingCallRejected0rDeclined(ZegoUIKitUser uiKitUser, String data) {
-        invitationCallListenerList.notifyAllListener(invitationListener -> {
+        if(invitationCallListenerList != null){
             try {
                 JSONObject jsonObject = new JSONObject(data);
                 String reason = getStringFromJson(jsonObject, "reason");
                 ZegoCallUser inviteCaller = new ZegoCallUser(uiKitUser.userID, uiKitUser.userName);
                 if ("busy".equals(reason)) {
-                    invitationListener.onOutgoingCallRejectedCauseBusy(callID, inviteCaller);
+                    invitationCallListenerList.onOutgoingCallRejectedCauseBusy(callID, inviteCaller);
                 } else {
-                    invitationListener.onOutgoingCallDeclined(callID, inviteCaller);
+                    invitationCallListenerList.onOutgoingCallDeclined(callID, inviteCaller);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        });
+        }
     }
 
     public void notifyOutgoingCallTimeout(List<ZegoUIKitUser> invitees) {
-        invitationCallListenerList.notifyAllListener(invitationListener -> {
+        if(invitationCallListenerList != null){
             List<ZegoCallUser> callees = new ArrayList<>();
             for (ZegoUIKitUser user : invitees) {
                 callees.add(new ZegoCallUser(user.userID, user.userName));
             }
-            invitationListener.onOutgoingCallTimeout(callID, callees);
-        });
+            invitationCallListenerList.onOutgoingCallTimeout(callID, callees);
+        }
     }
 
     private void showNotification(ZegoCallInvitationData invitationData) {
