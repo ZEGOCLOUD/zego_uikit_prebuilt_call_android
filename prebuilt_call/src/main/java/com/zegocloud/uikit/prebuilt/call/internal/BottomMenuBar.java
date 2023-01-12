@@ -215,9 +215,7 @@ public class BottomMenuBar extends LinearLayout {
         this.menuBarConfig = bottomMenuBarConfig;
         applyMenuBarStyle(bottomMenuBarConfig.style);
         applyMenuBarButtons(bottomMenuBarConfig.buttons);
-        if (menuBarConfig.hideAutomatically) {
-            getHandler().postDelayed(runnable, HIDE_DELAY_TIME);
-        }
+        getHandler().postDelayed(runnable, HIDE_DELAY_TIME);
     }
 
     private void applyMenuBarStyle(ZegoMenuBarStyle style) {

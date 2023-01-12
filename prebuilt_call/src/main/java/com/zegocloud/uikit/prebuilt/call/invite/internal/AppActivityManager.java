@@ -1,6 +1,7 @@
 package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Application.ActivityLifecycleCallbacks;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -45,6 +46,7 @@ public class AppActivityManager implements ActivityLifecycleCallbacks {
         if (mIsBackground) {
             mIsBackground = false;
         }
+        NotificationsUtils.clearAllNotifications();
     }
 
     @Override
@@ -158,6 +160,31 @@ public class AppActivityManager implements ActivityLifecycleCallbacks {
             }
         }
         return null;
+    }
+
+
+    /**
+     * Whether at the front desk
+     *
+     * @return
+     */
+    public static boolean isBackground() {
+        Context context = CallInvitationServiceImpl.getInstance().getApplication();
+        if(context == null){
+            return false;
+        }
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.processName.equals(context.getPackageName())) {
+                if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

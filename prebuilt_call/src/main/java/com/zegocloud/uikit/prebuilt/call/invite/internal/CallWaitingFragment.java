@@ -5,13 +5,16 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import com.permissionx.guolindev.PermissionX;
 import com.permissionx.guolindev.callback.RequestCallback;
 import com.zegocloud.uikit.ZegoUIKit;
@@ -20,6 +23,7 @@ import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.databinding.LayoutWaitingCallBinding;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import com.zegocloud.uikit.utils.GenericUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -74,10 +78,13 @@ public class CallWaitingFragment extends Fragment {
             binding.audioVideoView.setVisibility(View.GONE);
             binding.cameraSwitch.setVisibility(View.GONE);
             binding.callWaitingCancel.setVisibility(View.GONE);
-            binding.callWaitingRefuse.setVisibility(View.VISIBLE);
             binding.callWaitingAcceptText.setVisibility(View.VISIBLE);
-            binding.callWaitingRefuseText.setVisibility(View.VISIBLE);
             binding.callWaitingAccept.setVisibility(View.VISIBLE);
+            if (CallInvitationServiceImpl.getInstance().getConfig() != null) {
+                boolean showDeclineButton = CallInvitationServiceImpl.getInstance().getConfig().showDeclineButton;
+                binding.callWaitingRefuse.setVisibility(showDeclineButton ? View.VISIBLE : View.GONE);
+                binding.callWaitingRefuseText.setVisibility(showDeclineButton ? View.VISIBLE : View.GONE);
+            }
         } else if ("outgoing".equals(page)) {
             if (invitees.size() > 0) {
                 showUser = invitees.get(0);
@@ -102,22 +109,35 @@ public class CallWaitingFragment extends Fragment {
             binding.callUserIcon.setText(showUser.userName, false);
             binding.callUserName.setText(showUser.userName);
         }
+
+        boolean isGroup = invitees != null && invitees.size() > 1;
         if (type == ZegoInvitationType.VOICE_CALL.getValue()) {
             binding.callWaitingAccept.setBackgroundResource(R.drawable.selector_dialog_voice_accept);
+            if ("incoming".equals(page)) {
+                String callStateTextVoice = isGroup ? getString(R.string.incoming_group_voice_call) : getString(R.string.incoming_voice_call);
+                binding.callStateText.setText(callStateTextVoice);
+            }
         } else {
             binding.callWaitingAccept.setBackgroundResource(R.drawable.selector_dialog_video_accept);
+            if ("incoming".equals(page)) {
+                String callStateTextVideo = isGroup ? getString(R.string.incoming_group_video_call) : getString(R.string.incoming_video_call);
+                binding.callStateText.setText(callStateTextVideo);
+            }
         }
         binding.getRoot().setBackgroundResource(R.drawable.img_bg);
         binding.callWaitingAccept.setInviterID(inviter.userID);
         binding.callWaitingRefuse.setInviterID(inviter.userID);
         binding.callWaitingCancel.setInvitees(GenericUtils.map(invitees, uiKitUser -> uiKitUser.userID));
         binding.callWaitingCancel.setOnClickListener(v -> {
+            CallInvitationServiceImpl.getInstance().onOutgoingCallCancelButtonPressed();
             requireActivity().finish();
         });
         binding.callWaitingRefuse.setOnClickListener(v -> {
+            CallInvitationServiceImpl.getInstance().onIncomingCallDeclineButtonPressed();
             requireActivity().finish();
         });
         binding.callWaitingAccept.setOnClickListener(v -> {
+            CallInvitationServiceImpl.getInstance().onIncomingCallAcceptButtonPressed();
             CallInvitationServiceImpl.getInstance().setCallState(CallInvitationServiceImpl.CONNECTED);
         });
 
@@ -126,10 +146,14 @@ public class CallWaitingFragment extends Fragment {
                 if (grantedList.contains(permission.CAMERA)) {
                     if (type == ZegoInvitationType.VIDEO_CALL.getValue()) {
                         ZegoUIKit.turnCameraOn(userID, true);
+                    }else if(type == ZegoInvitationType.VOICE_CALL.getValue()){
+                        ZegoUIKit.turnCameraOn(userID, false);
                     }
                 }
             });
         });
+
+        setInnerText(page, type, showUser, invitees);
     }
 
     private void requestPermissionIfNeeded(RequestCallback requestCallback) {
@@ -158,11 +182,11 @@ public class CallWaitingFragment extends Fragment {
                 message = getContext().getString(R.string.settings_camera_mic);
             }
             scope.showForwardToSettingsDialog(deniedList, message, getString(R.string.settings),
-                getString(R.string.cancel));
+                    getString(R.string.cancel));
         }).request(new RequestCallback() {
             @Override
             public void onResult(boolean allGranted, @NonNull List<String> grantedList,
-                @NonNull List<String> deniedList) {
+                                 @NonNull List<String> deniedList) {
                 if (requestCallback != null) {
                     requestCallback.onResult(allGranted, grantedList, deniedList);
                 }
@@ -172,7 +196,7 @@ public class CallWaitingFragment extends Fragment {
 
     private void hideSystemNavigationBar() {
         int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         binding.getRoot().setSystemUiVisibility(uiOptions);
 
         int statusBarHeight = getInternalDimensionSize(getContext(), "status_bar_height");
@@ -189,7 +213,7 @@ public class CallWaitingFragment extends Fragment {
                 int sizeTwo = Resources.getSystem().getDimensionPixelSize(resourceId);
 
                 if (sizeTwo >= sizeOne && !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !key.equals(
-                    "status_bar_height"))) {
+                        "status_bar_height"))) {
                     return sizeTwo;
                 } else {
                     float densityOne = context.getResources().getDisplayMetrics().density;
@@ -204,5 +228,130 @@ public class CallWaitingFragment extends Fragment {
         return result;
     }
 
+    private void setInnerText(String page, int type, ZegoUIKitUser showUser, ArrayList<ZegoUIKitUser> invitees) {
+        if (CallInvitationServiceImpl.getInstance().getConfig() == null) {
+            return;
+        }
+        ZegoInnerText innerText = CallInvitationServiceImpl.getInstance().getConfig().innerText;
+
+        if (innerText == null) {
+            return;
+        }
+
+        if (!TextUtils.isEmpty(innerText.incomingCallPageAcceptButton)) {
+            binding.callWaitingAcceptText.setText(innerText.incomingCallPageAcceptButton);
+        }
+
+        if (!TextUtils.isEmpty(innerText.incomingCallPageDeclineButton)) {
+            binding.callWaitingRefuseText.setText(innerText.incomingCallPageDeclineButton);
+        }
+
+        boolean isVideoCall = type == ZegoInvitationType.VIDEO_CALL.getValue();
+        boolean isGroup = invitees != null && invitees.size() > 1;
+
+        if (isVideoCall) {
+            setVideoInnerText(isGroup,page,showUser,innerText);
+        } else {
+            setVoiceInnerText(isGroup,page,showUser,innerText);
+        }
+    }
+
+    private void setVoiceInnerText(boolean isGroup,String page,ZegoUIKitUser showUser,ZegoInnerText innerText){
+        if(isGroup){
+            if ("incoming".equals(page)) {
+                if (!TextUtils.isEmpty(innerText.incomingGroupVoiceCallPageTitle)) {
+                    if (showUser != null) {
+                        binding.callUserIcon.setText(String.format(innerText.incomingGroupVoiceCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(String.format(innerText.incomingGroupVoiceCallPageTitle, showUser.userName));
+                    }
+                }
+                if (!TextUtils.isEmpty(innerText.incomingGroupVoiceCallPageMessage)) {
+                    binding.callStateText.setText(innerText.incomingGroupVoiceCallPageMessage);
+                }
+            } else if ("outgoing".equals(page)) {
+                if (!TextUtils.isEmpty(innerText.outgoingGroupVoiceCallPageTitle)) {
+                    if (showUser != null) {
+                        binding.callUserIcon.setText(String.format(innerText.outgoingGroupVoiceCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(String.format(innerText.outgoingGroupVoiceCallPageTitle, showUser.userName));
+                    }
+                }
+                if (!TextUtils.isEmpty(innerText.outgoingGroupVoiceCallPageMessage)) {
+                    binding.callStateText.setText(innerText.outgoingGroupVoiceCallPageMessage);
+                }
+            }
+        }else {
+            if ("incoming".equals(page)) {
+                if (!TextUtils.isEmpty(innerText.incomingVoiceCallPageTitle)) {
+                    if (showUser != null) {
+                        binding.callUserIcon.setText(String.format(innerText.incomingVoiceCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(String.format(innerText.incomingVoiceCallPageTitle, showUser.userName));
+                    }
+                }
+                if (!TextUtils.isEmpty(innerText.incomingVoiceCallPageMessage)) {
+                    binding.callStateText.setText(innerText.incomingVoiceCallPageMessage);
+                }
+            } else if ("outgoing".equals(page)) {
+                if (!TextUtils.isEmpty(innerText.outgoingVoiceCallPageTitle)) {
+                    if (showUser != null) {
+                        binding.callUserIcon.setText(String.format(innerText.outgoingVoiceCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(String.format(innerText.outgoingVoiceCallPageTitle, showUser.userName));
+                    }
+                }
+                if (!TextUtils.isEmpty(innerText.outgoingVoiceCallPageMessage)) {
+                    binding.callStateText.setText(innerText.outgoingVoiceCallPageMessage);
+                }
+            }
+        }
+
+    }
+
+    private void setVideoInnerText(boolean isGroup,String page,ZegoUIKitUser showUser,ZegoInnerText innerText){
+        if(isGroup){
+            if ("incoming".equals(page)) {
+                if (!TextUtils.isEmpty(innerText.incomingGroupVideoCallPageTitle)) {
+                    if (showUser != null) {
+                        binding.callUserIcon.setText(String.format(innerText.incomingGroupVideoCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(String.format(innerText.incomingGroupVideoCallPageTitle, showUser.userName));
+                    }
+                }
+                if (!TextUtils.isEmpty(innerText.incomingGroupVideoCallPageMessage)) {
+                    binding.callStateText.setText(innerText.incomingGroupVideoCallPageMessage);
+                }
+            } else if ("outgoing".equals(page)) {
+                if (!TextUtils.isEmpty(innerText.outgoingGroupVideoCallPageTitle)) {
+                    if (showUser != null) {
+                        binding.callUserIcon.setText(String.format(innerText.outgoingGroupVideoCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(String.format(innerText.outgoingGroupVideoCallPageTitle, showUser.userName));
+                    }
+                }
+                if (!TextUtils.isEmpty(innerText.outgoingGroupVideoCallPageMessage)) {
+                    binding.callStateText.setText(innerText.outgoingGroupVideoCallPageMessage);
+                }
+            }
+        }else {
+            if ("incoming".equals(page)) {
+                if (!TextUtils.isEmpty(innerText.incomingVideoCallPageTitle)) {
+                    if (showUser != null) {
+                        binding.callUserIcon.setText(String.format(innerText.incomingVideoCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(String.format(innerText.incomingVideoCallPageTitle, showUser.userName));
+                    }
+                }
+                if (!TextUtils.isEmpty(innerText.incomingVideoCallPageMessage)) {
+                    binding.callStateText.setText(innerText.incomingVideoCallPageMessage);
+                }
+            } else if ("outgoing".equals(page)) {
+                if (!TextUtils.isEmpty(innerText.outgoingVideoCallPageTitle)) {
+                    if (showUser != null) {
+                        binding.callUserIcon.setText(String.format(innerText.outgoingVideoCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(String.format(innerText.outgoingVideoCallPageTitle, showUser.userName));
+                    }
+                }
+                if (!TextUtils.isEmpty(innerText.outgoingVideoCallPageMessage)) {
+                    binding.callStateText.setText(innerText.outgoingVideoCallPageMessage);
+                }
+            }
+        }
+
+    }
 
 }

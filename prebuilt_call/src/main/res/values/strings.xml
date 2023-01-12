@@ -1,9 +1,9 @@
 <resources>
 
-  <string name="voice_call">Voice call</string>
-  <string name="video_call">Video call</string>
-  <string name="group_voice_call">Group voice call</string>
-  <string name="group_video_call">Group video call</string>
+  <string name="incoming_voice_call">Incoming voice call...</string>
+  <string name="incoming_video_call">Incoming video call...</string>
+  <string name="incoming_group_voice_call">Incoming group voice call...</string>
+  <string name="incoming_group_video_call">Incoming group video call...</string>
   <string name="calling">Calling…</string>
   <string name="memberlist_title">Member</string>
   <string name="leave_title">Leave the call</string>

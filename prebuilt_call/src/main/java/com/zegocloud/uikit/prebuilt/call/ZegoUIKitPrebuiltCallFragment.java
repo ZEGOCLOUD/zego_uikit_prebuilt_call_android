@@ -53,6 +53,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         bundle.putString("callID", data.callID);
         bundle.putSerializable("config", config);
         fragment.setArguments(bundle);
+        CallInvitationServiceImpl.getInstance().addZegoUIKitPrebuiltCallFragment(fragment);
         return fragment;
     }
 
@@ -67,6 +68,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         bundle.putString("callID", callID);
         bundle.putSerializable("config", config);
         fragment.setArguments(bundle);
+        CallInvitationServiceImpl.getInstance().addZegoUIKitPrebuiltCallFragment(fragment);
         return fragment;
     }
 

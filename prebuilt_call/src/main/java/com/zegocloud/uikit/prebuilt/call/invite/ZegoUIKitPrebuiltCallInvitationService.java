@@ -1,17 +1,34 @@
 package com.zegocloud.uikit.prebuilt.call.invite;
 
 import android.app.Application;
+import android.os.Handler;
 import android.text.TextUtils;
+
+import com.zegocloud.uikit.ZegoUIKit;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.IncomingCallButtonListener;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.OutgoingCallButtonListener;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.RingtoneManager;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoInvitationCallListener;
 
 public class ZegoUIKitPrebuiltCallInvitationService {
 
     public static void init(Application application, long appID, String appSign, String userID, String userName,
-        ZegoUIKitPrebuiltCallInvitationConfig config) {
+                            ZegoUIKitPrebuiltCallInvitationConfig config) {
         initRingtoneManager(application, config);
         CallInvitationServiceImpl.getInstance().setPrebuiltConfigProvider(config.provider);
         CallInvitationServiceImpl.getInstance().init(application, appID, appSign, userID, userName, config);
+
+        if (config.notifyWhenAppRunningInBackgroundOrQuit) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
+                    RingtoneManager.setIncomingOfflineRing();
+                }
+            },500);
+        }
     }
 
     public static void unInit() {
@@ -35,4 +52,25 @@ public class ZegoUIKitPrebuiltCallInvitationService {
         }
         RingtoneManager.setIncomingUri(RingtoneManager.getUriFromRaw(application, incoming));
     }
+
+    public static void addIncomingCallButtonListener(IncomingCallButtonListener listener) {
+        CallInvitationServiceImpl.getInstance().addIncomingCallButtonListener(listener);
+    }
+
+    public static void addOutgoingCallButtonListener(OutgoingCallButtonListener listener) {
+        CallInvitationServiceImpl.getInstance().addOutgoingCallButtonListener(listener);
+    }
+
+    public static void addInvitationCallListener(ZegoInvitationCallListener listener) {
+        CallInvitationServiceImpl.getInstance().addInvitationCallListener(listener);
+    }
+
+    public static void removeInvitationCallListener(ZegoInvitationCallListener listener) {
+        CallInvitationServiceImpl.getInstance().removeInvitationCallListener(listener);
+    }
+
+    public static ZegoUIKitPrebuiltCallFragment getPrebuiltCallFragment() {
+        return CallInvitationServiceImpl.getInstance().getZegoUIKitPrebuiltCallFragment();
+    }
+
 }
