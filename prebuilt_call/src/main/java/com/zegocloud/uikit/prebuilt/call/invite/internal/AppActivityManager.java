@@ -162,7 +162,6 @@ public class AppActivityManager implements ActivityLifecycleCallbacks {
         return null;
     }
 
-
     /**
      * Whether at the front desk
      *

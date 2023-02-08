@@ -7,14 +7,14 @@ import android.text.TextUtils;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
+import com.zegocloud.uikit.plugin.adapter.plugins.ZegoSignalingPluginNotificationConfig;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallConfigProvider;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
-import com.zegocloud.uikit.service.defines.ZegoSignalingPluginNotificationConfig;
-import com.zegocloud.uikit.service.defines.ZegoUIKitSignalingPluginInvitationListener;
 import com.zegocloud.uikit.service.defines.ZegoScenario;
+import com.zegocloud.uikit.service.defines.ZegoUIKitSignalingPluginInvitationListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 
 import java.util.ArrayList;
@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,6 +42,7 @@ public class CallInvitationServiceImpl {
         return CallInvitationServiceImpl.Holder.INSTANCE;
     }
 
+    private ZegoUIKitPrebuiltCallInvitationConfig invitationConfig;
     public AppActivityManager appActivityManager;
     private CallInvitationDialog invitationDialog;
     private ZegoUIKitPrebuiltCallConfigProvider provider;
@@ -61,7 +61,6 @@ public class CallInvitationServiceImpl {
     private boolean isInit;
     private List<CallStateListener> callStateListeners;
     private ZegoInvitationCallListener invitationCallListenerList;
-    private ZegoUIKitPrebuiltCallInvitationConfig config;
     private OutgoingCallButtonListener outgoingCallButtonListener;
     private IncomingCallButtonListener incomingCallButtonListener;
     private ZegoUIKitPrebuiltCallFragment zegoUIKitPrebuiltCallFragment;
@@ -182,7 +181,6 @@ public class CallInvitationServiceImpl {
                 return;
             }
             setCallState(NONE_CANCELED);
-
             notifyIncomingCallCanceled(inviter);
         }
     };
@@ -208,9 +206,8 @@ public class CallInvitationServiceImpl {
 
     public void init(Application application, long appID, String appSign, String userID, String userName,
                      ZegoUIKitPrebuiltCallInvitationConfig config) {
-        this.config = config;
+        this.invitationConfig = config;
         isInit = true;
-        ZegoUIKit.installPlugins(config.plugins);
         ZegoUIKit.init(application, appID, appSign, ZegoScenario.GENERAL);
         ZegoUIKit.login(userID, userName);
         ZegoUIKit.getSignalingPlugin().login(userID, userName, null);
@@ -222,7 +219,8 @@ public class CallInvitationServiceImpl {
     }
 
     public void unInit() {
-        if (!config.notifyWhenAppRunningInBackgroundOrQuit) {
+        isInit = false;
+        if (!invitationConfig.notifyWhenAppRunningInBackgroundOrQuit) {
             ZegoUIKit.logout();
             ZegoUIKit.getSignalingPlugin().logout();
         }
@@ -294,13 +292,13 @@ public class CallInvitationServiceImpl {
         }
     }
 
-    public void sendInvitation(String callID,List<String> invitees, int timeout, int type, String data,
-                               ZegoSignalingPluginNotificationConfig notificationConfig, PluginCallbackListener callbackListener) {
+    public void sendInvitation(String callID,List<String> invitees, int timeout, int type, String data, ZegoSignalingPluginNotificationConfig notificationConfig,
+                               PluginCallbackListener callbackListener) {
         if (callState > 0) {
             return;
         }
         this.callID = callID;
-        ZegoUIKit.getSignalingPlugin().sendInvitation(invitees, timeout, type, data, notificationConfig, new PluginCallbackListener() {
+        ZegoUIKit.getSignalingPlugin().sendInvitation(invitees, timeout, type, data,notificationConfig,new PluginCallbackListener() {
             @Override
             public void callback(Map<String, Object> result) {
                 int code = (int) result.get("code");
@@ -436,7 +434,7 @@ public class CallInvitationServiceImpl {
     }
 
     public ZegoUIKitPrebuiltCallInvitationConfig getConfig() {
-        return config;
+        return invitationConfig;
     }
 
     public void notifyIncomingCallReceived(ZegoUIKitUser inviter, int type, String extendedData) {
@@ -454,7 +452,6 @@ public class CallInvitationServiceImpl {
 
                 ZegoCallType callType = type == ZegoCallType.VIDEO_CALL.value() ? ZegoCallType.VIDEO_CALL : ZegoCallType.VOICE_CALL;
                 ZegoCallUser inviteCaller = new ZegoCallUser(inviter.userID, inviter.userName);
-
                 invitationCallListenerList.onIncomingCallReceived(callID, inviteCaller, callType, list);
 
             } catch (JSONException e) {
@@ -536,9 +533,9 @@ public class CallInvitationServiceImpl {
 
         if (TextUtils.isEmpty(notificationMessage)) {
             if (isVideoCall) {
-                notificationMessage = isGroup ? application.getString(R.string.incoming_group_video_call) : application.getString(R.string.incoming_video_call);
+                notificationMessage = isGroup ? application.getString(R.string.call_incoming_group_video_call) : application.getString(R.string.call_incoming_video_call);
             } else {
-                notificationMessage = isGroup ? application.getString(R.string.incoming_group_voice_call) : application.getString(R.string.incoming_voice_call);
+                notificationMessage = isGroup ? application.getString(R.string.call_incoming_group_voice_call) : application.getString(R.string.call_incoming_voice_call);
             }
         }
 
@@ -562,5 +559,4 @@ public class CallInvitationServiceImpl {
 
         return notificationTitle;
     }
-
 }

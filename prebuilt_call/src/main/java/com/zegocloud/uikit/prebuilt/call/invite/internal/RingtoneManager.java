@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Vibrator;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.zegocloud.uikit.prebuilt.call.config.ZegoNotificationConfig;
 
@@ -26,7 +27,7 @@ public class RingtoneManager {
 
     public static Uri getUriFromRaw(Context context, String mp3Name) {
         return Uri.parse(
-                ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/raw/" + mp3Name);
+            ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/raw/" + mp3Name);
     }
 
     public static void init(Context context) {
@@ -49,7 +50,7 @@ public class RingtoneManager {
             if (incoming) {
                 if (uri == null) {
                     uri = android.media.RingtoneManager.getActualDefaultRingtoneUri(context,
-                            android.media.RingtoneManager.TYPE_RINGTONE);
+                        android.media.RingtoneManager.TYPE_RINGTONE);
                 }
             }
             //            ringtone = android.media.RingtoneManager.getRingtone(context, uri);

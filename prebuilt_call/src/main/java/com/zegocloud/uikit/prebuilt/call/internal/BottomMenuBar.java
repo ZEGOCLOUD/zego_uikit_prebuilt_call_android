@@ -125,7 +125,7 @@ public class BottomMenuBar extends LinearLayout {
                 break;
             case SHOW_MEMBER_LIST_BUTTON:
                 view = new ImageView(getContext());
-                ((ImageView) view).setImageResource(R.drawable.icon_top_member_normal);
+                ((ImageView) view).setImageResource(R.drawable.call_icon_top_member_normal);
                 view.setOnClickListener(v -> {
                     ZegoCallMemberList memberList = new ZegoCallMemberList(getContext());
                     ZegoMemberListItemViewProvider memberListItemProvider = CallConfigGlobal.getInstance()
@@ -215,14 +215,16 @@ public class BottomMenuBar extends LinearLayout {
         this.menuBarConfig = bottomMenuBarConfig;
         applyMenuBarStyle(bottomMenuBarConfig.style);
         applyMenuBarButtons(bottomMenuBarConfig.buttons);
-        getHandler().postDelayed(runnable, HIDE_DELAY_TIME);
+        if (menuBarConfig.hideAutomatically) {
+            getHandler().postDelayed(runnable, HIDE_DELAY_TIME);
+        }
     }
 
     private void applyMenuBarStyle(ZegoMenuBarStyle style) {
         if (style == ZegoMenuBarStyle.LIGHT) {
             setBackground(null);
         } else {
-            setBackgroundResource(R.drawable.background_bottom_menubar);
+            setBackgroundResource(R.drawable.call_background_bottom_menubar);
         }
     }
 
@@ -255,8 +257,8 @@ public class BottomMenuBar extends LinearLayout {
         private void initView() {
             StateListDrawable sld = new StateListDrawable();
             sld.addState(new int[]{android.R.attr.state_pressed},
-                ContextCompat.getDrawable(getContext(), R.drawable.icon_more_off));
-            sld.addState(new int[]{}, ContextCompat.getDrawable(getContext(), R.drawable.icon_more));
+                ContextCompat.getDrawable(getContext(), R.drawable.call_icon_more_off));
+            sld.addState(new int[]{}, ContextCompat.getDrawable(getContext(), R.drawable.call_icon_more));
             setImageDrawable(sld);
             setOnClickListener(v -> showMoreDialog());
         }

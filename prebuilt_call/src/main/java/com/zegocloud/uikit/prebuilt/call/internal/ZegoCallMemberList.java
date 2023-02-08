@@ -18,7 +18,7 @@ import com.zegocloud.uikit.components.memberlist.ZegoMemberListComparator;
 import com.zegocloud.uikit.components.memberlist.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMemberListConfig;
-import com.zegocloud.uikit.prebuilt.call.databinding.LayoutMemberlistBinding;
+import com.zegocloud.uikit.prebuilt.call.databinding.CallLayoutMemberlistBinding;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +26,7 @@ import java.util.List;
 
 public class ZegoCallMemberList extends BottomSheetDialog {
 
-    private LayoutMemberlistBinding binding;
+    private CallLayoutMemberlistBinding binding;
     private ZegoMemberListItemViewProvider memberListItemProvider;
     private ZegoMemberListConfig memberListConfig;
 
@@ -45,7 +45,7 @@ public class ZegoCallMemberList extends BottomSheetDialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = LayoutMemberlistBinding.inflate(getLayoutInflater());
+        binding = CallLayoutMemberlistBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         Window window = getWindow();

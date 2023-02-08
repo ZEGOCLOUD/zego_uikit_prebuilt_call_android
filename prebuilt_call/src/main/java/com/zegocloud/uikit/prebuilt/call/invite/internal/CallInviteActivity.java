@@ -3,8 +3,10 @@ package com.zegocloud.uikit.prebuilt.call.invite.internal;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
@@ -66,7 +68,7 @@ public class CallInviteActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_prebuilt_call);
+        setContentView(R.layout.call_activity_prebuilt);
 
         callStateListener = new CallStateListener() {
             @Override
@@ -74,6 +76,12 @@ public class CallInviteActivity extends AppCompatActivity {
                 if (after == CallInvitationServiceImpl.CONNECTED) {
                     showCallFragment();
                 } else {
+                    String userID = ZegoUIKit.getLocalUser().userID;
+                    if (!TextUtils.isEmpty(userID)) {
+                        if (ZegoUIKit.isCameraOn(userID)) {
+                            ZegoUIKit.turnCameraOn(userID, false);
+                        }
+                    }
                     CallInvitationServiceImpl.getInstance().removeCallStateListener(callStateListener);
                     finish();
                 }

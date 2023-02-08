@@ -3,6 +3,7 @@ package com.zegocloud.uikit.prebuilt.call;
 import android.Manifest.permission;
 import android.app.Application;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.permissionx.guolindev.PermissionX;
@@ -23,7 +25,7 @@ import com.zegocloud.uikit.components.audiovideocontainer.ZegoAudioVideoViewConf
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutMode;
 import com.zegocloud.uikit.components.memberlist.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
-import com.zegocloud.uikit.prebuilt.call.databinding.FragmentCallBinding;
+import com.zegocloud.uikit.prebuilt.call.databinding.CallFragmentCallBinding;
 import com.zegocloud.uikit.prebuilt.call.internal.CallConfigGlobal;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoVideoForegroundView;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
@@ -39,7 +41,7 @@ import java.util.List;
 
 public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
-    private FragmentCallBinding binding;
+    private CallFragmentCallBinding binding;
     private List<View> bottomMenuBarBtns = new ArrayList<>();
     private List<View> topMenuBarBtns = new ArrayList<>();
     private OnBackPressedCallback onBackPressedCallback;
@@ -99,16 +101,16 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         }
         if (config.hangUpConfirmDialogInfo != null) {
             if (TextUtils.isEmpty(config.hangUpConfirmDialogInfo.title)) {
-                config.hangUpConfirmDialogInfo.title = getString(R.string.leave_title);
+                config.hangUpConfirmDialogInfo.title = getString(R.string.call_leave_title);
             }
             if (TextUtils.isEmpty(config.hangUpConfirmDialogInfo.message)) {
-                config.hangUpConfirmDialogInfo.message = getString(R.string.leave_message);
+                config.hangUpConfirmDialogInfo.message = getString(R.string.call_leave_message);
             }
             if (TextUtils.isEmpty(config.hangUpConfirmDialogInfo.cancelButtonName)) {
-                config.hangUpConfirmDialogInfo.cancelButtonName = getString(R.string.leava_cancel);
+                config.hangUpConfirmDialogInfo.cancelButtonName = getString(R.string.call_leave_cancel);
             }
             if (TextUtils.isEmpty(config.hangUpConfirmDialogInfo.confirmButtonName)) {
-                config.hangUpConfirmDialogInfo.confirmButtonName = getString(R.string.leave_confirm);
+                config.hangUpConfirmDialogInfo.confirmButtonName = getString(R.string.call_leave_confirm);
             }
         }
         onBackPressedCallback = new OnBackPressedCallback(true) {
@@ -141,7 +143,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
         @Nullable Bundle savedInstanceState) {
-        binding = FragmentCallBinding.inflate(inflater, container, false);
+        binding = CallFragmentCallBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
     }
@@ -251,31 +253,42 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
     private void requestPermissionIfNeeded(RequestCallback requestCallback) {
         List<String> permissions = Arrays.asList(permission.CAMERA, permission.RECORD_AUDIO);
+
+        boolean allGranted = true;
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(getContext(), permission) != PackageManager.PERMISSION_GRANTED) {
+                allGranted = false;
+            }
+        }
+        if (allGranted) {
+            requestCallback.onResult(true, permissions, new ArrayList<>());
+            return;
+        }
         PermissionX.init(requireActivity()).permissions(permissions).onExplainRequestReason((scope, deniedList) -> {
             String message = "";
             if (deniedList.size() == 1) {
                 if (deniedList.contains(permission.CAMERA)) {
-                    message = getContext().getString(R.string.permission_explain_camera);
+                    message = getContext().getString(R.string.call_permission_explain_camera);
                 } else if (deniedList.contains(permission.RECORD_AUDIO)) {
-                    message = getContext().getString(R.string.permission_explain_mic);
+                    message = getContext().getString(R.string.call_permission_explain_mic);
                 }
             } else {
-                message = getContext().getString(R.string.permission_explain_camera_mic);
+                message = getContext().getString(R.string.call_permission_explain_camera_mic);
             }
-            scope.showRequestReasonDialog(deniedList, message, getString(R.string.ok));
+            scope.showRequestReasonDialog(deniedList, message, getString(R.string.call_ok));
         }).onForwardToSettings((scope, deniedList) -> {
             String message = "";
             if (deniedList.size() == 1) {
                 if (deniedList.contains(permission.CAMERA)) {
-                    message = getContext().getString(R.string.settings_camera);
+                    message = getContext().getString(R.string.call_settings_camera);
                 } else if (deniedList.contains(permission.RECORD_AUDIO)) {
-                    message = getContext().getString(R.string.settings_mic);
+                    message = getContext().getString(R.string.call_settings_mic);
                 }
             } else {
-                message = getContext().getString(R.string.settings_camera_mic);
+                message = getContext().getString(R.string.call_settings_camera_mic);
             }
-            scope.showForwardToSettingsDialog(deniedList, message, getString(R.string.settings),
-                getString(R.string.cancel));
+            scope.showForwardToSettingsDialog(deniedList, message, getString(R.string.call_settings),
+                getString(R.string.call_cancel));
         }).request(new RequestCallback() {
             @Override
             public void onResult(boolean allGranted, @NonNull List<String> grantedList,

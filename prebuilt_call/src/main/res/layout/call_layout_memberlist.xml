@@ -7,7 +7,7 @@
     android:id="@+id/memberlist_layout"
     android:layout_width="match_parent"
     android:layout_height="571dp"
-    android:background="@drawable/background_memberlist"
+    android:background="@drawable/call_background_memberlist"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -21,7 +21,7 @@
         android:layout_height="35dp"
         android:layout_centerVertical="true"
         android:layout_marginStart="12dp"
-        android:src="@drawable/icon_down" />
+        android:src="@drawable/call_icon_down" />
 
       <TextView
         android:layout_width="wrap_content"
@@ -29,7 +29,7 @@
         android:layout_centerVertical="true"
         android:layout_marginStart="5dp"
         android:layout_toEndOf="@id/memberlist_down"
-        android:text="@string/memberlist_title"
+        android:text="@string/call_memberlist_title"
         android:textColor="@android:color/white"
         android:textSize="18sp" />
     </RelativeLayout>

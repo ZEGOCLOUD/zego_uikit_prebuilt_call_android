@@ -27,7 +27,7 @@ public class PermissionExplainDialog extends RationaleDialog {
     @Override
     public View getPositiveButton() {
         MaterialButton materialButton = new MaterialButton(getContext());
-        materialButton.setText(R.string.ok);
+        materialButton.setText(R.string.call_ok);
         return materialButton;
     }
 
@@ -35,7 +35,7 @@ public class PermissionExplainDialog extends RationaleDialog {
     @Override
     public View getNegativeButton() {
         MaterialButton materialButton = new MaterialButton(getContext());
-        materialButton.setText(R.string.cancel);
+        materialButton.setText(R.string.call_cancel);
         return materialButton;
     }
 

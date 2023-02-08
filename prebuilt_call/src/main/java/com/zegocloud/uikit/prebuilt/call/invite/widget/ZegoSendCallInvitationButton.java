@@ -11,14 +11,14 @@ import androidx.annotation.Nullable;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.plugin.invitation.components.ZegoStartInvitationButton;
+import com.zegocloud.uikit.plugin.adapter.plugins.ZegoSignalingPluginNotificationConfig;
+import com.zegocloud.uikit.plugin.adapter.utils.GenericUtils;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ClickListener;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallUser;
-import com.zegocloud.uikit.service.defines.ZegoSignalingPluginNotificationConfig;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
-import com.zegocloud.uikit.utils.GenericUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,6 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
      * This only takes effect when the notifyWhenAppRunningInBackgroundOrQuit is true.
      */
     private String resourceID = "";
-
     private ClickListener sendInvitationListener;
 
     public ZegoSendCallInvitationButton(@NonNull Context context) {
@@ -121,7 +120,7 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
                     }
                 }
                 if (!errorInvitees.isEmpty()) {
-                    StringBuilder sb = new StringBuilder(getContext().getString(R.string.invite_error_offline));
+                    StringBuilder sb = new StringBuilder(getContext().getString(R.string.call_invite_error_offline));
                     int count = 0;
                     for (ZegoUIKitUser errorInvitee : errorInvitees) {
                         sb.append(errorInvitee.userID);
@@ -135,7 +134,7 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
                     Toast.makeText(getContext(), sb.toString(), Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(getContext(), getContext().getString(R.string.invite_error, code, message),
+                Toast.makeText(getContext(), getContext().getString(R.string.call_invite_error, code, message),
                         Toast.LENGTH_SHORT).show();
             }
 
@@ -184,6 +183,5 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
         notificationConfig.setMessage(offlineMessage);
         return notificationConfig;
     }
-
 
 }

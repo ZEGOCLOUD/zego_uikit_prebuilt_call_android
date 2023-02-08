@@ -2,6 +2,7 @@ package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
 import android.Manifest.permission;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,28 +10,26 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-
 import com.permissionx.guolindev.PermissionX;
 import com.permissionx.guolindev.callback.RequestCallback;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
+import com.zegocloud.uikit.plugin.adapter.utils.GenericUtils;
 import com.zegocloud.uikit.prebuilt.call.R;
-import com.zegocloud.uikit.prebuilt.call.databinding.LayoutWaitingCallBinding;
+import com.zegocloud.uikit.prebuilt.call.databinding.CallLayoutWaitingBinding;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
-import com.zegocloud.uikit.utils.GenericUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class CallWaitingFragment extends Fragment {
 
-    private LayoutWaitingCallBinding binding;
+    private CallLayoutWaitingBinding binding;
     private OnBackPressedCallback onBackPressedCallback;
 
     public CallWaitingFragment() {
@@ -58,7 +57,7 @@ public class CallWaitingFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        binding = LayoutWaitingCallBinding.inflate(inflater, container, false);
+        binding = CallLayoutWaitingBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -80,6 +79,7 @@ public class CallWaitingFragment extends Fragment {
             binding.callWaitingCancel.setVisibility(View.GONE);
             binding.callWaitingAcceptText.setVisibility(View.VISIBLE);
             binding.callWaitingAccept.setVisibility(View.VISIBLE);
+
             if (CallInvitationServiceImpl.getInstance().getConfig() != null) {
                 boolean showDeclineButton = CallInvitationServiceImpl.getInstance().getConfig().showDeclineButton;
                 binding.callWaitingRefuse.setVisibility(showDeclineButton ? View.VISIBLE : View.GONE);
@@ -112,19 +112,19 @@ public class CallWaitingFragment extends Fragment {
 
         boolean isGroup = invitees != null && invitees.size() > 1;
         if (type == ZegoInvitationType.VOICE_CALL.getValue()) {
-            binding.callWaitingAccept.setBackgroundResource(R.drawable.selector_dialog_voice_accept);
+            binding.callWaitingAccept.setBackgroundResource(R.drawable.call_selector_dialog_voice_accept);
             if ("incoming".equals(page)) {
-                String callStateTextVoice = isGroup ? getString(R.string.incoming_group_voice_call) : getString(R.string.incoming_voice_call);
+                String callStateTextVoice = isGroup ? getString(R.string.call_incoming_group_voice_call) : getString(R.string.call_incoming_voice_call);
                 binding.callStateText.setText(callStateTextVoice);
             }
         } else {
-            binding.callWaitingAccept.setBackgroundResource(R.drawable.selector_dialog_video_accept);
+            binding.callWaitingAccept.setBackgroundResource(R.drawable.call_selector_dialog_video_accept);
             if ("incoming".equals(page)) {
-                String callStateTextVideo = isGroup ? getString(R.string.incoming_group_video_call) : getString(R.string.incoming_video_call);
+                String callStateTextVideo = isGroup ? getString(R.string.call_incoming_group_video_call) : getString(R.string.call_incoming_video_call);
                 binding.callStateText.setText(callStateTextVideo);
             }
         }
-        binding.getRoot().setBackgroundResource(R.drawable.img_bg);
+        binding.getRoot().setBackgroundResource(R.drawable.call_img_bg);
         binding.callWaitingAccept.setInviterID(inviter.userID);
         binding.callWaitingRefuse.setInviterID(inviter.userID);
         binding.callWaitingCancel.setInvitees(GenericUtils.map(invitees, uiKitUser -> uiKitUser.userID));
@@ -158,35 +158,47 @@ public class CallWaitingFragment extends Fragment {
 
     private void requestPermissionIfNeeded(RequestCallback requestCallback) {
         List<String> permissions = Arrays.asList(permission.CAMERA, permission.RECORD_AUDIO);
+
+        boolean allGranted = true;
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(getContext(), permission) != PackageManager.PERMISSION_GRANTED) {
+                allGranted = false;
+            }
+        }
+        if (allGranted) {
+            requestCallback.onResult(true, permissions, new ArrayList<>());
+            return;
+        }
+
         PermissionX.init(requireActivity()).permissions(permissions).onExplainRequestReason((scope, deniedList) -> {
             String message = "";
             if (deniedList.size() == 1) {
                 if (deniedList.contains(permission.CAMERA)) {
-                    message = getContext().getString(R.string.permission_explain_camera);
+                    message = getContext().getString(R.string.call_permission_explain_camera);
                 } else if (deniedList.contains(permission.RECORD_AUDIO)) {
-                    message = getContext().getString(R.string.permission_explain_mic);
+                    message = getContext().getString(R.string.call_permission_explain_mic);
                 }
             } else {
-                message = getContext().getString(R.string.permission_explain_camera_mic);
+                message = getContext().getString(R.string.call_permission_explain_camera_mic);
             }
-            scope.showRequestReasonDialog(deniedList, message, getString(R.string.ok));
+            scope.showRequestReasonDialog(deniedList, message, getString(R.string.call_ok));
         }).onForwardToSettings((scope, deniedList) -> {
             String message = "";
             if (deniedList.size() == 1) {
                 if (deniedList.contains(permission.CAMERA)) {
-                    message = getContext().getString(R.string.settings_camera);
+                    message = getContext().getString(R.string.call_settings_camera);
                 } else if (deniedList.contains(permission.RECORD_AUDIO)) {
-                    message = getContext().getString(R.string.settings_mic);
+                    message = getContext().getString(R.string.call_settings_mic);
                 }
             } else {
-                message = getContext().getString(R.string.settings_camera_mic);
+                message = getContext().getString(R.string.call_settings_camera_mic);
             }
-            scope.showForwardToSettingsDialog(deniedList, message, getString(R.string.settings),
-                    getString(R.string.cancel));
+            scope.showForwardToSettingsDialog(deniedList, message, getString(R.string.call_settings),
+                getString(R.string.call_cancel));
         }).request(new RequestCallback() {
             @Override
             public void onResult(boolean allGranted, @NonNull List<String> grantedList,
-                                 @NonNull List<String> deniedList) {
+                @NonNull List<String> deniedList) {
                 if (requestCallback != null) {
                     requestCallback.onResult(allGranted, grantedList, deniedList);
                 }
@@ -196,7 +208,7 @@ public class CallWaitingFragment extends Fragment {
 
     private void hideSystemNavigationBar() {
         int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         binding.getRoot().setSystemUiVisibility(uiOptions);
 
         int statusBarHeight = getInternalDimensionSize(getContext(), "status_bar_height");
@@ -213,7 +225,7 @@ public class CallWaitingFragment extends Fragment {
                 int sizeTwo = Resources.getSystem().getDimensionPixelSize(resourceId);
 
                 if (sizeTwo >= sizeOne && !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !key.equals(
-                        "status_bar_height"))) {
+                    "status_bar_height"))) {
                     return sizeTwo;
                 } else {
                     float densityOne = context.getResources().getDisplayMetrics().density;
@@ -353,5 +365,6 @@ public class CallWaitingFragment extends Fragment {
         }
 
     }
+
 
 }

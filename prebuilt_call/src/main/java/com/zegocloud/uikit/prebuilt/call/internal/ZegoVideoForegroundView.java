@@ -41,7 +41,7 @@ public class ZegoVideoForegroundView extends FrameLayout {
 
     private void initView() {
         ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(getContext())
-            .inflate(R.layout.layout_video_foreground, null, false);
+            .inflate(R.layout.call_layout_video_foreground, null, false);
         textView = viewGroup.findViewById(R.id.foreground_textview);
         micStatusView = viewGroup.findViewById(R.id.foreground_mic);
         cameraStatusView = viewGroup.findViewById(R.id.foreground_camera);

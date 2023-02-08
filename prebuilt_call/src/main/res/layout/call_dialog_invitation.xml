@@ -11,7 +11,7 @@
     android:layout_width="match_parent"
     android:layout_height="80dp"
     android:layout_margin="8dp"
-    android:background="@drawable/round_rect_bg_call">
+    android:background="@drawable/zego_uikit_round_rect_bg_call">
 
     <com.zegocloud.uikit.components.internal.RippleIconView
       android:id="@+id/dialog_call_icon"
