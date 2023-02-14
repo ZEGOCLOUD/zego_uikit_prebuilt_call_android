@@ -27,9 +27,10 @@ import com.zegocloud.uikit.components.memberlist.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallFragmentCallBinding;
 import com.zegocloud.uikit.prebuilt.call.internal.CallConfigGlobal;
-import com.zegocloud.uikit.prebuilt.call.internal.ZegoVideoForegroundView;
+import com.zegocloud.uikit.prebuilt.call.internal.ZegoAudioVideoForegroundView;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.components.audiovideo.ZegoBaseAudioVideoForegroundView;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoScenario;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
@@ -208,11 +209,11 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         if (provider == null) {
             binding.avcontainer.setForegroundViewProvider(new ZegoForegroundViewProvider() {
                 @Override
-                public View getForegroundView(ViewGroup parent, ZegoUIKitUser uiKitUser) {
-                    ZegoVideoForegroundView foregroundView = new ZegoVideoForegroundView(getContext(), uiKitUser);
-                    foregroundView.showMicrophone(config.audioVideoViewConfig.showMicrophoneStateOnView);
-                    foregroundView.showCamera(config.audioVideoViewConfig.showCameraStateOnView);
-                    foregroundView.showUserName(config.audioVideoViewConfig.showUserNameOnView);
+                public ZegoBaseAudioVideoForegroundView getForegroundView(ViewGroup parent, ZegoUIKitUser uiKitUser) {
+                    ZegoAudioVideoForegroundView foregroundView = new ZegoAudioVideoForegroundView(getContext(), uiKitUser.userID);
+                    foregroundView.showMicrophoneView(config.audioVideoViewConfig.showMicrophoneStateOnView);
+                    foregroundView.showCameraView(config.audioVideoViewConfig.showCameraStateOnView);
+                    foregroundView.showUserNameView(config.audioVideoViewConfig.showUserNameOnView);
                     return foregroundView;
                 }
             });
