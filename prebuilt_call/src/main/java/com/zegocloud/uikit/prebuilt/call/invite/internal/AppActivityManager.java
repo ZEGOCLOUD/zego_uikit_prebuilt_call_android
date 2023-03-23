@@ -169,7 +169,7 @@ public class AppActivityManager implements ActivityLifecycleCallbacks {
      */
     public static boolean isBackground() {
         Context context = CallInvitationServiceImpl.getInstance().getApplication();
-        if(context == null){
+        if (context == null) {
             return false;
         }
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);

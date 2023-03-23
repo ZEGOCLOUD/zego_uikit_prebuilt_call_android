@@ -207,7 +207,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     private void applyAudioVideoViewConfig(ZegoUIKitPrebuiltCallConfig config) {
         ZegoForegroundViewProvider provider = CallConfigGlobal.getInstance().getVideoViewForegroundViewProvider();
         if (provider == null) {
-            binding.avcontainer.setForegroundViewProvider(new ZegoForegroundViewProvider() {
+            binding.avcontainer.setAudioVideoForegroundViewProvider(new ZegoForegroundViewProvider() {
                 @Override
                 public ZegoBaseAudioVideoForegroundView getForegroundView(ViewGroup parent, ZegoUIKitUser uiKitUser) {
                     ZegoAudioVideoForegroundView foregroundView = new ZegoAudioVideoForegroundView(getContext(), uiKitUser.userID);
@@ -218,7 +218,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 }
             });
         } else {
-            binding.avcontainer.setForegroundViewProvider(provider);
+            binding.avcontainer.setAudioVideoForegroundViewProvider(provider);
         }
         binding.avcontainer.setLayout(config.layout);
         binding.avcontainer.setAudioVideoComparator(new ZegoAudioVideoComparator() {
