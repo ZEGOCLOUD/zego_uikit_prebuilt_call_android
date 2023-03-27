@@ -141,5 +141,4 @@ You can simply click the **Run** on Android Studio to run and test your App on y
 
 [About Us](https://www.zegocloud.com)
 
-If you have any questions regarding bugs and feature requests, visit the [ZEGOCLOUD community](https://discord.gg/EtNRATttyp) or email us at global_support@zegocloud.com.
 
