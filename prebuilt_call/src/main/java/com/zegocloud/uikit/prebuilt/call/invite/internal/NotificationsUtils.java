@@ -71,19 +71,20 @@ public class NotificationsUtils {
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+            pendingIntent = PendingIntent.getActivity(context, notifyConfig.userId.hashCode(), notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         } else {
-            pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_ONE_SHOT);
+            pendingIntent = PendingIntent.getActivity(context, notifyConfig.userId.hashCode(), notificationIntent, PendingIntent.FLAG_ONE_SHOT);
         }
         notification.contentIntent = pendingIntent;
-        Long userId = Long.parseLong(notifyConfig.userId);
-
-        notificationManager.notify(userId.intValue(), notification);
+        int notifyId = notifyConfig.userId.hashCode();
+        notificationManager.notify(notifyId, notification);
     }
 
     public static void clearAllNotifications() {
-        NotificationManager notificationManager = (NotificationManager)CallInvitationServiceImpl.getInstance().getApplication().getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancelAll();
+        if(CallInvitationServiceImpl.getInstance().getApplication() != null){
+            NotificationManager notificationManager = (NotificationManager)CallInvitationServiceImpl.getInstance().getApplication().getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancelAll();
+        }
     }
 
 }

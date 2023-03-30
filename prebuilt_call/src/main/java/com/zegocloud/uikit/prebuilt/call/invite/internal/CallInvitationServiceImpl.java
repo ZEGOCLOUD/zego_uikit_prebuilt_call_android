@@ -220,12 +220,16 @@ public class CallInvitationServiceImpl {
 
     public void unInit() {
         isInit = false;
-        if (!invitationConfig.notifyWhenAppRunningInBackgroundOrQuit) {
-            ZegoUIKit.logout();
-            ZegoUIKit.getSignalingPlugin().logout();
+        if(invitationConfig != null){
+            if (!invitationConfig.notifyWhenAppRunningInBackgroundOrQuit) {
+                ZegoUIKit.logout();
+                ZegoUIKit.getSignalingPlugin().logout();
+            }
         }
-        this.application.unregisterActivityLifecycleCallbacks(appActivityManager);
-        this.application = null;
+        if (application != null) {
+            this.application.unregisterActivityLifecycleCallbacks(appActivityManager);
+            this.application = null;
+        }
         ZegoUIKit.getSignalingPlugin().removeInvitationListener(invitationListener);
     }
 
