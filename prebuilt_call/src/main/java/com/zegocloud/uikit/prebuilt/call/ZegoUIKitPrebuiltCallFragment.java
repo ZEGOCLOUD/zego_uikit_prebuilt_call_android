@@ -42,7 +42,6 @@ import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoScenario;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
-import com.zegocloud.uikit.service.internal.ExpressAdapter;
 import im.zego.zegoexpress.constants.ZegoOrientation;
 import im.zego.zegoexpress.constants.ZegoVideoConfigPreset;
 import im.zego.zegoexpress.entity.ZegoVideoConfig;
