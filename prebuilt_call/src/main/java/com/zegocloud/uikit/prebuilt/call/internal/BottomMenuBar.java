@@ -17,6 +17,7 @@ import com.zegocloud.uikit.components.audiovideo.ZegoSwitchAudioOutputButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleMicrophoneButton;
+import com.zegocloud.uikit.components.common.ZegoScreenSharingToggleButton;
 import com.zegocloud.uikit.components.memberlist.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCallListener;
@@ -25,6 +26,7 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMemberListConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltVideoConfig;
 import com.zegocloud.uikit.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,7 @@ public class BottomMenuBar extends LinearLayout {
     private Runnable runnable;
     private static final long HIDE_DELAY_TIME = 5000;
     private ZegoBottomMenuBarConfig menuBarConfig;
+    private ZegoPrebuiltVideoConfig screenSharingVideoConfig;
 
     public BottomMenuBar(@NonNull Context context) {
         super(context);
@@ -135,6 +138,14 @@ public class BottomMenuBar extends LinearLayout {
                     memberList.setMemberListConfig(memberListConfig);
                     memberList.show();
                 });
+                break;
+            case SCREEN_SHARING_TOGGLE_BUTTON:
+                view = new ZegoScreenSharingToggleButton(getContext());
+                ((ZegoScreenSharingToggleButton) view).bottomBarStyle();
+                if (screenSharingVideoConfig != null) {
+                    ((ZegoScreenSharingToggleButton) view).setPresetResolution(screenSharingVideoConfig.resolution);
+                }
+
                 break;
         }
         if (view != null) {
@@ -238,6 +249,23 @@ public class BottomMenuBar extends LinearLayout {
             if (menuBarConfig.hideAutomatically) {
                 getHandler().removeCallbacks(runnable);
                 getHandler().postDelayed(runnable, HIDE_DELAY_TIME);
+            }
+        }
+    }
+
+    public void setScreenShareVideoConfig(ZegoPrebuiltVideoConfig screenSharingVideoConfig) {
+        this.screenSharingVideoConfig = screenSharingVideoConfig;
+        if (screenSharingVideoConfig == null) {
+            return;
+        }
+        for (View view : showList) {
+            if (view instanceof ZegoScreenSharingToggleButton) {
+                ((ZegoScreenSharingToggleButton) view).setPresetResolution(screenSharingVideoConfig.resolution);
+            }
+        }
+        for (View view : hideList) {
+            if (view instanceof ZegoScreenSharingToggleButton) {
+                ((ZegoScreenSharingToggleButton) view).setPresetResolution(screenSharingVideoConfig.resolution);
             }
         }
     }

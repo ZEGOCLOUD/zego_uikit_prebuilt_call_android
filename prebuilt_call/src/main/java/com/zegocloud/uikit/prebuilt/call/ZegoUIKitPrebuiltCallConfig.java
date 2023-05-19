@@ -4,19 +4,21 @@ import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayout;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutGalleryConfig;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutMode;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutPictureInPictureConfig;
+import com.zegocloud.uikit.components.common.ZegoPresetResolution;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoBottomMenuBarConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMemberListConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltAudioVideoViewConfig;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltVideoConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-public class ZegoUIKitPrebuiltCallConfig implements Serializable {
+public class ZegoUIKitPrebuiltCallConfig {
 
     public boolean turnOnCameraWhenJoining = true;
     public boolean turnOnMicrophoneWhenJoining = true;
@@ -27,6 +29,9 @@ public class ZegoUIKitPrebuiltCallConfig implements Serializable {
     public ZegoTopMenuBarConfig topMenuBarConfig = new ZegoTopMenuBarConfig();
     public ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo;
     public ZegoMemberListConfig memberListConfig = new ZegoMemberListConfig();
+    public ZegoPrebuiltVideoConfig screenSharingVideoConfig = new ZegoPrebuiltVideoConfig(
+        ZegoPresetResolution.PRESET_540P);
+    public ZegoPrebuiltVideoConfig videoConfig = new ZegoPrebuiltVideoConfig(ZegoPresetResolution.PRESET_360P);
 
     public ZegoUIKitPrebuiltCallConfig() {
 
