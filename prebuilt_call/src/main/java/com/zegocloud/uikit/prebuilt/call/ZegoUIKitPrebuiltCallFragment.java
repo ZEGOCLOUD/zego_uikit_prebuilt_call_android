@@ -149,7 +149,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                     .getRotation()) {
                     orientation = ZegoOrientation.ORIENTATION_90;
                 }
-                ExpressAdapter.setAppOrientation(orientation);
+                ZegoUIKit.setAppOrientation(orientation);
             }
         };
 
