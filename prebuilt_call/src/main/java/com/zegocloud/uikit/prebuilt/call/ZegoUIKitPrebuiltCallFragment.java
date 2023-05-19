@@ -2,11 +2,16 @@ package com.zegocloud.uikit.prebuilt.call;
 
 import android.Manifest.permission;
 import android.app.Application;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -37,6 +42,8 @@ import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoScenario;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
+import com.zegocloud.uikit.service.internal.ExpressAdapter;
+import im.zego.zegoexpress.constants.ZegoOrientation;
 import im.zego.zegoexpress.constants.ZegoVideoConfigPreset;
 import im.zego.zegoexpress.entity.ZegoVideoConfig;
 import java.util.ArrayList;
@@ -53,6 +60,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     private LeaveCallListener leaveCallListener;
     private ZegoOnlySelfInRoomListener onlySelfInRoomListener;
     private ZegoUIKitPrebuiltCallConfig config;
+    private IntentFilter configurationChangeFilter;
+    private BroadcastReceiver configurationChangeReceiver;
 
     public static ZegoUIKitPrebuiltCallFragment newInstance(ZegoCallInvitationData data,
         ZegoUIKitPrebuiltCallConfig config) {
@@ -118,6 +127,32 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 config.hangUpConfirmDialogInfo.confirmButtonName = getString(R.string.call_leave_confirm);
             }
         }
+
+        configurationChangeFilter = new IntentFilter();
+        configurationChangeFilter.addAction("android.intent.action.CONFIGURATION_CHANGED");
+
+        configurationChangeReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                ZegoOrientation orientation = ZegoOrientation.ORIENTATION_0;
+
+                if (Surface.ROTATION_0 == requireActivity().getWindowManager().getDefaultDisplay()
+                    .getRotation()) {
+                    orientation = ZegoOrientation.ORIENTATION_0;
+                } else if (Surface.ROTATION_180 == requireActivity().getWindowManager().getDefaultDisplay()
+                    .getRotation()) {
+                    orientation = ZegoOrientation.ORIENTATION_180;
+                } else if (Surface.ROTATION_270 == requireActivity().getWindowManager().getDefaultDisplay()
+                    .getRotation()) {
+                    orientation = ZegoOrientation.ORIENTATION_270;
+                } else if (Surface.ROTATION_90 == requireActivity().getWindowManager().getDefaultDisplay()
+                    .getRotation()) {
+                    orientation = ZegoOrientation.ORIENTATION_90;
+                }
+                ExpressAdapter.setAppOrientation(orientation);
+            }
+        };
+
         onBackPressedCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -180,6 +215,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void onRoomJoinSucceed() {
+        requireActivity().registerReceiver(configurationChangeReceiver,configurationChangeFilter);
+
         String userID = ZegoUIKit.getLocalUser().userID;
 
         applyMenuBarConfig(config);
@@ -387,6 +424,11 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void leaveRoom() {
+        if (configurationChangeReceiver != null) {
+            requireActivity().unregisterReceiver(configurationChangeReceiver);
+            configurationChangeReceiver = null;
+        }
+
         CallInvitationServiceImpl.getInstance().leaveRoom();
         ZegoUIKit.leaveRoom();
     }
