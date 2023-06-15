@@ -31,6 +31,7 @@ import com.zegocloud.uikit.components.audiovideocontainer.ZegoAudioVideoViewConf
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutGalleryConfig;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutMode;
 import com.zegocloud.uikit.components.memberlist.ZegoMemberListItemViewProvider;
+import com.zegocloud.uikit.prebuilt.call.config.DurationUpdateListener;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallFragmentCallBinding;
 import com.zegocloud.uikit.prebuilt.call.internal.CallConfigGlobal;
@@ -69,7 +70,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         bundle.putString("callID", data.callID);
         fragment.setPrebuiltCallConfig(config);
         fragment.setArguments(bundle);
-        CallInvitationServiceImpl.getInstance().addZegoUIKitPrebuiltCallFragment(fragment);
+        CallInvitationServiceImpl.getInstance().setZegoUIKitPrebuiltCallFragment(fragment);
         return fragment;
     }
 
@@ -84,7 +85,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         bundle.putString("callID", callID);
         fragment.setArguments(bundle);
         fragment.setPrebuiltCallConfig(config);
-        CallInvitationServiceImpl.getInstance().addZegoUIKitPrebuiltCallFragment(fragment);
+        CallInvitationServiceImpl.getInstance().setZegoUIKitPrebuiltCallFragment(fragment);
         return fragment;
     }
 
@@ -135,8 +136,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             public void onReceive(Context context, Intent intent) {
                 ZegoOrientation orientation = ZegoOrientation.ORIENTATION_0;
 
-                if (Surface.ROTATION_0 == requireActivity().getWindowManager().getDefaultDisplay()
-                    .getRotation()) {
+                if (Surface.ROTATION_0 == requireActivity().getWindowManager().getDefaultDisplay().getRotation()) {
                     orientation = ZegoOrientation.ORIENTATION_0;
                 } else if (Surface.ROTATION_180 == requireActivity().getWindowManager().getDefaultDisplay()
                     .getRotation()) {
@@ -175,7 +175,9 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         leaveRoom();
+        binding.timeElapsed.stopTimeCount();
         CallConfigGlobal.getInstance().clear();
+        CallInvitationServiceImpl.getInstance().setZegoUIKitPrebuiltCallFragment(null);
     }
 
     private void handleFragmentBackPressed(ZegoHangUpConfirmDialogInfo quitInfo) {
@@ -214,7 +216,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void onRoomJoinSucceed() {
-        requireActivity().registerReceiver(configurationChangeReceiver,configurationChangeFilter);
+        requireActivity().registerReceiver(configurationChangeReceiver, configurationChangeFilter);
 
         String userID = ZegoUIKit.getLocalUser().userID;
 
@@ -396,6 +398,23 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             }
         });
         binding.topMenuBar.setTitleText(config.topMenuBarConfig.title);
+
+        if (config.durationConfig != null) {
+            if (config.durationConfig.isVisible) {
+                binding.timeElapsed.setVisibility(View.VISIBLE);
+                binding.timeElapsed.startTimeCount();
+            } else {
+                binding.timeElapsed.setVisibility(View.GONE);
+            }
+        }
+        binding.timeElapsed.setUpdateListener(new DurationUpdateListener() {
+            @Override
+            public void onDurationUpdate(long seconds) {
+                if (config.durationConfig != null && config.durationConfig.durationUpdateListener != null) {
+                    config.durationConfig.durationUpdateListener.onDurationUpdate(seconds);
+                }
+            }
+        });
     }
 
     private void showQuitDialog(String title, String message, String positiveText, String negativeText) {

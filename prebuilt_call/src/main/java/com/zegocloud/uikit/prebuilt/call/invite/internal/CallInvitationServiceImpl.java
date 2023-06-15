@@ -425,7 +425,7 @@ public class CallInvitationServiceImpl {
         this.invitationCallListenerList = listener;
     }
 
-    public void addZegoUIKitPrebuiltCallFragment(ZegoUIKitPrebuiltCallFragment zegoUIKitPrebuiltCallFragment) {
+    public void setZegoUIKitPrebuiltCallFragment(ZegoUIKitPrebuiltCallFragment zegoUIKitPrebuiltCallFragment) {
         this.zegoUIKitPrebuiltCallFragment = zegoUIKitPrebuiltCallFragment;
     }
 

@@ -1,5 +1,6 @@
 package com.zegocloud.uikit.prebuilt.call.invite;
 
+import android.graphics.drawable.Drawable;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoNotificationConfig;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoInnerText;
 
@@ -8,6 +9,8 @@ public class ZegoUIKitPrebuiltCallInvitationConfig {
     public String incomingCallRingtone;
     public String outgoingCallRingtone;
     public ZegoUIKitPrebuiltCallConfigProvider provider;
+    public Drawable incomingCallBackground;
+    public Drawable outgoingCallBackground;
 
     //Indicates if the reject button is displayed. Default is true
     public boolean showDeclineButton = true;

@@ -4,6 +4,7 @@ import android.Manifest.permission;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -31,6 +32,7 @@ public class CallWaitingFragment extends Fragment {
 
     private CallLayoutWaitingBinding binding;
     private OnBackPressedCallback onBackPressedCallback;
+    private Drawable backgroundDrawable;
 
     public CallWaitingFragment() {
     }
@@ -65,6 +67,11 @@ public class CallWaitingFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         hideSystemNavigationBar();
+        if (backgroundDrawable != null) {
+            binding.getRoot().setBackground(backgroundDrawable);
+        } else {
+            binding.getRoot().setBackgroundResource(R.drawable.call_img_bg);
+        }
         int type = getArguments().getInt("type");
         String page = getArguments().getString("page");
         ZegoUIKitUser inviter = getArguments().getParcelable("inviter");
@@ -124,7 +131,6 @@ public class CallWaitingFragment extends Fragment {
                 binding.callStateText.setText(callStateTextVideo);
             }
         }
-        binding.getRoot().setBackgroundResource(R.drawable.call_img_bg);
         binding.callWaitingAccept.setInviterID(inviter.userID);
         binding.callWaitingRefuse.setInviterID(inviter.userID);
         binding.callWaitingCancel.setInvitees(GenericUtils.map(invitees, uiKitUser -> uiKitUser.userID));
@@ -367,4 +373,7 @@ public class CallWaitingFragment extends Fragment {
     }
 
 
+    public void setBackground(Drawable drawable) {
+        this.backgroundDrawable = drawable;
+    }
 }

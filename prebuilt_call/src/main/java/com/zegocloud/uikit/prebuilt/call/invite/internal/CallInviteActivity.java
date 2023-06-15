@@ -12,6 +12,7 @@ import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
@@ -96,7 +97,7 @@ public class CallInviteActivity extends AppCompatActivity {
         boolean isOneOnOneCall = "outgoing".equals(page) && invitees.size() == 1;
         boolean isIncoming = "incoming".equals(page);
         if (isIncoming || isOneOnOneCall) {
-            showWaitingFragment();
+            showWaitingFragment(isIncoming);
         } else {
             showCallFragment();
         }
@@ -149,9 +150,19 @@ public class CallInviteActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction().replace(R.id.call_fragment_container, fragment).commitNow();
     }
 
-    private void showWaitingFragment() {
+    private void showWaitingFragment(boolean isIncoming) {
         Bundle bundle = getIntent().getParcelableExtra("bundle");
         CallWaitingFragment fragment = CallWaitingFragment.newInstance(bundle);
+        ZegoUIKitPrebuiltCallInvitationConfig invitationConfig = CallInvitationServiceImpl.getInstance().getConfig();
+        if (isIncoming) {
+            if (invitationConfig.incomingCallBackground != null) {
+                fragment.setBackground(invitationConfig.incomingCallBackground);
+            }
+        } else {
+            if (invitationConfig.outgoingCallBackground != null) {
+                fragment.setBackground(invitationConfig.outgoingCallBackground);
+            }
+        }
         getSupportFragmentManager().beginTransaction().replace(R.id.call_fragment_container, fragment).commitNow();
     }
 }

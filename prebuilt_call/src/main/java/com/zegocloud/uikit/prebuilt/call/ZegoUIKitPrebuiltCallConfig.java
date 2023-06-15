@@ -6,6 +6,7 @@ import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutMode;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutPictureInPictureConfig;
 import com.zegocloud.uikit.components.common.ZegoPresetResolution;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoBottomMenuBarConfig;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoCallDurationConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMemberListConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
@@ -13,7 +14,6 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltAudioVideoViewConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltVideoConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +32,7 @@ public class ZegoUIKitPrebuiltCallConfig {
     public ZegoPrebuiltVideoConfig screenSharingVideoConfig = new ZegoPrebuiltVideoConfig(
         ZegoPresetResolution.PRESET_540P);
     public ZegoPrebuiltVideoConfig videoConfig = new ZegoPrebuiltVideoConfig(ZegoPresetResolution.PRESET_360P);
+    public ZegoCallDurationConfig durationConfig;
 
     public ZegoUIKitPrebuiltCallConfig() {
 

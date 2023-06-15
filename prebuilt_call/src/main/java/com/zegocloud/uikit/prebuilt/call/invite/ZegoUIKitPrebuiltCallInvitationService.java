@@ -27,7 +27,7 @@ public class ZegoUIKitPrebuiltCallInvitationService {
                     ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
                     RingtoneManager.setIncomingOfflineRing();
                 }
-            },500);
+            }, 500);
         }
     }
 
@@ -78,4 +78,10 @@ public class ZegoUIKitPrebuiltCallInvitationService {
         return CallInvitationServiceImpl.getInstance().getZegoUIKitPrebuiltCallFragment();
     }
 
+    public static void endCall() {
+        ZegoUIKitPrebuiltCallFragment prebuiltCallFragment = getPrebuiltCallFragment();
+        if (prebuiltCallFragment != null) {
+            prebuiltCallFragment.requireActivity().finish();
+        }
+    }
 }
