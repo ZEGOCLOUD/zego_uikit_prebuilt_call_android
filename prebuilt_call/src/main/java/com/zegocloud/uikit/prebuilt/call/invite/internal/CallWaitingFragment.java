@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import com.permissionx.guolindev.PermissionX;
 import com.permissionx.guolindev.callback.RequestCallback;
 import com.zegocloud.uikit.ZegoUIKit;
+import com.zegocloud.uikit.components.audiovideo.ZegoAvatarViewProvider;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.plugin.adapter.utils.GenericUtils;
 import com.zegocloud.uikit.prebuilt.call.R;
@@ -33,6 +34,7 @@ public class CallWaitingFragment extends Fragment {
     private CallLayoutWaitingBinding binding;
     private OnBackPressedCallback onBackPressedCallback;
     private Drawable backgroundDrawable;
+    private ZegoAvatarViewProvider zegoAvatarViewProvider;
 
     public CallWaitingFragment() {
     }
@@ -115,19 +117,26 @@ public class CallWaitingFragment extends Fragment {
         if (showUser != null) {
             binding.callUserIcon.setText(showUser.userName, false);
             binding.callUserName.setText(showUser.userName);
+            if (zegoAvatarViewProvider != null) {
+                View customIcon = zegoAvatarViewProvider.onUserIDUpdated(binding.callUserCustomIcon, showUser);
+                binding.callUserCustomIcon.removeAllViews();
+                binding.callUserCustomIcon.addView(customIcon);
+            }
         }
 
         boolean isGroup = invitees != null && invitees.size() > 1;
         if (type == ZegoInvitationType.VOICE_CALL.getValue()) {
             binding.callWaitingAccept.setBackgroundResource(R.drawable.call_selector_dialog_voice_accept);
             if ("incoming".equals(page)) {
-                String callStateTextVoice = isGroup ? getString(R.string.call_incoming_group_voice_call) : getString(R.string.call_incoming_voice_call);
+                String callStateTextVoice = isGroup ? getString(R.string.call_incoming_group_voice_call)
+                    : getString(R.string.call_incoming_voice_call);
                 binding.callStateText.setText(callStateTextVoice);
             }
         } else {
             binding.callWaitingAccept.setBackgroundResource(R.drawable.call_selector_dialog_video_accept);
             if ("incoming".equals(page)) {
-                String callStateTextVideo = isGroup ? getString(R.string.call_incoming_group_video_call) : getString(R.string.call_incoming_video_call);
+                String callStateTextVideo = isGroup ? getString(R.string.call_incoming_group_video_call)
+                    : getString(R.string.call_incoming_video_call);
                 binding.callStateText.setText(callStateTextVideo);
             }
         }
@@ -152,7 +161,7 @@ public class CallWaitingFragment extends Fragment {
                 if (grantedList.contains(permission.CAMERA)) {
                     if (type == ZegoInvitationType.VIDEO_CALL.getValue()) {
                         ZegoUIKit.turnCameraOn(userID, true);
-                    }else if(type == ZegoInvitationType.VOICE_CALL.getValue()){
+                    } else if (type == ZegoInvitationType.VOICE_CALL.getValue()) {
                         ZegoUIKit.turnCameraOn(userID, false);
                     }
                 }
@@ -268,19 +277,21 @@ public class CallWaitingFragment extends Fragment {
         boolean isGroup = invitees != null && invitees.size() > 1;
 
         if (isVideoCall) {
-            setVideoInnerText(isGroup,page,showUser,innerText);
+            setVideoInnerText(isGroup, page, showUser, innerText);
         } else {
-            setVoiceInnerText(isGroup,page,showUser,innerText);
+            setVoiceInnerText(isGroup, page, showUser, innerText);
         }
     }
 
-    private void setVoiceInnerText(boolean isGroup,String page,ZegoUIKitUser showUser,ZegoInnerText innerText){
-        if(isGroup){
+    private void setVoiceInnerText(boolean isGroup, String page, ZegoUIKitUser showUser, ZegoInnerText innerText) {
+        if (isGroup) {
             if ("incoming".equals(page)) {
                 if (!TextUtils.isEmpty(innerText.incomingGroupVoiceCallPageTitle)) {
                     if (showUser != null) {
-                        binding.callUserIcon.setText(String.format(innerText.incomingGroupVoiceCallPageTitle, showUser.userName), false);
-                        binding.callUserName.setText(String.format(innerText.incomingGroupVoiceCallPageTitle, showUser.userName));
+                        binding.callUserIcon.setText(
+                            String.format(innerText.incomingGroupVoiceCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(
+                            String.format(innerText.incomingGroupVoiceCallPageTitle, showUser.userName));
                     }
                 }
                 if (!TextUtils.isEmpty(innerText.incomingGroupVoiceCallPageMessage)) {
@@ -289,20 +300,24 @@ public class CallWaitingFragment extends Fragment {
             } else if ("outgoing".equals(page)) {
                 if (!TextUtils.isEmpty(innerText.outgoingGroupVoiceCallPageTitle)) {
                     if (showUser != null) {
-                        binding.callUserIcon.setText(String.format(innerText.outgoingGroupVoiceCallPageTitle, showUser.userName), false);
-                        binding.callUserName.setText(String.format(innerText.outgoingGroupVoiceCallPageTitle, showUser.userName));
+                        binding.callUserIcon.setText(
+                            String.format(innerText.outgoingGroupVoiceCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(
+                            String.format(innerText.outgoingGroupVoiceCallPageTitle, showUser.userName));
                     }
                 }
                 if (!TextUtils.isEmpty(innerText.outgoingGroupVoiceCallPageMessage)) {
                     binding.callStateText.setText(innerText.outgoingGroupVoiceCallPageMessage);
                 }
             }
-        }else {
+        } else {
             if ("incoming".equals(page)) {
                 if (!TextUtils.isEmpty(innerText.incomingVoiceCallPageTitle)) {
                     if (showUser != null) {
-                        binding.callUserIcon.setText(String.format(innerText.incomingVoiceCallPageTitle, showUser.userName), false);
-                        binding.callUserName.setText(String.format(innerText.incomingVoiceCallPageTitle, showUser.userName));
+                        binding.callUserIcon.setText(
+                            String.format(innerText.incomingVoiceCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(
+                            String.format(innerText.incomingVoiceCallPageTitle, showUser.userName));
                     }
                 }
                 if (!TextUtils.isEmpty(innerText.incomingVoiceCallPageMessage)) {
@@ -311,8 +326,10 @@ public class CallWaitingFragment extends Fragment {
             } else if ("outgoing".equals(page)) {
                 if (!TextUtils.isEmpty(innerText.outgoingVoiceCallPageTitle)) {
                     if (showUser != null) {
-                        binding.callUserIcon.setText(String.format(innerText.outgoingVoiceCallPageTitle, showUser.userName), false);
-                        binding.callUserName.setText(String.format(innerText.outgoingVoiceCallPageTitle, showUser.userName));
+                        binding.callUserIcon.setText(
+                            String.format(innerText.outgoingVoiceCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(
+                            String.format(innerText.outgoingVoiceCallPageTitle, showUser.userName));
                     }
                 }
                 if (!TextUtils.isEmpty(innerText.outgoingVoiceCallPageMessage)) {
@@ -323,13 +340,15 @@ public class CallWaitingFragment extends Fragment {
 
     }
 
-    private void setVideoInnerText(boolean isGroup,String page,ZegoUIKitUser showUser,ZegoInnerText innerText){
-        if(isGroup){
+    private void setVideoInnerText(boolean isGroup, String page, ZegoUIKitUser showUser, ZegoInnerText innerText) {
+        if (isGroup) {
             if ("incoming".equals(page)) {
                 if (!TextUtils.isEmpty(innerText.incomingGroupVideoCallPageTitle)) {
                     if (showUser != null) {
-                        binding.callUserIcon.setText(String.format(innerText.incomingGroupVideoCallPageTitle, showUser.userName), false);
-                        binding.callUserName.setText(String.format(innerText.incomingGroupVideoCallPageTitle, showUser.userName));
+                        binding.callUserIcon.setText(
+                            String.format(innerText.incomingGroupVideoCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(
+                            String.format(innerText.incomingGroupVideoCallPageTitle, showUser.userName));
                     }
                 }
                 if (!TextUtils.isEmpty(innerText.incomingGroupVideoCallPageMessage)) {
@@ -338,20 +357,24 @@ public class CallWaitingFragment extends Fragment {
             } else if ("outgoing".equals(page)) {
                 if (!TextUtils.isEmpty(innerText.outgoingGroupVideoCallPageTitle)) {
                     if (showUser != null) {
-                        binding.callUserIcon.setText(String.format(innerText.outgoingGroupVideoCallPageTitle, showUser.userName), false);
-                        binding.callUserName.setText(String.format(innerText.outgoingGroupVideoCallPageTitle, showUser.userName));
+                        binding.callUserIcon.setText(
+                            String.format(innerText.outgoingGroupVideoCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(
+                            String.format(innerText.outgoingGroupVideoCallPageTitle, showUser.userName));
                     }
                 }
                 if (!TextUtils.isEmpty(innerText.outgoingGroupVideoCallPageMessage)) {
                     binding.callStateText.setText(innerText.outgoingGroupVideoCallPageMessage);
                 }
             }
-        }else {
+        } else {
             if ("incoming".equals(page)) {
                 if (!TextUtils.isEmpty(innerText.incomingVideoCallPageTitle)) {
                     if (showUser != null) {
-                        binding.callUserIcon.setText(String.format(innerText.incomingVideoCallPageTitle, showUser.userName), false);
-                        binding.callUserName.setText(String.format(innerText.incomingVideoCallPageTitle, showUser.userName));
+                        binding.callUserIcon.setText(
+                            String.format(innerText.incomingVideoCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(
+                            String.format(innerText.incomingVideoCallPageTitle, showUser.userName));
                     }
                 }
                 if (!TextUtils.isEmpty(innerText.incomingVideoCallPageMessage)) {
@@ -360,8 +383,10 @@ public class CallWaitingFragment extends Fragment {
             } else if ("outgoing".equals(page)) {
                 if (!TextUtils.isEmpty(innerText.outgoingVideoCallPageTitle)) {
                     if (showUser != null) {
-                        binding.callUserIcon.setText(String.format(innerText.outgoingVideoCallPageTitle, showUser.userName), false);
-                        binding.callUserName.setText(String.format(innerText.outgoingVideoCallPageTitle, showUser.userName));
+                        binding.callUserIcon.setText(
+                            String.format(innerText.outgoingVideoCallPageTitle, showUser.userName), false);
+                        binding.callUserName.setText(
+                            String.format(innerText.outgoingVideoCallPageTitle, showUser.userName));
                     }
                 }
                 if (!TextUtils.isEmpty(innerText.outgoingVideoCallPageMessage)) {
@@ -375,5 +400,9 @@ public class CallWaitingFragment extends Fragment {
 
     public void setBackground(Drawable drawable) {
         this.backgroundDrawable = drawable;
+    }
+
+    public void setAvatarViewProvider(ZegoAvatarViewProvider zegoAvatarViewProvider) {
+        this.zegoAvatarViewProvider = zegoAvatarViewProvider;
     }
 }

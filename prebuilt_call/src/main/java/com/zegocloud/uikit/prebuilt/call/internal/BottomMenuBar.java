@@ -18,7 +18,6 @@ import com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleMicrophoneButton;
 import com.zegocloud.uikit.components.common.ZegoScreenSharingToggleButton;
-import com.zegocloud.uikit.components.memberlist.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCallListener;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoBottomMenuBarConfig;
@@ -42,6 +41,9 @@ public class BottomMenuBar extends LinearLayout {
     private static final long HIDE_DELAY_TIME = 5000;
     private ZegoBottomMenuBarConfig menuBarConfig;
     private ZegoPrebuiltVideoConfig screenSharingVideoConfig;
+    private ZegoMemberListConfig memberListConfig;
+    private ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo;
+    private LeaveCallListener leaveCallListener;
 
     public BottomMenuBar(@NonNull Context context) {
         super(context);
@@ -117,11 +119,12 @@ public class BottomMenuBar extends LinearLayout {
                 break;
             case HANG_UP_BUTTON:
                 view = new ZegoLeaveCallButton(getContext());
-                ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo = CallConfigGlobal.getInstance()
-                    .getConfig().hangUpConfirmDialogInfo;
-                ((ZegoLeaveCallButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
-                LeaveCallListener leaveCallListener = CallConfigGlobal.getInstance().getLeaveCallListener();
-                ((ZegoLeaveCallButton) view).setLeaveListener(leaveCallListener);
+                if (hangUpConfirmDialogInfo != null) {
+                    ((ZegoLeaveCallButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
+                }
+                if (leaveCallListener != null) {
+                    ((ZegoLeaveCallButton) view).setLeaveListener(leaveCallListener);
+                }
                 break;
             case SWITCH_AUDIO_OUTPUT_BUTTON:
                 view = new ZegoSwitchAudioOutputButton(getContext());
@@ -131,11 +134,9 @@ public class BottomMenuBar extends LinearLayout {
                 ((ImageView) view).setImageResource(R.drawable.call_icon_top_member_normal);
                 view.setOnClickListener(v -> {
                     ZegoCallMemberList memberList = new ZegoCallMemberList(getContext());
-                    ZegoMemberListItemViewProvider memberListItemProvider = CallConfigGlobal.getInstance()
-                        .getMemberListItemProvider();
-                    memberList.setMemberListItemViewProvider(memberListItemProvider);
-                    ZegoMemberListConfig memberListConfig = CallConfigGlobal.getInstance().getConfig().memberListConfig;
-                    memberList.setMemberListConfig(memberListConfig);
+                    if (memberListConfig != null) {
+                        memberList.setMemberListConfig(memberListConfig);
+                    }
                     memberList.show();
                 });
                 break;
@@ -266,6 +267,38 @@ public class BottomMenuBar extends LinearLayout {
         for (View view : hideList) {
             if (view instanceof ZegoScreenSharingToggleButton) {
                 ((ZegoScreenSharingToggleButton) view).setPresetResolution(screenSharingVideoConfig.resolution);
+            }
+        }
+    }
+
+    public void setMemberListConfig(ZegoMemberListConfig memberListConfig) {
+        this.memberListConfig = memberListConfig;
+    }
+
+    public void setHangUpConfirmDialogInfo(ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo) {
+        this.hangUpConfirmDialogInfo = hangUpConfirmDialogInfo;
+        for (View view : showList) {
+            if (view instanceof ZegoLeaveCallButton) {
+                ((ZegoLeaveCallButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
+            }
+        }
+        for (View view : hideList) {
+            if (view instanceof ZegoLeaveCallButton) {
+                ((ZegoLeaveCallButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
+            }
+        }
+    }
+
+    public void setLeaveCallListener(LeaveCallListener leaveCallListener) {
+        this.leaveCallListener = leaveCallListener;
+        for (View view : showList) {
+            if (view instanceof ZegoLeaveCallButton) {
+                ((ZegoLeaveCallButton) view).setLeaveListener(leaveCallListener);
+            }
+        }
+        for (View view : hideList) {
+            if (view instanceof ZegoLeaveCallButton) {
+                ((ZegoLeaveCallButton) view).setLeaveListener(leaveCallListener);
             }
         }
     }

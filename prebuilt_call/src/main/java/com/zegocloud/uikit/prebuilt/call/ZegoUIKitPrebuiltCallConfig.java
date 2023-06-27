@@ -5,6 +5,7 @@ import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutGalleryConfi
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutMode;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutPictureInPictureConfig;
 import com.zegocloud.uikit.components.common.ZegoPresetResolution;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCallListener;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoBottomMenuBarConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoCallDurationConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
@@ -33,6 +34,7 @@ public class ZegoUIKitPrebuiltCallConfig {
         ZegoPresetResolution.PRESET_540P);
     public ZegoPrebuiltVideoConfig videoConfig = new ZegoPrebuiltVideoConfig(ZegoPresetResolution.PRESET_360P);
     public ZegoCallDurationConfig durationConfig;
+    public LeaveCallListener leaveCallListener;
 
     public ZegoUIKitPrebuiltCallConfig() {
 

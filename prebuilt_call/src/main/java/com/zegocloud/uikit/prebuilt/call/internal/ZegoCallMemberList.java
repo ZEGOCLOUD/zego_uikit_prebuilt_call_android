@@ -98,11 +98,10 @@ public class ZegoCallMemberList extends BottomSheetDialog {
         return false;
     }
 
-    public void setMemberListItemViewProvider(ZegoMemberListItemViewProvider memberListItemProvider) {
-        this.memberListItemProvider = memberListItemProvider;
-    }
-
     public void setMemberListConfig(ZegoMemberListConfig memberListConfig) {
         this.memberListConfig = memberListConfig;
+        if (memberListConfig != null && memberListConfig.memberListItemProvider != null) {
+            this.memberListItemProvider = memberListConfig.memberListItemProvider;
+        }
     }
 }

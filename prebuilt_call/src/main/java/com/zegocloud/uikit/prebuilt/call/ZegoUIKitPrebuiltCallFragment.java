@@ -30,11 +30,9 @@ import com.zegocloud.uikit.components.audiovideocontainer.ZegoAudioVideoComparat
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoAudioVideoViewConfig;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutGalleryConfig;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutMode;
-import com.zegocloud.uikit.components.memberlist.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.config.DurationUpdateListener;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallFragmentCallBinding;
-import com.zegocloud.uikit.prebuilt.call.internal.CallConfigGlobal;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoAudioVideoForegroundView;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoScreenShareForegroundView;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
@@ -57,7 +55,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     private List<View> bottomMenuBarBtns = new ArrayList<>();
     private List<View> topMenuBarBtns = new ArrayList<>();
     private OnBackPressedCallback onBackPressedCallback;
-    private LeaveCallListener leaveCallListener;
     private ZegoOnlySelfInRoomListener onlySelfInRoomListener;
     private ZegoUIKitPrebuiltCallConfig config;
     private IntentFilter configurationChangeFilter;
@@ -102,7 +99,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle arguments = getArguments();
-        CallConfigGlobal.getInstance().setConfig(config);
         Application application = requireActivity().getApplication();
         long appID = arguments.getLong("appID");
         String appSign = arguments.getString("appSign");
@@ -158,8 +154,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 if (config.hangUpConfirmDialogInfo != null) {
                     handleFragmentBackPressed(config.hangUpConfirmDialogInfo);
                 } else {
-                    leaveRoom();
                     setEnabled(false);
+                    leaveRoom();
                     requireActivity().onBackPressed();
                 }
             }
@@ -176,7 +172,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         super.onDestroy();
         leaveRoom();
         binding.timeElapsed.stopTimeCount();
-        CallConfigGlobal.getInstance().clear();
         CallInvitationServiceImpl.getInstance().setZegoUIKitPrebuiltCallFragment(null);
     }
 
@@ -250,12 +245,12 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void applyAudioVideoViewConfig(ZegoUIKitPrebuiltCallConfig config) {
-        ZegoForegroundViewProvider provider = CallConfigGlobal.getInstance().getVideoViewForegroundViewProvider();
-        if (provider == null) {
+        if (config.audioVideoViewConfig == null
+            || config.audioVideoViewConfig.videoViewForegroundViewProvider == null) {
             binding.avcontainer.setAudioVideoForegroundViewProvider(new ZegoForegroundViewProvider() {
                 @Override
                 public ZegoBaseAudioVideoForegroundView getForegroundView(ViewGroup parent, ZegoUIKitUser uiKitUser) {
-                    ZegoAudioVideoForegroundView foregroundView = new ZegoAudioVideoForegroundView(getContext(),
+                    ZegoAudioVideoForegroundView foregroundView = new ZegoAudioVideoForegroundView(parent.getContext(),
                         uiKitUser.userID);
                     foregroundView.showMicrophoneView(config.audioVideoViewConfig.showMicrophoneStateOnView);
                     foregroundView.showCameraView(config.audioVideoViewConfig.showCameraStateOnView);
@@ -264,7 +259,13 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 }
             });
         } else {
-            binding.avcontainer.setAudioVideoForegroundViewProvider(provider);
+            binding.avcontainer.setAudioVideoForegroundViewProvider(
+                config.audioVideoViewConfig.videoViewForegroundViewProvider);
+        }
+        if (config.audioVideoViewConfig == null || config.audioVideoViewConfig.avatarViewProvider == null) {
+
+        } else {
+            binding.avcontainer.setAvatarViewProvider(config.audioVideoViewConfig.avatarViewProvider);
         }
         binding.avcontainer.setLayout(config.layout);
         binding.avcontainer.setAudioVideoComparator(new ZegoAudioVideoComparator() {
@@ -366,23 +367,40 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void applyMenuBarConfig(ZegoUIKitPrebuiltCallConfig config) {
-        CallConfigGlobal.getInstance().setLeaveCallListener(new LeaveCallListener() {
+        binding.bottomMenuBar.setMemberListConfig(config.memberListConfig);
+        binding.topMenuBar.setMemberListConfig(config.memberListConfig);
+
+        binding.topMenuBar.setScreenShareVideoConfig(config.screenSharingVideoConfig);
+        binding.bottomMenuBar.setScreenShareVideoConfig(config.screenSharingVideoConfig);
+
+        binding.topMenuBar.setHangUpConfirmDialogInfo(config.hangUpConfirmDialogInfo);
+        binding.bottomMenuBar.setHangUpConfirmDialogInfo(config.hangUpConfirmDialogInfo);
+
+        binding.bottomMenuBar.setLeaveCallListener(new LeaveCallListener() {
             @Override
             public void onLeaveCall() {
-                CallInvitationServiceImpl.getInstance().leaveRoom();
-                if (leaveCallListener != null) {
-                    leaveCallListener.onLeaveCall();
+                if (config.leaveCallListener != null) {
+                    config.leaveCallListener.onLeaveCall();
                 } else {
-                    ZegoUIKit.leaveRoom();
+                    leaveRoom();
                     requireActivity().finish();
                 }
             }
         });
-        binding.bottomMenuBar.setConfig(config.bottomMenuBarConfig);
-        binding.topMenuBar.setConfig(config.topMenuBarConfig);
+        binding.topMenuBar.setLeaveCallListener(new LeaveCallListener() {
+            @Override
+            public void onLeaveCall() {
+                if (config.leaveCallListener != null) {
+                    config.leaveCallListener.onLeaveCall();
+                } else {
+                    leaveRoom();
+                    requireActivity().finish();
+                }
+            }
+        });
 
-        binding.topMenuBar.setScreenShareVideoConfig(config.screenSharingVideoConfig);
-        binding.bottomMenuBar.setScreenShareVideoConfig(config.screenSharingVideoConfig);
+        binding.topMenuBar.setConfig(config.topMenuBarConfig);
+        binding.bottomMenuBar.setConfig(config.bottomMenuBarConfig);
 
         if (bottomMenuBarBtns.size() > 0) {
             binding.bottomMenuBar.addButtons(bottomMenuBarBtns);
@@ -463,18 +481,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         if (binding != null) {
             binding.topMenuBar.addButtons(viewList);
         }
-    }
-
-    public void setForegroundViewProvider(ZegoForegroundViewProvider provider) {
-        CallConfigGlobal.getInstance().setVideoViewForegroundViewProvider(provider);
-    }
-
-    public void setLeaveCallListener(LeaveCallListener listener) {
-        this.leaveCallListener = listener;
-    }
-
-    public void setMemberListItemViewProvider(ZegoMemberListItemViewProvider memberListItemProvider) {
-        CallConfigGlobal.getInstance().setMemberListItemProvider(memberListItemProvider);
     }
 
     public void setOnOnlySelfInRoomListener(ZegoOnlySelfInRoomListener listener) {

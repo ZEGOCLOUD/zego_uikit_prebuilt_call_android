@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.zegocloud.uikit.ZegoUIKit;
@@ -119,6 +120,22 @@ public class CallInviteActivity extends AppCompatActivity {
         ArrayList<ZegoUIKitUser> invitees = bundle.getParcelableArrayList("invitees");
         ZegoCallInvitationData invitationData = new ZegoCallInvitationData(bundle.getString("callID"),
             bundle.getInt("type"), invitees, bundle.getParcelable("inviter"), bundle.getString("custom_data"));
+        ZegoUIKitPrebuiltCallConfig config = getPrebuiltCallConfig(invitationData);
+
+        ZegoUIKitPrebuiltCallFragment fragment = ZegoUIKitPrebuiltCallFragment.newInstance(invitationData, config);
+        if (invitees.size() > 1) {
+            fragment.setOnOnlySelfInRoomListener(new ZegoOnlySelfInRoomListener() {
+                @Override
+                public void onOnlySelfInRoom() {
+
+                }
+            });
+        }
+        getSupportFragmentManager().beginTransaction().replace(R.id.call_fragment_container, fragment).commitNow();
+    }
+
+    @NonNull
+    private ZegoUIKitPrebuiltCallConfig getPrebuiltCallConfig(ZegoCallInvitationData invitationData) {
         ZegoUIKitPrebuiltCallConfig config = null;
         CallInvitationServiceImpl service = CallInvitationServiceImpl.getInstance();
         if (service.getProvider() != null) {
@@ -137,22 +154,23 @@ public class CallInviteActivity extends AppCompatActivity {
                 config = ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall();
             }
         }
-
-        ZegoUIKitPrebuiltCallFragment fragment = ZegoUIKitPrebuiltCallFragment.newInstance(invitationData, config);
-        if (invitees.size() > 1) {
-            fragment.setOnOnlySelfInRoomListener(new ZegoOnlySelfInRoomListener() {
-                @Override
-                public void onOnlySelfInRoom() {
-
-                }
-            });
-        }
-        getSupportFragmentManager().beginTransaction().replace(R.id.call_fragment_container, fragment).commitNow();
+        return config;
     }
 
     private void showWaitingFragment(boolean isIncoming) {
         Bundle bundle = getIntent().getParcelableExtra("bundle");
         CallWaitingFragment fragment = CallWaitingFragment.newInstance(bundle);
+        ArrayList<ZegoUIKitUser> invitees = bundle.getParcelableArrayList("invitees");
+        ZegoCallInvitationData invitationData = new ZegoCallInvitationData(bundle.getString("callID"),
+            bundle.getInt("type"), invitees, bundle.getParcelable("inviter"), bundle.getString("custom_data"));
+        CallInvitationServiceImpl service = CallInvitationServiceImpl.getInstance();
+        if (service.getProvider() != null) {
+            ZegoUIKitPrebuiltCallConfig prebuiltCallConfig = service.getProvider().requireConfig(invitationData);
+            if (prebuiltCallConfig.audioVideoViewConfig != null
+                && prebuiltCallConfig.audioVideoViewConfig.avatarViewProvider != null) {
+                fragment.setAvatarViewProvider(prebuiltCallConfig.audioVideoViewConfig.avatarViewProvider);
+            }
+        }
         ZegoUIKitPrebuiltCallInvitationConfig invitationConfig = CallInvitationServiceImpl.getInstance().getConfig();
         if (isIncoming) {
             if (invitationConfig.incomingCallBackground != null) {

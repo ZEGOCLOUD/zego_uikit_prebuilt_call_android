@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AlertDialog.Builder;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallDialogInvitationBinding;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 
@@ -79,6 +80,18 @@ public class CallInvitationDialog {
             CallInviteActivity.startIncomingPage(context, invitationData.inviter, invitationData.invitees,
                 invitationData.callID, invitationData.type);
         });
+
+        CallInvitationServiceImpl service = CallInvitationServiceImpl.getInstance();
+        if (service.getProvider() != null) {
+            ZegoUIKitPrebuiltCallConfig prebuiltCallConfig = service.getProvider().requireConfig(invitationData);
+            if (prebuiltCallConfig.audioVideoViewConfig != null
+                && prebuiltCallConfig.audioVideoViewConfig.avatarViewProvider != null) {
+                View view = prebuiltCallConfig.audioVideoViewConfig.avatarViewProvider.onUserIDUpdated(
+                    binding.dialogCallCustomIcon, invitationData.inviter);
+                binding.dialogCallCustomIcon.removeAllViews();
+                binding.dialogCallCustomIcon.addView(view);
+            }
+        }
     }
 
     public void show() {

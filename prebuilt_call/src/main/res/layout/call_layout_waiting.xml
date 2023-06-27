@@ -29,6 +29,15 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent" />
 
+  <FrameLayout
+    android:id="@+id/call_user_custom_icon"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    app:layout_constraintBottom_toBottomOf="@id/call_user_icon"
+    app:layout_constraintEnd_toEndOf="@id/call_user_icon"
+    app:layout_constraintStart_toStartOf="@id/call_user_icon"
+    app:layout_constraintTop_toTopOf="@id/call_user_icon" />
+
   <TextView
     android:id="@+id/call_user_name"
     android:layout_width="match_parent"
