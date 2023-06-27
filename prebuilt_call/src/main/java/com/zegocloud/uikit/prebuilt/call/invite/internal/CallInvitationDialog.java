@@ -85,8 +85,8 @@ public class CallInvitationDialog {
         if (service.getProvider() != null) {
             ZegoUIKitPrebuiltCallConfig prebuiltCallConfig = service.getProvider().requireConfig(invitationData);
             if (prebuiltCallConfig.audioVideoViewConfig != null
-                && prebuiltCallConfig.audioVideoViewConfig.avatarViewProvider != null) {
-                View view = prebuiltCallConfig.audioVideoViewConfig.avatarViewProvider.onUserIDUpdated(
+                && prebuiltCallConfig.avatarViewProvider != null) {
+                View view = prebuiltCallConfig.avatarViewProvider.onUserIDUpdated(
                     binding.dialogCallCustomIcon, invitationData.inviter);
                 binding.dialogCallCustomIcon.removeAllViews();
                 binding.dialogCallCustomIcon.addView(view);

@@ -262,10 +262,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             binding.avcontainer.setAudioVideoForegroundViewProvider(
                 config.audioVideoViewConfig.videoViewForegroundViewProvider);
         }
-        if (config.audioVideoViewConfig == null || config.audioVideoViewConfig.avatarViewProvider == null) {
-
-        } else {
-            binding.avcontainer.setAvatarViewProvider(config.audioVideoViewConfig.avatarViewProvider);
+        if (config.avatarViewProvider != null) {
+            binding.avcontainer.setAvatarViewProvider(config.avatarViewProvider);
         }
         binding.avcontainer.setLayout(config.layout);
         binding.avcontainer.setAudioVideoComparator(new ZegoAudioVideoComparator() {

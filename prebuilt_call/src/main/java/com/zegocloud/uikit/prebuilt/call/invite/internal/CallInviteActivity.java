@@ -167,8 +167,8 @@ public class CallInviteActivity extends AppCompatActivity {
         if (service.getProvider() != null) {
             ZegoUIKitPrebuiltCallConfig prebuiltCallConfig = service.getProvider().requireConfig(invitationData);
             if (prebuiltCallConfig.audioVideoViewConfig != null
-                && prebuiltCallConfig.audioVideoViewConfig.avatarViewProvider != null) {
-                fragment.setAvatarViewProvider(prebuiltCallConfig.audioVideoViewConfig.avatarViewProvider);
+                && prebuiltCallConfig.avatarViewProvider != null) {
+                fragment.setAvatarViewProvider(prebuiltCallConfig.avatarViewProvider);
             }
         }
         ZegoUIKitPrebuiltCallInvitationConfig invitationConfig = CallInvitationServiceImpl.getInstance().getConfig();

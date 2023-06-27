@@ -1,5 +1,6 @@
 package com.zegocloud.uikit.prebuilt.call;
 
+import com.zegocloud.uikit.components.audiovideo.ZegoAvatarViewProvider;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayout;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutGalleryConfig;
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutMode;
@@ -35,6 +36,7 @@ public class ZegoUIKitPrebuiltCallConfig {
     public ZegoPrebuiltVideoConfig videoConfig = new ZegoPrebuiltVideoConfig(ZegoPresetResolution.PRESET_360P);
     public ZegoCallDurationConfig durationConfig;
     public LeaveCallListener leaveCallListener;
+    public ZegoAvatarViewProvider avatarViewProvider;
 
     public ZegoUIKitPrebuiltCallConfig() {
 
