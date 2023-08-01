@@ -109,10 +109,10 @@ public class BottomMenuBar extends LinearLayout {
         View view = null;
         switch (menuBar) {
             case TOGGLE_CAMERA_BUTTON:
-                view = new ZegoToggleCameraButton(getContext());
+                view = new PermissionCameraButton(getContext());
                 break;
             case TOGGLE_MICROPHONE_BUTTON:
-                view = new ZegoToggleMicrophoneButton(getContext());
+                view = new PermissionMicrophoneButton(getContext());
                 break;
             case SWITCH_CAMERA_BUTTON:
                 view = new ZegoSwitchCameraButton(getContext());

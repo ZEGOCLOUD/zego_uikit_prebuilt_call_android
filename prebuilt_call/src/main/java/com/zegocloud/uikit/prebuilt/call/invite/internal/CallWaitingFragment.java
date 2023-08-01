@@ -20,13 +20,12 @@ import com.permissionx.guolindev.PermissionX;
 import com.permissionx.guolindev.callback.RequestCallback;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.components.audiovideo.ZegoAvatarViewProvider;
-import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.plugin.adapter.utils.GenericUtils;
+import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallLayoutWaitingBinding;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class CallWaitingFragment extends Fragment {
@@ -157,7 +156,13 @@ public class CallWaitingFragment extends Fragment {
         });
 
         binding.getRoot().post(() -> {
-            requestPermissionIfNeeded((allGranted, grantedList, deniedList) -> {
+            List<String> permissions = new ArrayList<>();
+            if (type == ZegoInvitationType.VOICE_CALL.getValue()) {
+                permissions.add(permission.RECORD_AUDIO);
+            } else {
+                permissions.add(permission.CAMERA);
+            }
+            requestPermissionIfNeeded(permissions, (allGranted, grantedList, deniedList) -> {
                 if (grantedList.contains(permission.CAMERA)) {
                     if (type == ZegoInvitationType.VIDEO_CALL.getValue()) {
                         ZegoUIKit.turnCameraOn(userID, true);
@@ -171,9 +176,7 @@ public class CallWaitingFragment extends Fragment {
         setInnerText(page, type, showUser, invitees);
     }
 
-    private void requestPermissionIfNeeded(RequestCallback requestCallback) {
-        List<String> permissions = Arrays.asList(permission.CAMERA, permission.RECORD_AUDIO);
-
+    private void requestPermissionIfNeeded(List<String> permissions, RequestCallback requestCallback) {
         boolean allGranted = true;
         for (String permission : permissions) {
             if (ContextCompat.checkSelfPermission(getContext(), permission) != PackageManager.PERMISSION_GRANTED) {

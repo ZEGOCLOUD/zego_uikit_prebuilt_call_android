@@ -221,7 +221,14 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
         applyAudioVideoViewConfig(config);
 
-        requestPermissionIfNeeded((allGranted, grantedList, deniedList) -> {
+        List<String> permissions = new ArrayList<>();
+        if (config.turnOnCameraWhenJoining) {
+            permissions.add(permission.CAMERA);
+        }
+        if (config.turnOnMicrophoneWhenJoining) {
+            permissions.add(permission.RECORD_AUDIO);
+        }
+        requestPermissionIfNeeded(permissions, (allGranted, grantedList, deniedList) -> {
             if (grantedList.contains(permission.CAMERA)) {
                 if (config.turnOnCameraWhenJoining) {
                     ZegoUIKit.turnCameraOn(userID, true);
@@ -315,9 +322,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         }
     }
 
-    private void requestPermissionIfNeeded(RequestCallback requestCallback) {
-        List<String> permissions = Arrays.asList(permission.CAMERA, permission.RECORD_AUDIO);
-
+    private void requestPermissionIfNeeded(List<String> permissions, RequestCallback requestCallback) {
         boolean allGranted = true;
         for (String permission : permissions) {
             if (ContextCompat.checkSelfPermission(getContext(), permission) != PackageManager.PERMISSION_GRANTED) {
@@ -339,7 +344,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             } else {
                 message = getContext().getString(R.string.call_permission_explain_camera_mic);
             }
-            scope.showRequestReasonDialog(deniedList, message, getString(R.string.call_ok));
+            scope.showRequestReasonDialog(deniedList, message, getContext().getString(R.string.call_ok));
         }).onForwardToSettings((scope, deniedList) -> {
             String message = "";
             if (deniedList.size() == 1) {
@@ -351,8 +356,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             } else {
                 message = getContext().getString(R.string.call_settings_camera_mic);
             }
-            scope.showForwardToSettingsDialog(deniedList, message, getString(R.string.call_settings),
-                getString(R.string.call_cancel));
+            scope.showForwardToSettingsDialog(deniedList, message, getContext().getString(R.string.call_settings),
+                getContext().getString(R.string.call_cancel));
         }).request(new RequestCallback() {
             @Override
             public void onResult(boolean allGranted, @NonNull List<String> grantedList,
