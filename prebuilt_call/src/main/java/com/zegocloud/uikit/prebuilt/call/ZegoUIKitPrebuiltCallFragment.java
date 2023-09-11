@@ -108,9 +108,9 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             ZegoUIKit.init(application, appID, appSign, ZegoScenario.GENERAL);
             ZegoUIKit.login(userID, userName);
             ZegoUIKit.getSignalingPlugin().login(userID, userName, null);
-            ZegoUIKit.getBeautyPlugin().init(application, appID, appSign);
-            ZegoUIKit.getBeautyPlugin().setZegoBeautyPluginConfig(config.beautyConfig);
         }
+        ZegoUIKit.getBeautyPlugin().setZegoBeautyPluginConfig(config.beautyConfig);
+        ZegoUIKit.getBeautyPlugin().init(application, appID, appSign);
         if (config.hangUpConfirmDialogInfo != null) {
             if (TextUtils.isEmpty(config.hangUpConfirmDialogInfo.title)) {
                 config.hangUpConfirmDialogInfo.title = getString(R.string.call_leave_title);
