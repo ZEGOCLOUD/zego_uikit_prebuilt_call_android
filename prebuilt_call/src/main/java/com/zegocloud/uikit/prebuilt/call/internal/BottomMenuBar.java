@@ -1,5 +1,6 @@
 package com.zegocloud.uikit.prebuilt.call.internal;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.StateListDrawable;
 import android.util.AttributeSet;
@@ -13,10 +14,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.content.ContextCompat;
+import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.components.audiovideo.ZegoSwitchAudioOutputButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraButton;
-import com.zegocloud.uikit.components.audiovideo.ZegoToggleCameraButton;
-import com.zegocloud.uikit.components.audiovideo.ZegoToggleMicrophoneButton;
 import com.zegocloud.uikit.components.common.ZegoScreenSharingToggleButton;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCallListener;
@@ -28,7 +28,9 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltVideoConfig;
 import com.zegocloud.uikit.utils.Utils;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BottomMenuBar extends LinearLayout {
 
@@ -44,6 +46,8 @@ public class BottomMenuBar extends LinearLayout {
     private ZegoMemberListConfig memberListConfig;
     private ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo;
     private LeaveCallListener leaveCallListener;
+    private Map<ZegoMenuBarButtonName, View> enumViewMap = new HashMap<>();
+    private Dialog beautyDialog;
 
     public BottomMenuBar(@NonNull Context context) {
         super(context);
@@ -65,6 +69,11 @@ public class BottomMenuBar extends LinearLayout {
         setLayoutParams(new LayoutParams(-1, -2));
         setGravity(Gravity.CENTER_HORIZONTAL);
         runnable = () -> setVisibility(View.GONE);
+
+        for (ZegoMenuBarButtonName name : ZegoMenuBarButtonName.values()) {
+            View viewFromType = getViewFromType(name);
+            enumViewMap.put(name, viewFromType);
+        }
     }
 
     private void applyMenuBarButtons(List<ZegoMenuBarButtonName> zegoMenuBarButtons) {
@@ -88,7 +97,7 @@ public class BottomMenuBar extends LinearLayout {
         List<View> viewList = new ArrayList<>();
         if (list != null && list.size() > 0) {
             for (ZegoMenuBarButtonName zegoMenuBarButton : list) {
-                View viewFromType = getViewFromType(zegoMenuBarButton);
+                View viewFromType = enumViewMap.get(zegoMenuBarButton);
                 viewList.add(viewFromType);
             }
         }
@@ -146,8 +155,24 @@ public class BottomMenuBar extends LinearLayout {
                 if (screenSharingVideoConfig != null) {
                     ((ZegoScreenSharingToggleButton) view).setPresetResolution(screenSharingVideoConfig.resolution);
                 }
-
                 break;
+            case BEAUTY_BUTTON: {
+                view = new BeautyButton(getContext());
+                view.setOnClickListener(v -> {
+                    if (beautyDialog == null) {
+                        beautyDialog = ZegoUIKit.getBeautyPlugin().getBeautyDialog(getContext());
+                    }
+                    if (beautyDialog != null) {
+                        beautyDialog.show();
+                    }
+                });
+                if (ZegoUIKit.getBeautyPlugin().isPluginExited()) {
+                    view.setVisibility(VISIBLE);
+                } else {
+                    view.setVisibility(GONE);
+                }
+            }
+            break;
         }
         if (view != null) {
             view.setTag(menuBar);

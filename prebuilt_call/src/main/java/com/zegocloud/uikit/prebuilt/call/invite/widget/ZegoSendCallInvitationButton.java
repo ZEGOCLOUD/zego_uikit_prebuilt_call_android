@@ -11,7 +11,7 @@ import androidx.annotation.Nullable;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.plugin.invitation.components.ZegoStartInvitationButton;
-import com.zegocloud.uikit.plugin.adapter.plugins.ZegoSignalingPluginNotificationConfig;
+import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginNotificationConfig;
 import com.zegocloud.uikit.plugin.adapter.utils.GenericUtils;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;

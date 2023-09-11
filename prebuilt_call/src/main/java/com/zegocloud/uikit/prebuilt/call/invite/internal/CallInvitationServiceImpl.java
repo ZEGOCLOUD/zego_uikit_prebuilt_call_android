@@ -7,7 +7,7 @@ import android.text.TextUtils;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
-import com.zegocloud.uikit.plugin.adapter.plugins.ZegoSignalingPluginNotificationConfig;
+import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginNotificationConfig;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
@@ -223,6 +223,12 @@ public class CallInvitationServiceImpl {
 
     public void unInit() {
         isInit = false;
+        callInvitationData = null;
+        setCallState(NONE);
+        callID = null;
+        callUserStates.clear();
+        zegoUIKitPrebuiltCallFragment = null;
+
         if (invitationConfig != null) {
             if (!invitationConfig.notifyWhenAppRunningInBackgroundOrQuit) {
                 ZegoUIKit.logout();

@@ -14,29 +14,40 @@ import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoInvitationCallListe
 
 public class ZegoUIKitPrebuiltCallInvitationService {
 
+    private static boolean alreadyInit = false;
+
     public static void init(Application application, long appID, String appSign, String userID, String userName,
         ZegoUIKitPrebuiltCallInvitationConfig config) {
-        initRingtoneManager(application, config);
-        CallInvitationServiceImpl.getInstance().setPrebuiltConfigProvider(config.provider);
-        CallInvitationServiceImpl.getInstance().init(application, appID, appSign, userID, userName, config);
-
-        if (config.notifyWhenAppRunningInBackgroundOrQuit) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
-                    RingtoneManager.setIncomingOfflineRing();
-                }
-            }, 500);
+        if (alreadyInit) {
+            return;
         }
+        alreadyInit = true;
+        initRingtoneManager(application, null);
+        if (config == null) {
+            CallInvitationServiceImpl.getInstance().init(application, appID, appSign, userID, userName, null);
+        } else {
+            CallInvitationServiceImpl.getInstance().setPrebuiltConfigProvider(config.provider);
+            CallInvitationServiceImpl.getInstance().init(application, appID, appSign, userID, userName, config);
+
+            if (config.notifyWhenAppRunningInBackgroundOrQuit) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
+                        RingtoneManager.setIncomingOfflineRing();
+                    }
+                }, 500);
+            }
+        }
+
     }
 
     public static void init(Application application, long appID, String appSign, String userID, String userName) {
-        initRingtoneManager(application, null);
-        CallInvitationServiceImpl.getInstance().init(application, appID, appSign, userID, userName, null);
+        init(application, appID, appSign, userID, userName, null);
     }
 
     public static void unInit() {
+        alreadyInit = false;
         CallInvitationServiceImpl.getInstance().unInit();
     }
 

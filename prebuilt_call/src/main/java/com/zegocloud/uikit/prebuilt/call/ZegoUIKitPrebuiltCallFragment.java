@@ -108,6 +108,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             ZegoUIKit.init(application, appID, appSign, ZegoScenario.GENERAL);
             ZegoUIKit.login(userID, userName);
             ZegoUIKit.getSignalingPlugin().login(userID, userName, null);
+            ZegoUIKit.getBeautyPlugin().init(application, appID, appSign);
+            ZegoUIKit.getBeautyPlugin().setZegoBeautyPluginConfig(config.beautyConfig);
         }
         if (config.hangUpConfirmDialogInfo != null) {
             if (TextUtils.isEmpty(config.hangUpConfirmDialogInfo.title)) {
@@ -370,6 +372,9 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void applyMenuBarConfig(ZegoUIKitPrebuiltCallConfig config) {
+        binding.topMenuBar.setConfig(config.topMenuBarConfig);
+        binding.bottomMenuBar.setConfig(config.bottomMenuBarConfig);
+
         binding.bottomMenuBar.setMemberListConfig(config.memberListConfig);
         binding.topMenuBar.setMemberListConfig(config.memberListConfig);
 
@@ -401,9 +406,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 }
             }
         });
-
-        binding.topMenuBar.setConfig(config.topMenuBarConfig);
-        binding.bottomMenuBar.setConfig(config.bottomMenuBarConfig);
 
         if (bottomMenuBarBtns.size() > 0) {
             binding.bottomMenuBar.addButtons(bottomMenuBarBtns);
