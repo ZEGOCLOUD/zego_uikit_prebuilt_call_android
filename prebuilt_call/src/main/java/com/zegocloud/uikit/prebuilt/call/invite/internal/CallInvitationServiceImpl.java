@@ -65,6 +65,8 @@ public class CallInvitationServiceImpl {
     private IncomingCallButtonListener incomingCallButtonListener;
     private ZegoUIKitPrebuiltCallFragment zegoUIKitPrebuiltCallFragment;
     private String callID;
+    private long appID;
+    private String appSign;
 
     private ZegoUIKitSignalingPluginInvitationListener invitationListener = new ZegoUIKitSignalingPluginInvitationListener() {
         @Override
@@ -101,8 +103,6 @@ public class CallInvitationServiceImpl {
                     for (ZegoUIKitUser zegoUIKitUser : list) {
                         changeUserState(zegoUIKitUser, CallInvitationState.WAITING);
                     }
-
-
 
                     setCallState(INCOMING);
                     invitationDialog = new CallInvitationDialog(topActivity, callInvitationData);
@@ -210,15 +210,23 @@ public class CallInvitationServiceImpl {
     public void init(Application application, long appID, String appSign, String userID, String userName,
         ZegoUIKitPrebuiltCallInvitationConfig config) {
         this.invitationConfig = config;
+        this.application = application;
+        this.appID = appID;
+        this.appSign = appSign;
+
         isInit = true;
+
         ZegoUIKit.init(application, appID, appSign, ZegoScenario.GENERAL);
         ZegoUIKit.login(userID, userName);
         ZegoUIKit.getSignalingPlugin().login(userID, userName, null);
-        this.application = application;
 
         appActivityManager = new AppActivityManager();
         this.application.registerActivityLifecycleCallbacks(appActivityManager);
         ZegoUIKit.getSignalingPlugin().addInvitationListener(invitationListener);
+    }
+
+    void initBeautyPlugin() {
+        ZegoUIKit.getBeautyPlugin().init(application, appID, appSign);
     }
 
     public void unInit() {

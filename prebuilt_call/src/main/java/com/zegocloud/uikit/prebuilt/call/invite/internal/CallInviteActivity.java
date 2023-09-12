@@ -122,6 +122,9 @@ public class CallInviteActivity extends AppCompatActivity {
             bundle.getInt("type"), invitees, bundle.getParcelable("inviter"), bundle.getString("custom_data"));
         ZegoUIKitPrebuiltCallConfig config = getPrebuiltCallConfig(invitationData);
 
+        ZegoUIKit.getBeautyPlugin().setZegoBeautyPluginConfig(config.beautyConfig);
+        CallInvitationServiceImpl.getInstance().initBeautyPlugin();
+
         ZegoUIKitPrebuiltCallFragment fragment = ZegoUIKitPrebuiltCallFragment.newInstance(invitationData, config);
         if (invitees.size() > 1) {
             fragment.setOnOnlySelfInRoomListener(new ZegoOnlySelfInRoomListener() {
