@@ -32,6 +32,7 @@ import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutGalleryConfi
 import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutMode;
 import com.zegocloud.uikit.prebuilt.call.config.DurationUpdateListener;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallFragmentCallBinding;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoAudioVideoForegroundView;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoScreenShareForegroundView;
@@ -106,8 +107,10 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         String userName = arguments.getString("userName");
         if (appID != 0) {
             ZegoUIKit.init(application, appID, appSign, ZegoScenario.GENERAL);
-            ZegoUIKit.getBeautyPlugin().setZegoBeautyPluginConfig(config.beautyConfig);
-            ZegoUIKit.getBeautyPlugin().init(application, appID, appSign);
+            if (config.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)) {
+                ZegoUIKit.getBeautyPlugin().setZegoBeautyPluginConfig(config.beautyConfig);
+                ZegoUIKit.getBeautyPlugin().init(application, appID, appSign);
+            }
             ZegoUIKit.login(userID, userName);
             ZegoUIKit.getSignalingPlugin().login(userID, userName, null);
         }

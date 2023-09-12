@@ -12,6 +12,7 @@ import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
@@ -122,8 +123,10 @@ public class CallInviteActivity extends AppCompatActivity {
             bundle.getInt("type"), invitees, bundle.getParcelable("inviter"), bundle.getString("custom_data"));
         ZegoUIKitPrebuiltCallConfig config = getPrebuiltCallConfig(invitationData);
 
-        ZegoUIKit.getBeautyPlugin().setZegoBeautyPluginConfig(config.beautyConfig);
-        CallInvitationServiceImpl.getInstance().initBeautyPlugin();
+        if (config.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)) {
+            ZegoUIKit.getBeautyPlugin().setZegoBeautyPluginConfig(config.beautyConfig);
+            CallInvitationServiceImpl.getInstance().initBeautyPlugin();
+        }
 
         ZegoUIKitPrebuiltCallFragment fragment = ZegoUIKitPrebuiltCallFragment.newInstance(invitationData, config);
         if (invitees.size() > 1) {
