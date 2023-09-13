@@ -22,24 +22,7 @@ public class ZegoUIKitPrebuiltCallInvitationService {
             return;
         }
         alreadyInit = true;
-        initRingtoneManager(application, null);
-        if (config == null) {
-            CallInvitationServiceImpl.getInstance().init(application, appID, appSign, userID, userName, null);
-        } else {
-            CallInvitationServiceImpl.getInstance().setPrebuiltConfigProvider(config.provider);
-            CallInvitationServiceImpl.getInstance().init(application, appID, appSign, userID, userName, config);
-
-            if (config.notifyWhenAppRunningInBackgroundOrQuit) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
-                        RingtoneManager.setIncomingOfflineRing();
-                    }
-                }, 500);
-            }
-        }
-
+        CallInvitationServiceImpl.getInstance().init(application, appID, appSign, userID, userName, config);
     }
 
     public static void init(Application application, long appID, String appSign, String userID, String userName) {
@@ -49,24 +32,6 @@ public class ZegoUIKitPrebuiltCallInvitationService {
     public static void unInit() {
         alreadyInit = false;
         CallInvitationServiceImpl.getInstance().unInit();
-    }
-
-    private static void initRingtoneManager(Application application, ZegoUIKitPrebuiltCallInvitationConfig config) {
-        RingtoneManager.init(application);
-        String outgoing;
-        if (config == null || TextUtils.isEmpty(config.outgoingCallRingtone)) {
-            outgoing = "zego_outgoing";
-        } else {
-            outgoing = config.outgoingCallRingtone;
-        }
-        RingtoneManager.setOutgoingUri(RingtoneManager.getUriFromRaw(application, outgoing));
-        String incoming;
-        if (config == null || TextUtils.isEmpty(config.incomingCallRingtone)) {
-            incoming = "zego_incoming";
-        } else {
-            incoming = config.incomingCallRingtone;
-        }
-        RingtoneManager.setIncomingUri(RingtoneManager.getUriFromRaw(application, incoming));
     }
 
     public static void addIncomingCallButtonListener(IncomingCallButtonListener listener) {
