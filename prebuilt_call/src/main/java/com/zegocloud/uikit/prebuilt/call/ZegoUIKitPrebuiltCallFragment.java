@@ -234,16 +234,21 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             permissions.add(permission.RECORD_AUDIO);
         }
         requestPermissionIfNeeded(permissions, (allGranted, grantedList, deniedList) -> {
-            if (grantedList.contains(permission.CAMERA)) {
-                if (config.turnOnCameraWhenJoining) {
+            if (config.turnOnCameraWhenJoining) {
+                if (grantedList.contains(permission.CAMERA)) {
                     ZegoUIKit.turnCameraOn(userID, true);
                 }
+            } else {
+                ZegoUIKit.turnCameraOn(userID, false);
             }
-            if (grantedList.contains(permission.RECORD_AUDIO)) {
-                if (config.turnOnMicrophoneWhenJoining) {
+            if (config.turnOnMicrophoneWhenJoining) {
+                if (grantedList.contains(permission.RECORD_AUDIO)) {
                     ZegoUIKit.turnMicrophoneOn(userID, true);
                 }
+            } else {
+                ZegoUIKit.turnMicrophoneOn(userID, false);
             }
+
         });
 
         ZegoUIKit.addOnOnlySelfInRoomListener(() -> {
