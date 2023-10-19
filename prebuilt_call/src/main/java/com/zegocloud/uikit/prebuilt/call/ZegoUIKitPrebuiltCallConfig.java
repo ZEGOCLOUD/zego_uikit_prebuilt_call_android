@@ -11,6 +11,7 @@ import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCall
 import com.zegocloud.uikit.prebuilt.call.config.ZegoBottomMenuBarConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoCallDurationConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoInRoomChatConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMemberListConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
@@ -39,6 +40,7 @@ public class ZegoUIKitPrebuiltCallConfig {
     public LeaveCallListener leaveCallListener;
     public ZegoAvatarViewProvider avatarViewProvider;
     public ZegoBeautyPluginConfig beautyConfig = new ZegoBeautyPluginConfig();
+    public ZegoInRoomChatConfig inRoomChatConfig = new ZegoInRoomChatConfig();
 
     public ZegoUIKitPrebuiltCallConfig() {
 

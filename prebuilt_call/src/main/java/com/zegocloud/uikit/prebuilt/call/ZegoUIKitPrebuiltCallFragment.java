@@ -380,6 +380,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void applyMenuBarConfig(ZegoUIKitPrebuiltCallConfig config) {
+        binding.bottomMenuBar.setInRoomChatConfig(config.inRoomChatConfig);
+
         binding.topMenuBar.setConfig(config.topMenuBarConfig);
         binding.bottomMenuBar.setConfig(config.bottomMenuBarConfig);
 

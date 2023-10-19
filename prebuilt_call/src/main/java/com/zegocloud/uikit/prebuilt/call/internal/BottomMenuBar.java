@@ -17,11 +17,13 @@ import androidx.core.content.ContextCompat;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.components.audiovideo.ZegoSwitchAudioOutputButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraButton;
+import com.zegocloud.uikit.components.chat.ZegoInRoomChatItemViewProvider;
 import com.zegocloud.uikit.components.common.ZegoScreenSharingToggleButton;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCallListener;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoBottomMenuBarConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoInRoomChatConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMemberListConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
@@ -45,6 +47,7 @@ public class BottomMenuBar extends LinearLayout {
     private ZegoPrebuiltVideoConfig screenSharingVideoConfig;
     private ZegoMemberListConfig memberListConfig;
     private ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo;
+    private ZegoInRoomChatConfig inRoomChatConfig;
     private LeaveCallListener leaveCallListener;
     private Map<ZegoMenuBarButtonName, View> enumViewMap = new HashMap<>();
     private Dialog beautyDialog;
@@ -171,6 +174,16 @@ public class BottomMenuBar extends LinearLayout {
                 } else {
                     view.setVisibility(GONE);
                 }
+            }
+            break;
+            case CHAT_BUTTON: {
+                view = new ImageView(getContext());
+                ((ImageView) view).setImageResource(R.drawable.call_icon_chat_normal);
+                view.setOnClickListener(v -> {
+                    ZegoInRoomChatDialog inRoomChatDialog = new ZegoInRoomChatDialog(getContext());
+                    inRoomChatDialog.setInRoomChatConfig(inRoomChatConfig);
+                    inRoomChatDialog.show();
+                });
             }
             break;
         }
@@ -326,6 +339,10 @@ public class BottomMenuBar extends LinearLayout {
                 ((ZegoLeaveCallButton) view).setLeaveListener(leaveCallListener);
             }
         }
+    }
+
+    public void setInRoomChatConfig(ZegoInRoomChatConfig inRoomChatConfig) {
+        this.inRoomChatConfig = inRoomChatConfig;
     }
 
     public class MoreButton extends AppCompatImageView {

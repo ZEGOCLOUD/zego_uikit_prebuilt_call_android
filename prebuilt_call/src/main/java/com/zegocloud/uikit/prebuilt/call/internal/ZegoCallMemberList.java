@@ -31,7 +31,7 @@ public class ZegoCallMemberList extends BottomSheetDialog {
     private ZegoMemberListConfig memberListConfig;
 
     public ZegoCallMemberList(@NonNull Context context) {
-        super(context, R.style.TransparentDialog);
+        super(context, R.style.Call_TransparentDialog);
         Window window = getWindow();
         window.requestFeature(Window.FEATURE_NO_TITLE);
     }
