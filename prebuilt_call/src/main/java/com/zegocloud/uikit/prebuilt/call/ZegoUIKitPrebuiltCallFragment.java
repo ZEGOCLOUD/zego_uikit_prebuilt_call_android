@@ -152,6 +152,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 ZegoUIKit.setAppOrientation(orientation);
             }
         };
+        requireActivity().registerReceiver(configurationChangeReceiver, configurationChangeFilter);
 
         onBackPressedCallback = new OnBackPressedCallback(true) {
             @Override
@@ -175,8 +176,12 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        leaveRoom();
+        if (configurationChangeReceiver != null) {
+            requireActivity().unregisterReceiver(configurationChangeReceiver);
+            configurationChangeReceiver = null;
+        }
         binding.timeElapsed.stopTimeCount();
+        leaveRoom();
         CallInvitationServiceImpl.getInstance().setZegoUIKitPrebuiltCallFragment(null);
     }
 
@@ -216,7 +221,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void onRoomJoinSucceed() {
-        requireActivity().registerReceiver(configurationChangeReceiver, configurationChangeFilter);
 
         String userID = ZegoUIKit.getLocalUser().userID;
 
@@ -475,11 +479,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void leaveRoom() {
-        if (configurationChangeReceiver != null) {
-            requireActivity().unregisterReceiver(configurationChangeReceiver);
-            configurationChangeReceiver = null;
-        }
-
         CallInvitationServiceImpl.getInstance().leaveRoom();
         ZegoUIKit.leaveRoom();
     }
