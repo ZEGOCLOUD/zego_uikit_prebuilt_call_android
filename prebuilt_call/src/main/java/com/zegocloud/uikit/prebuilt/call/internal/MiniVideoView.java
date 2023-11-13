@@ -10,7 +10,6 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
-import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallLayoutMiniViewBinding;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
@@ -74,7 +73,7 @@ public class MiniVideoView extends ConstraintLayout {
             }
         }
 
-        if (invitationData.inviter == localUser) {
+        if (localUser.equals(invitationData.inviter)) {
             if (isVoiceCall || invitationData.invitees.size() > 1) {
                 binding.miniViewVideoParent.setVisibility(GONE);
             } else {
