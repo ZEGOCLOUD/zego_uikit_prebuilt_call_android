@@ -2,7 +2,6 @@ package com.zegocloud.uikit.prebuilt.call.internal;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -60,7 +59,7 @@ public class MiniVideoView extends ConstraintLayout {
             if (callConfig.miniVideoConfig != null && callConfig.miniVideoConfig.miniVideoAudioDrawable != null) {
                 binding.miniViewIcon.setImageDrawable(callConfig.miniVideoConfig.miniVideoAudioDrawable);
             } else {
-                binding.miniViewIcon.setImageResource(R.drawable.zego_uikit_icon_online_voice);
+                binding.miniViewIcon.setImageResource(com.zegocloud.uikit.R.drawable.zego_uikit_icon_online_voice);
                 if (callConfig.miniVideoConfig != null && callConfig.miniVideoConfig.miniVideoDrawableColor != 0) {
                     ColorStateList tintColor = ColorStateList.valueOf(
                         callConfig.miniVideoConfig.miniVideoDrawableColor);
@@ -71,7 +70,7 @@ public class MiniVideoView extends ConstraintLayout {
             if (callConfig.miniVideoConfig != null && callConfig.miniVideoConfig.miniVideoVideoDrawable != null) {
                 binding.miniViewIcon.setImageDrawable(callConfig.miniVideoConfig.miniVideoVideoDrawable);
             } else {
-                binding.miniViewIcon.setImageResource(R.drawable.zego_uikit_icon_online_video);
+                binding.miniViewIcon.setImageResource(com.zegocloud.uikit.R.drawable.zego_uikit_icon_online_video);
             }
         }
 
