@@ -231,8 +231,11 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         if (!requireActivity().isFinishing()) {
             boolean isCallInvite = CallInvitationServiceImpl.getInstance().getCallInvitationConfig() != null;
             boolean isInRoom = CallInvitationServiceImpl.getInstance().isInRoom();
-
-            if (isInRoom && isCallInvite && checkAlertWindowPermission()) {
+            ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
+            boolean hasMiniButton =
+                callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
+                    || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON);
+            if (isInRoom && isCallInvite && checkAlertWindowPermission() || hasMiniButton) {
                 showMiniVideoWindow();
             }
         }
