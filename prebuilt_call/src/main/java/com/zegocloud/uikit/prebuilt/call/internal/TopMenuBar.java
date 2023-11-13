@@ -1,5 +1,6 @@
 package com.zegocloud.uikit.prebuilt.call.internal;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
@@ -12,15 +13,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.components.audiovideo.ZegoSwitchAudioOutputButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleMicrophoneButton;
 import com.zegocloud.uikit.components.common.ZegoScreenSharingToggleButton;
 import com.zegocloud.uikit.prebuilt.call.R;
-import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCallListener;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoInRoomChatConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMemberListConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
@@ -28,7 +30,10 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltVideoConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig;
 import com.zegocloud.uikit.utils.Utils;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 public class TopMenuBar extends FrameLayout {
 
@@ -44,6 +49,9 @@ public class TopMenuBar extends FrameLayout {
     private ZegoMemberListConfig memberListConfig;
     private ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo;
     private LeaveCallListener leaveCallListener;
+    private Dialog beautyDialog;
+    private ZegoInRoomChatConfig inRoomChatConfig;
+    private Map<ZegoMenuBarButtonName, View> enumViewMap = new HashMap<>();
 
     public TopMenuBar(Context context) {
         super(context);
@@ -81,6 +89,13 @@ public class TopMenuBar extends FrameLayout {
         }
         addView(titleView, layoutParams);
         runnable = () -> setVisibility(View.GONE);
+
+        for (ZegoMenuBarButtonName name : ZegoMenuBarButtonName.values()) {
+            View viewFromType = getViewFromType(name);
+            if (viewFromType != null) {
+                enumViewMap.put(name, viewFromType);
+            }
+        }
     }
 
     @NonNull
@@ -105,10 +120,16 @@ public class TopMenuBar extends FrameLayout {
 
     private void applyMenuBarButtons(List<ZegoMenuBarButtonName> buttons) {
         showList.clear();
-        if (buttons.size() > maxViewCount) {
-            buttons = buttons.subList(0, maxViewCount);
+        List<ZegoMenuBarButtonName> distinct = new ArrayList<>(buttons.size());
+        for (ZegoMenuBarButtonName button : buttons) {
+            if (!distinct.contains(button)) {
+                distinct.add(button);
+            }
         }
-        List<View> menuBarViews = getMenuBarViews(buttons);
+        if (distinct.size() > maxViewCount) {
+            distinct = distinct.subList(0, maxViewCount);
+        }
+        List<View> menuBarViews = getMenuBarViews(distinct);
         showList.addAll(menuBarViews);
         notifyListChanged();
     }
@@ -116,10 +137,11 @@ public class TopMenuBar extends FrameLayout {
     private List<View> getMenuBarViews(List<ZegoMenuBarButtonName> buttons) {
         List<View> viewList = new ArrayList<>();
         if (buttons != null && buttons.size() > 0) {
-            for (int i = 0; i < buttons.size(); i++) {
-                ZegoMenuBarButtonName buttonName = buttons.get(i);
-                View view = getViewFromType(buttonName);
-                viewList.add(view);
+            for (ZegoMenuBarButtonName zegoMenuBarButton : buttons) {
+                View viewFromType = enumViewMap.get(zegoMenuBarButton);
+                if (viewFromType != null && !viewList.contains(viewFromType)) {
+                    viewList.add(viewFromType);
+                }
             }
         }
         return viewList;
@@ -176,13 +198,46 @@ public class TopMenuBar extends FrameLayout {
                 if (screenSharingVideoConfig != null) {
                     ((ZegoScreenSharingToggleButton) view).setPresetResolution(screenSharingVideoConfig.resolution);
                 }
-
                 break;
+            case BEAUTY_BUTTON: {
+                view = new BeautyButton(getContext());
+                view.setOnClickListener(v -> {
+                    if (beautyDialog == null) {
+                        beautyDialog = ZegoUIKit.getBeautyPlugin().getBeautyDialog(getContext());
+                    }
+                    if (beautyDialog != null) {
+                        beautyDialog.show();
+                    }
+                });
+                if (ZegoUIKit.getBeautyPlugin().isPluginExited()) {
+                    view.setVisibility(VISIBLE);
+                } else {
+                    view.setVisibility(GONE);
+                }
+            }
+            break;
+            case CHAT_BUTTON:
+                view = new ImageView(getContext());
+                ((ImageView) view).setImageResource(R.drawable.call_icon_chat_normal);
+                view.setOnClickListener(v -> {
+                    ZegoInRoomChatDialog inRoomChatDialog = new ZegoInRoomChatDialog(getContext());
+                    inRoomChatDialog.setInRoomChatConfig(inRoomChatConfig);
+                    inRoomChatDialog.show();
+                });
+                break;
+            case MINIMIZING_BUTTON: {
+                view = new MiniVideoButton(getContext());
+            }
+            break;
         }
         if (view != null) {
             view.setTag(menuBar);
         }
         return view;
+    }
+
+    public void setInRoomChatConfig(ZegoInRoomChatConfig inRoomChatConfig) {
+        this.inRoomChatConfig = inRoomChatConfig;
     }
 
     public void addButtons(List<View> viewList) {

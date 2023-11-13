@@ -3,11 +3,16 @@
 
   <uses-permission android:name="android.permission.VIBRATE" />
 
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+  <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
+
   <application>
     <activity
       android:name="com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity"
+      android:configChanges="locale|keyboardHidden|fontScale|orientation|screenSize|screenLayout|layoutDirection|density|uiMode"
+      android:excludeFromRecents="true"
       android:exported="false"
-      android:configChanges="locale|keyboardHidden|fontScale|orientation|screenSize|screenLayout|layoutDirection|density|uiMode"/>
+      android:taskAffinity=":zego" />
   </application>
 
 </manifest>

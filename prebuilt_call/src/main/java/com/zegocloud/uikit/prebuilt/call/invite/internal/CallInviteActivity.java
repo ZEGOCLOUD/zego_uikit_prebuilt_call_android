@@ -37,6 +37,7 @@ public class CallInviteActivity extends AppCompatActivity {
         bundle.putInt("type", type);
         bundle.putString("callID", callID);
         bundle.putInt("timeout", timeout);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("bundle", bundle);
         context.startActivity(intent);
     }
@@ -50,6 +51,7 @@ public class CallInviteActivity extends AppCompatActivity {
         bundle.putParcelableArrayList("invitees", new ArrayList<>(invitees));
         bundle.putInt("type", type);
         bundle.putString("callID", callID);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("bundle", bundle);
         context.startActivity(intent);
     }
@@ -64,6 +66,7 @@ public class CallInviteActivity extends AppCompatActivity {
         bundle.putParcelableArrayList("invitees", new ArrayList<>(invitees));
         bundle.putInt("type", type);
         bundle.putString("callID", callID);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("bundle", bundle);
         context.startActivity(intent);
     }
@@ -105,7 +108,6 @@ public class CallInviteActivity extends AppCompatActivity {
         }
     }
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -128,7 +130,8 @@ public class CallInviteActivity extends AppCompatActivity {
             CallInvitationServiceImpl.getInstance().initBeautyPlugin();
         }
 
-        ZegoUIKitPrebuiltCallFragment fragment = ZegoUIKitPrebuiltCallFragment.newInstance(invitationData, config);
+        ZegoUIKitPrebuiltCallFragment fragment = ZegoUIKitPrebuiltCallFragment.newInstance(this,invitationData.callID,
+            config);
         if (invitees.size() > 1) {
             fragment.setOnOnlySelfInRoomListener(new ZegoOnlySelfInRoomListener() {
                 @Override
@@ -172,8 +175,7 @@ public class CallInviteActivity extends AppCompatActivity {
         CallInvitationServiceImpl service = CallInvitationServiceImpl.getInstance();
         if (service.getProvider() != null) {
             ZegoUIKitPrebuiltCallConfig prebuiltCallConfig = service.getProvider().requireConfig(invitationData);
-            if (prebuiltCallConfig.audioVideoViewConfig != null
-                && prebuiltCallConfig.avatarViewProvider != null) {
+            if (prebuiltCallConfig.audioVideoViewConfig != null && prebuiltCallConfig.avatarViewProvider != null) {
                 fragment.setAvatarViewProvider(prebuiltCallConfig.avatarViewProvider);
             }
         }

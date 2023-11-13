@@ -105,7 +105,7 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
         ZegoSignalingPluginNotificationConfig notificationConfig = getSendInvitationConfig();
         data = jsonObject.toString();
         List<String> idList = GenericUtils.map(invitees, uiKitUser -> uiKitUser.userID);
-        CallInvitationServiceImpl.getInstance().sendInvitation(callID,idList, timeout, type, data, notificationConfig, result -> {
+        CallInvitationServiceImpl.getInstance().sendInvitation(idList, timeout, type, data, notificationConfig, result -> {
             int code = (int) result.get("code");
             String message = (String) result.get("message");
             List<ZegoUIKitUser> errorInvitees = (List<ZegoUIKitUser>) result.get("errorInvitees");

@@ -18,6 +18,7 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltAudioVideoViewConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltVideoConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig;
+import com.zegocloud.uikit.prebuilt.call.internal.ZegoMiniVideoConfig;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,6 +42,8 @@ public class ZegoUIKitPrebuiltCallConfig {
     public ZegoAvatarViewProvider avatarViewProvider;
     public ZegoBeautyPluginConfig beautyConfig = new ZegoBeautyPluginConfig();
     public ZegoInRoomChatConfig inRoomChatConfig = new ZegoInRoomChatConfig();
+    public ZegoMiniVideoConfig miniVideoConfig = new ZegoMiniVideoConfig();
+
 
     public ZegoUIKitPrebuiltCallConfig() {
 
@@ -57,7 +60,8 @@ public class ZegoUIKitPrebuiltCallConfig {
             Arrays.asList(ZegoMenuBarButtonName.TOGGLE_CAMERA_BUTTON, ZegoMenuBarButtonName.SWITCH_CAMERA_BUTTON,
                 ZegoMenuBarButtonName.HANG_UP_BUTTON, ZegoMenuBarButtonName.TOGGLE_MICROPHONE_BUTTON,
                 ZegoMenuBarButtonName.SWITCH_AUDIO_OUTPUT_BUTTON));
-        config.topMenuBarConfig.buttons = new ArrayList<>(Collections.singletonList(ZegoMenuBarButtonName.SHOW_MEMBER_LIST_BUTTON));
+        config.topMenuBarConfig.buttons = new ArrayList<>(
+            Collections.singletonList(ZegoMenuBarButtonName.SHOW_MEMBER_LIST_BUTTON));
         config.topMenuBarConfig.isVisible = true;
         config.bottomMenuBarConfig.style = ZegoMenuBarStyle.DARK;
         config.audioVideoViewConfig.useVideoViewAspectFill = false;
@@ -74,7 +78,8 @@ public class ZegoUIKitPrebuiltCallConfig {
         config.bottomMenuBarConfig.buttons = new ArrayList<>(
             Arrays.asList(ZegoMenuBarButtonName.TOGGLE_MICROPHONE_BUTTON, ZegoMenuBarButtonName.HANG_UP_BUTTON,
                 ZegoMenuBarButtonName.SWITCH_AUDIO_OUTPUT_BUTTON));
-        config.topMenuBarConfig.buttons = new ArrayList<>(Collections.singletonList(ZegoMenuBarButtonName.SHOW_MEMBER_LIST_BUTTON));
+        config.topMenuBarConfig.buttons = new ArrayList<>(
+            Collections.singletonList(ZegoMenuBarButtonName.SHOW_MEMBER_LIST_BUTTON));
         config.topMenuBarConfig.isVisible = true;
         config.bottomMenuBarConfig.style = ZegoMenuBarStyle.DARK;
         config.audioVideoViewConfig.useVideoViewAspectFill = false;

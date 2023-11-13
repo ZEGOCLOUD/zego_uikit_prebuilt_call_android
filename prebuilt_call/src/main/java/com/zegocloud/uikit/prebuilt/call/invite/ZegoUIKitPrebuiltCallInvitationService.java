@@ -1,28 +1,18 @@
 package com.zegocloud.uikit.prebuilt.call.invite;
 
 import android.app.Application;
-import android.os.Handler;
-import android.text.TextUtils;
-
-import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.IncomingCallButtonListener;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.OutgoingCallButtonListener;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.RingtoneManager;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoInvitationCallListener;
 
 public class ZegoUIKitPrebuiltCallInvitationService {
 
-    private static boolean alreadyInit = false;
-
     public static void init(Application application, long appID, String appSign, String userID, String userName,
         ZegoUIKitPrebuiltCallInvitationConfig config) {
-        if (alreadyInit) {
-            return;
-        }
-        alreadyInit = true;
-        CallInvitationServiceImpl.getInstance().init(application, appID, appSign, userID, userName, config);
+        CallInvitationServiceImpl.getInstance().initAndLoginUser(application, appID, appSign, userID, userName);
+        CallInvitationServiceImpl.getInstance().setCallInvitationConfig(config);
     }
 
     public static void init(Application application, long appID, String appSign, String userID, String userName) {
@@ -30,7 +20,6 @@ public class ZegoUIKitPrebuiltCallInvitationService {
     }
 
     public static void unInit() {
-        alreadyInit = false;
         CallInvitationServiceImpl.getInstance().unInit();
     }
 

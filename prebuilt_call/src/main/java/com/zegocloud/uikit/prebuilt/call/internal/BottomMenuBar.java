@@ -75,15 +75,23 @@ public class BottomMenuBar extends LinearLayout {
 
         for (ZegoMenuBarButtonName name : ZegoMenuBarButtonName.values()) {
             View viewFromType = getViewFromType(name);
-            enumViewMap.put(name, viewFromType);
+            if (viewFromType != null) {
+                enumViewMap.put(name, viewFromType);
+            }
         }
     }
 
     private void applyMenuBarButtons(List<ZegoMenuBarButtonName> zegoMenuBarButtons) {
         showList.clear();
         hideList.clear();
-        List<View> menuBarViews = getMenuBarViews(zegoMenuBarButtons);
-        if (zegoMenuBarButtons.size() <= menuBarConfig.maxCount) {
+        List<ZegoMenuBarButtonName> distinct = new ArrayList<>(zegoMenuBarButtons.size());
+        for (ZegoMenuBarButtonName button : zegoMenuBarButtons) {
+            if (!distinct.contains(button)) {
+                distinct.add(button);
+            }
+        }
+        List<View> menuBarViews = getMenuBarViews(distinct);
+        if (distinct.size() <= menuBarConfig.maxCount) {
             showList.addAll(menuBarViews);
         } else {
             int showChildCount = menuBarConfig.maxCount - 1;
@@ -101,7 +109,9 @@ public class BottomMenuBar extends LinearLayout {
         if (list != null && list.size() > 0) {
             for (ZegoMenuBarButtonName zegoMenuBarButton : list) {
                 View viewFromType = enumViewMap.get(zegoMenuBarButton);
-                viewList.add(viewFromType);
+                if (viewFromType != null) {
+                    viewList.add(viewFromType);
+                }
             }
         }
         return viewList;
@@ -184,6 +194,13 @@ public class BottomMenuBar extends LinearLayout {
                     inRoomChatDialog.setInRoomChatConfig(inRoomChatConfig);
                     inRoomChatDialog.show();
                 });
+            }
+            break;
+            case MINIMIZING_BUTTON:{
+                view = new MiniVideoButton(getContext());
+                view.setBackgroundResource(R.drawable.zego_uikit_bg_button);
+                int padding = Utils.dp2px(10, getResources().getDisplayMetrics());
+                view.setPadding(padding, padding, padding, padding);
             }
             break;
         }

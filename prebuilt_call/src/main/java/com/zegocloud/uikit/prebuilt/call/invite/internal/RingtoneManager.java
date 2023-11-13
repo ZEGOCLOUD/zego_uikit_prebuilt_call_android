@@ -12,8 +12,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Vibrator;
 import android.text.TextUtils;
-import android.util.Log;
-
 import com.zegocloud.uikit.prebuilt.call.config.ZegoNotificationConfig;
 
 public class RingtoneManager {
