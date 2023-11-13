@@ -198,7 +198,7 @@ public class BottomMenuBar extends LinearLayout {
             break;
             case MINIMIZING_BUTTON:{
                 view = new MiniVideoButton(getContext());
-                view.setBackgroundResource(R.drawable.zego_uikit_bg_button);
+                view.setBackgroundResource(com.zegocloud.uikit.R.drawable.zego_uikit_bg_button);
                 int padding = Utils.dp2px(10, getResources().getDisplayMetrics());
                 view.setPadding(padding, padding, padding, padding);
             }
