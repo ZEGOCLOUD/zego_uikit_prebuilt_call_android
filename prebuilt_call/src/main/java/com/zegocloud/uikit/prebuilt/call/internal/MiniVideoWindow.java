@@ -1,18 +1,22 @@
 package com.zegocloud.uikit.prebuilt.call.internal;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import com.zegocloud.uikit.utils.Utils;
 
 public class MiniVideoWindow {
 
+    private final int scaledTouchSlop;
+    private final int longPressTimeout;
     private boolean isViewAddedToWindow;
     private WindowManager windowManager;
     private WindowManager.LayoutParams lp;
@@ -38,6 +42,9 @@ public class MiniVideoWindow {
         int heightPixels = context.getResources().getDisplayMetrics().heightPixels;
         lp.y = heightPixels / 2;
         lp.x = Utils.dp2px(8, context.getResources().getDisplayMetrics());
+
+        scaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        longPressTimeout = ViewConfiguration.getLongPressTimeout();
     }
 
     public void showMinimalWindow(View contentView) {
@@ -63,12 +70,20 @@ public class MiniVideoWindow {
 
     int lastX;
     int lastY;
+    boolean isClick;
+    long downTime;
+    int downX;
+    int downY;
 
     private void processTouchEvent(MotionEvent event) {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                lastX = (int) event.getRawX();
-                lastY = (int) event.getRawY();
+                downX = (int) event.getRawX();
+                downY = (int) event.getRawY();
+                lastX = downX;
+                lastY = downY;
+                downTime = System.currentTimeMillis();
+                isClick = true;
                 break;
             case MotionEvent.ACTION_MOVE:
                 int currentX = (int) event.getRawX();
@@ -80,9 +95,20 @@ public class MiniVideoWindow {
                 updatePosition(lp.x, lp.y - distanceY);
                 lastX = currentX;
                 lastY = currentY;
+                if (Math.abs(currentX - downX) > scaledTouchSlop || Math.abs(currentY - distanceY) > scaledTouchSlop) {
+                    isClick = false;
+                }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                if (System.currentTimeMillis() - downTime > longPressTimeout) {
+                    isClick = false;
+                }
+                if (isClick) {
+                    Intent intent2 = new Intent(context, context.getClass());
+                    intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent2);
+                }
                 widthPixels = context.getResources().getDisplayMetrics().widthPixels;
                 if (lp.x + contentView.getWidth() / 2 < widthPixels / 2) {
                     lp.x = 0;

@@ -346,26 +346,24 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         if (miniVideoWindow == null) {
             miniVideoWindow = new MiniVideoWindow(context);
             contentView = new MiniVideoView(context);
-            contentView.setOnClickListener(v -> {
-                //                // 获取当前任务的ID
-                //                ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-                //                List<AppTask> appTasks = activityManager.getAppTasks();
-
-                //                if (VERSION.SDK_INT >= VERSION_CODES.M) {
-                //                    for (int index = appTasks.size(); index > 0; index--) {
-                //                        RecentTaskInfo taskInfo = appTasks.get(index).getTaskInfo();
-                //                        if (!Objects.equals(taskInfo.topActivity, requireActivity().getComponentName())) {
-                //                            activityManager.moveTaskToFront(taskInfo.taskId, ActivityManager.MOVE_TASK_WITH_HOME);
-                //                        }
-                //                    }
-                //                }
-
-                Intent intent2 = new Intent(context, context.getClass());
-                intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent2);
-
-                miniVideoWindow.dismissMinimalWindow();
-            });
+//            contentView.setOnClickListener(v -> {
+            //                //                // 获取当前任务的ID
+            //                //                ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+            //                //                List<AppTask> appTasks = activityManager.getAppTasks();
+            //
+            //                //                if (VERSION.SDK_INT >= VERSION_CODES.M) {
+            //                //                    for (int index = appTasks.size(); index > 0; index--) {
+            //                //                        RecentTaskInfo taskInfo = appTasks.get(index).getTaskInfo();
+            //                //                        if (!Objects.equals(taskInfo.topActivity, requireActivity().getComponentName())) {
+            //                //                            activityManager.moveTaskToFront(taskInfo.taskId, ActivityManager.MOVE_TASK_WITH_HOME);
+            //                //                        }
+            //                //                    }
+            //                //                }
+            //
+            //                Intent intent2 = new Intent(context, context.getClass());
+            //                intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            //                context.startActivity(intent2);
+            //            });
         }
 
         long startTimeLocal = CallInvitationServiceImpl.getInstance().getStartTimeLocal();
