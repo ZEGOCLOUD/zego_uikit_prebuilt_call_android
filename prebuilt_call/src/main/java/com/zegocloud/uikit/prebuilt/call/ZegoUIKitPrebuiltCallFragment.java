@@ -235,7 +235,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             boolean hasMiniButton =
                 callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
                     || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON);
-            if (isInRoom && isCallInvite && checkAlertWindowPermission() || hasMiniButton) {
+            if (isInRoom && isCallInvite && checkAlertWindowPermission() && hasMiniButton) {
                 showMiniVideoWindow();
             }
         }
