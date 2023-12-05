@@ -2,6 +2,7 @@ package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
 import android.app.Activity;
 import android.app.Notification;
+import android.app.Notification.Builder;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -16,9 +17,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationCompat.Action;
-import androidx.core.app.NotificationCompat.CallStyle;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.core.app.Person;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.IconCompat;
 import com.tencent.mmkv.MMKV;
@@ -186,25 +185,36 @@ public class CallNotificationManager {
         PendingIntent acceptIntent = getAcceptIntent(context);
         PendingIntent declineIntent = getDeclineIntent(context);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelID).setSmallIcon(
-                R.drawable.call_icon_chat_normal) //// A small icon that will be displayed in the status bar
-            .setContentTitle(title)   // Notification text, usually the caller’s name
-            .setContentText(body).setContentIntent(clickIntent).setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC).setCategory(NotificationCompat.CATEGORY_CALL)
-            .setOngoing(true).setAutoCancel(true);
-
-        Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
-        boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
-        if (zimPushMessage == null && topActivity != null && canShowFullOnLockScreen) {
-            PendingIntent lockScreenIntent = getLockScreenIntent(context);
-            builder.setFullScreenIntent(lockScreenIntent, true);
-        }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Person caller = new Person.Builder().setName(title).setImportant(true).build();
-            CallStyle callStyle = CallStyle.forIncomingCall(caller, declineIntent, acceptIntent);
+            android.app.Person caller = new android.app.Person.Builder().setName(title).setImportant(true).build();
+            Notification.CallStyle callStyle = Notification.CallStyle.forIncomingCall(caller, declineIntent,
+                acceptIntent);
+            Notification.Builder builder = new Builder(context, channelID).setSmallIcon(
+                    R.drawable.call_icon_chat_normal) //// A small icon that will be displayed in the status bar
+                .setContentTitle(title)   // Notification text, usually the caller’s name
+                .setContentText(body).setContentIntent(clickIntent).setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setCategory(NotificationCompat.CATEGORY_CALL).setOngoing(true).setStyle(callStyle).setAutoCancel(true);
+            Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
+            boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
+            if (zimPushMessage == null && topActivity != null && canShowFullOnLockScreen) {
+                PendingIntent lockScreenIntent = getLockScreenIntent(context);
+                builder.setFullScreenIntent(lockScreenIntent, true);
+            }
             builder.setStyle(callStyle);
+            return builder.build();
         } else {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelID).setSmallIcon(
+                    R.drawable.call_icon_chat_normal) //// A small icon that will be displayed in the status bar
+                .setContentTitle(title)   // Notification text, usually the caller’s name
+                .setContentText(body).setContentIntent(clickIntent).setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC).setCategory(NotificationCompat.CATEGORY_CALL)
+                .setOngoing(true).setAutoCancel(true);
+            Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
+            boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
+            if (zimPushMessage == null && topActivity != null && canShowFullOnLockScreen) {
+                PendingIntent lockScreenIntent = getLockScreenIntent(context);
+                builder.setFullScreenIntent(lockScreenIntent, true);
+            }
             NotificationCompat.Action.Builder acceptAction = new Action.Builder(
                 // The icon that will be displayed on the button (or not, depends on the Android version)
                 IconCompat.createWithResource(context, R.drawable.call_selector_dialog_voice_accept),
@@ -220,8 +230,8 @@ public class CallNotificationManager {
 
             builder.addAction(acceptAction.build());
             builder.addAction(declineAction.build());
+            return builder.build();
         }
-        return builder.build();
     }
 
     private PendingIntent getAcceptIntent(Context context) {
