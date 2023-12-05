@@ -190,7 +190,6 @@ public class CallInvitationServiceImpl {
                         clearPushMessage();
                     } else if (CallNotificationManager.ACTION_DECLINE_CALL.equals(notificationAction)) {
                         // offline push
-                        ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
                         ZegoUIKit.getSignalingPlugin()
                             .refuseInvitation(inviter.userID, "", new PluginCallbackListener() {
                                 @Override
@@ -472,14 +471,12 @@ public class CallInvitationServiceImpl {
             this.invitationConfig = invitationConfig;
         }
         if (invitationConfig != null) {
-            if (invitationConfig.notifyWhenAppRunningInBackgroundOrQuit) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
-                    }
-                }, 500);
-            }
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
+                }
+            }, 500);
         }
     }
 
@@ -561,10 +558,8 @@ public class CallInvitationServiceImpl {
     public void unInit() {
         leaveRoom();
         if (invitationConfig != null) {
-            if (!invitationConfig.notifyWhenAppRunningInBackgroundOrQuit) {
-                ZegoUIKit.logout();
-                ZegoUIKit.getSignalingPlugin().logout();
-            }
+            ZegoUIKit.logout();
+            ZegoUIKit.getSignalingPlugin().logout();
         }
         unInitToReceiveOffline();
 
