@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 34
 
     defaultConfig {
         minSdk 21
@@ -29,10 +29,14 @@ android {
 }
 
 dependencies {
-
-    implementation 'androidx.appcompat:appcompat:1.5.0'
-    implementation 'com.google.android.material:material:1.6.1'
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.core:core:1.12.0'
+        }
+    }
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    api 'com.github.ZEGOCLOUD:zego_uikit_android:[2.6.6,)'
+    api 'com.github.ZEGOCLOUD:zego_uikit_android:alpha-2.7.0'
     api 'com.guolindev.permissionx:permissionx:1.7.1'
 }

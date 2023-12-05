@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
@@ -53,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import timber.log.Timber;
 
 public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
@@ -125,8 +127,9 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         String appSign = arguments.getString("appSign");
         String userID = arguments.getString("userID");
         String userName = arguments.getString("userName");
-
-        CallInvitationServiceImpl.getInstance().initAndLoginUser(application, appID, appSign, userID, userName);
+        if (appID != 0) {
+            CallInvitationServiceImpl.getInstance().initAndLoginUser(application, appID, appSign, userID, userName);
+        }
 
         ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
 
@@ -321,6 +324,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         CallInvitationServiceImpl.getInstance().setLeaveRoomListener(new LeaveRoomListener() {
             @Override
             public void onLeaveRoom() {
+                Timber.d("onLeaveRoom() called");
                 dismissMiniVideoWindow();
                 requireActivity().finish();
             }
@@ -346,7 +350,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         if (miniVideoWindow == null) {
             miniVideoWindow = new MiniVideoWindow(context);
             contentView = new MiniVideoView(context);
-//            contentView.setOnClickListener(v -> {
+            //            contentView.setOnClickListener(v -> {
             //                //                // 获取当前任务的ID
             //                //                ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
             //                //                List<AppTask> appTasks = activityManager.getAppTasks();
@@ -608,6 +612,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void leaveRoom() {
+        Timber.d("leaveRoom() called");
         CallInvitationServiceImpl.getInstance().leaveRoom();
     }
 

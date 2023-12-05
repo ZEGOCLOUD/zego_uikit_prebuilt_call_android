@@ -41,8 +41,9 @@ public class CallInvitationDialog {
         alertDialog.getWindow().setAttributes(attributes);
         alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable());
 
-        if (CallInvitationServiceImpl.getInstance().getConfig() != null) {
-            boolean showDeclineButton = CallInvitationServiceImpl.getInstance().getConfig().showDeclineButton;
+        if (CallInvitationServiceImpl.getInstance().getCallInvitationConfig() != null) {
+            boolean showDeclineButton = CallInvitationServiceImpl.getInstance()
+                .getCallInvitationConfig().showDeclineButton;
             binding.dialogCallDecline.setVisibility(showDeclineButton ? View.VISIBLE : View.GONE);
         }
 
@@ -52,8 +53,7 @@ public class CallInvitationDialog {
         binding.dialogCallAccept.setOnClickListener(v -> {
             CallInvitationServiceImpl.getInstance().onIncomingCallAcceptButtonPressed();
             hide();
-            CallInviteActivity.startCallPage(context, invitationData.inviter, invitationData.invitees,
-                invitationData.callID, invitationData.type);
+            CallInviteActivity.startCallPage(context);
         });
         if (invitationData.type == ZegoInvitationType.VOICE_CALL.getValue()) {
             binding.dialogCallAccept.setBackgroundResource(R.drawable.call_selector_dialog_voice_accept);
@@ -77,8 +77,7 @@ public class CallInvitationDialog {
         });
         binding.getRoot().setOnClickListener(v -> {
             hide();
-            CallInviteActivity.startIncomingPage(context, invitationData.inviter, invitationData.invitees,
-                invitationData.callID, invitationData.type);
+            CallInviteActivity.startIncomingPage(context);
         });
 
         CallInvitationServiceImpl service = CallInvitationServiceImpl.getInstance();
@@ -97,6 +96,10 @@ public class CallInvitationDialog {
     public void show() {
         alertDialog.show();
         alertDialog.getWindow().setDimAmount(0.1f);
+    }
+
+    public boolean isShowing(){
+        return alertDialog.isShowing();
     }
 
     public void hide() {

@@ -1,18 +1,13 @@
 package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
-import android.annotation.TargetApi;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Vibrator;
-import android.text.TextUtils;
-import com.zegocloud.uikit.prebuilt.call.config.ZegoNotificationConfig;
+import android.util.Log;
 
 public class RingtoneManager {
 
@@ -40,6 +35,14 @@ public class RingtoneManager {
 
     public static void setIncomingUri(Uri incomingUri) {
         RingtoneManager.incomingUri = incomingUri;
+    }
+
+    public static Uri getOutgoingUri() {
+        return outgoingUri;
+    }
+
+    public static Uri getIncomingUri() {
+        return incomingUri;
     }
 
     public static void playRingTone(boolean incoming) {
@@ -92,36 +95,4 @@ public class RingtoneManager {
             vibrator.cancel();
         }
     }
-
-    @TargetApi(Build.VERSION_CODES.O)
-    public static void setIncomingOfflineRing() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            ZegoNotificationConfig androidNotificationConfig = CallInvitationServiceImpl.getInstance().getConfig().notificationConfig;
-            if (androidNotificationConfig != null) {
-                String channelID = androidNotificationConfig.channelID;
-                String channelName = TextUtils.isEmpty(androidNotificationConfig.channelName) ? androidNotificationConfig.channelID : androidNotificationConfig.channelName;
-                String soundName = getSoundName(androidNotificationConfig.sound);
-                NotificationChannel channel = new NotificationChannel(channelID, channelName, NotificationManager.IMPORTANCE_HIGH);
-                Uri sound = RingtoneManager.getUriFromRaw(RingtoneManager.context, soundName);
-                channel.setSound(sound, null);
-                NotificationManager notificationManager = RingtoneManager.context.getSystemService(NotificationManager.class);
-                notificationManager.createNotificationChannel(channel);
-            }
-        }
-    }
-
-    public static String getSoundName(String sound) {
-        if (TextUtils.isEmpty(sound)) {
-            return "CallInvitation";
-        }
-        String[] splits = sound.split("\\.");
-        String suffixStr = "";
-        if (splits != null && splits.length > 1) {
-            suffixStr = sound.substring(0, sound.length() - (splits[splits.length - 1].length() + 1));
-        } else {
-            suffixStr = sound;
-        }
-        return suffixStr;
-    }
-
 }

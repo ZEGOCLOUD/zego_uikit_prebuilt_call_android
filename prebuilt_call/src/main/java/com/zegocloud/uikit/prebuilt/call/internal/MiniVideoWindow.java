@@ -66,8 +66,6 @@ public class MiniVideoWindow {
         return isViewAddedToWindow;
     }
 
-    private static final String TAG = "SystemAlertWindow";
-
     int lastX;
     int lastY;
     boolean isClick;

@@ -19,7 +19,7 @@ public class ZegoUIKitPrebuiltCallInvitationConfig {
      * notificationConfig.channelID must be the same as the FCM Channel ID in [ZEGOCLOUD Admin Console|_blank]https://console.zegocloud.com),
      * and the notificationConfig.channelName can be an arbitrary value.The notificationConfig.sound must be the same as the FCM sound in Admin Console either.
      */
-    public boolean notifyWhenAppRunningInBackgroundOrQuit = true;
+    public boolean notifyWhenAppRunningInBackgroundOrQuit = false;
     public ZegoNotificationConfig notificationConfig;
     public ZegoInnerText innerText = new ZegoInnerText();
 }

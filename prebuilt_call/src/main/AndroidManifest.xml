@@ -1,18 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <uses-permission android:name="android.permission.REORDER_TASKS" />
   <uses-permission android:name="android.permission.VIBRATE" />
 
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
   <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
+  <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
   <application>
     <activity
       android:name="com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity"
       android:configChanges="locale|keyboardHidden|fontScale|orientation|screenSize|screenLayout|layoutDirection|density|uiMode"
       android:excludeFromRecents="true"
-      android:exported="false"
+      android:exported="true"
+      android:showOnLockScreen="true"
       android:taskAffinity=":zego" />
+
+    <service android:name=".invite.OffLineCallNotificationService"
+      android:foregroundServiceType="phoneCall">
+
+    </service>
+    <receiver
+      android:name=".MyZPNsReceiver"
+      android:enabled="true"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="im.zego.zim.zpns.intent.action.MESSAGE" />
+      </intent-filter>
+    </receiver>
   </application>
 
 </manifest>

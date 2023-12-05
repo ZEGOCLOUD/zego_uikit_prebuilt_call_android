@@ -113,7 +113,7 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
                 if (errorInvitees.isEmpty() || errorInvitees.size() != invitees.size()) {
                     ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
                     if (uiKitUser != null) {
-                        CallInviteActivity.startOutgoingPage(getContext(), uiKitUser, invitees, callID, type, timeout);
+                        CallInviteActivity.startOutgoingPage(getContext());
                     } else {
                         Toast.makeText(getContext(), "please call ZegoUIKit.login(String,String) first",
                                 Toast.LENGTH_SHORT).show();
@@ -161,6 +161,7 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
 
     public void setResourceID(String resourceID) {
         this.resourceID = resourceID;
+        CallInvitationServiceImpl.getInstance().setCallResourceID(resourceID);
     }
 
     private ZegoSignalingPluginNotificationConfig getSendInvitationConfig() {

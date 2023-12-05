@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import com.zegocloud.uikit.plugin.adapter.utils.GenericUtils;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallLayoutWaitingBinding;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,11 +75,14 @@ public class CallWaitingFragment extends Fragment {
         } else {
             binding.getRoot().setBackgroundResource(R.drawable.call_img_bg);
         }
-        int type = getArguments().getInt("type");
+
         String page = getArguments().getString("page");
-        ZegoUIKitUser inviter = getArguments().getParcelable("inviter");
+
+        ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
+        int type = invitationData.type;
         String userID = ZegoUIKit.getLocalUser().userID;
-        ArrayList<ZegoUIKitUser> invitees = getArguments().getParcelableArrayList("invitees");
+        ZegoUIKitUser inviter = invitationData.inviter;
+        List<ZegoUIKitUser> invitees = invitationData.invitees;
 
         ZegoUIKitUser showUser = null;
         if ("incoming".equals(page)) {
@@ -88,8 +93,9 @@ public class CallWaitingFragment extends Fragment {
             binding.callWaitingAcceptText.setVisibility(View.VISIBLE);
             binding.callWaitingAccept.setVisibility(View.VISIBLE);
 
-            if (CallInvitationServiceImpl.getInstance().getConfig() != null) {
-                boolean showDeclineButton = CallInvitationServiceImpl.getInstance().getConfig().showDeclineButton;
+            if (CallInvitationServiceImpl.getInstance().getCallInvitationConfig() != null) {
+                boolean showDeclineButton = CallInvitationServiceImpl.getInstance()
+                    .getCallInvitationConfig().showDeclineButton;
                 binding.callWaitingRefuse.setVisibility(showDeclineButton ? View.VISIBLE : View.GONE);
                 binding.callWaitingRefuseText.setVisibility(showDeclineButton ? View.VISIBLE : View.GONE);
             }
@@ -149,10 +155,14 @@ public class CallWaitingFragment extends Fragment {
         binding.callWaitingRefuse.setOnClickListener(v -> {
             CallInvitationServiceImpl.getInstance().onIncomingCallDeclineButtonPressed();
             requireActivity().finish();
+            CallInvitationServiceImpl.getInstance().dismissCallNotification();
+            CallInvitationServiceImpl.getInstance().clearPushMessage();
         });
         binding.callWaitingAccept.setOnClickListener(v -> {
             CallInvitationServiceImpl.getInstance().onIncomingCallAcceptButtonPressed();
             CallInvitationServiceImpl.getInstance().setCallState(CallInvitationServiceImpl.CONNECTED);
+            CallInvitationServiceImpl.getInstance().dismissCallNotification();
+            CallInvitationServiceImpl.getInstance().clearPushMessage();
         });
 
         binding.getRoot().post(() -> {
@@ -258,11 +268,11 @@ public class CallWaitingFragment extends Fragment {
         return result;
     }
 
-    private void setInnerText(String page, int type, ZegoUIKitUser showUser, ArrayList<ZegoUIKitUser> invitees) {
-        if (CallInvitationServiceImpl.getInstance().getConfig() == null) {
+    private void setInnerText(String page, int type, ZegoUIKitUser showUser, List<ZegoUIKitUser> invitees) {
+        if (CallInvitationServiceImpl.getInstance().getCallInvitationConfig() == null) {
             return;
         }
-        ZegoInnerText innerText = CallInvitationServiceImpl.getInstance().getConfig().innerText;
+        ZegoInnerText innerText = CallInvitationServiceImpl.getInstance().getCallInvitationConfig().innerText;
 
         if (innerText == null) {
             return;

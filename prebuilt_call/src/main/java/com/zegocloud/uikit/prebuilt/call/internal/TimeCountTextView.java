@@ -12,7 +12,6 @@ import java.util.Locale;
 
 public class TimeCountTextView extends AppCompatTextView {
 
-    private static final String TAG = "TimeCountTextView";
     private long elapsedTime;
     private long startTimeLocal;
     private Handler handler = new Handler(Looper.getMainLooper());
