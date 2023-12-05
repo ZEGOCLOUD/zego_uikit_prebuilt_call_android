@@ -47,6 +47,11 @@ public class CallNotificationManager {
         isNotificationShowed = true;
     }
 
+    public void showCallBackgroundNotification(Context context) {
+        Notification callNotification = CallInvitationServiceImpl.getInstance().getCallNotification(context);
+        NotificationManagerCompat.from(context).notify(callNotificationID, callNotification);
+        isNotificationShowed = true;
+    }
 
     public String getBackgroundNotificationMessage(boolean isVideoCall, boolean isGroup) {
         String notificationMessage = "";
@@ -137,6 +142,8 @@ public class CallNotificationManager {
         Intent intent = new Intent(context, OffLineCallNotificationService.class);
         isNotificationShowed = false;
         context.stopService(intent);
+
+        NotificationManagerCompat.from(context).cancel(callNotificationID);
     }
 
     public boolean isNotificationShowed() {

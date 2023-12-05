@@ -152,7 +152,7 @@ public class CallInvitationServiceImpl {
             if (pushMessage == null) {
                 if (topActivity != null) {
                     if (isBackground(topActivity)) {
-                        callNotificationManager.showCallNotification(topActivity);
+                        callNotificationManager.showCallBackgroundNotification(topActivity);
                     } else {
                         RingtoneManager.playRingTone(true);
                         invitationDialog = new CallInvitationDialog(topActivity, callInvitationData);
@@ -211,7 +211,7 @@ public class CallInvitationServiceImpl {
                     clearPushMessage();
                     if (topActivity != null) {
                         if (isBackground(topActivity)) {
-                            callNotificationManager.showCallNotification(topActivity);
+                            callNotificationManager.showCallBackgroundNotification(topActivity);
                         } else {
                             RingtoneManager.playRingTone(true);
                             invitationDialog = new CallInvitationDialog(topActivity, callInvitationData);
