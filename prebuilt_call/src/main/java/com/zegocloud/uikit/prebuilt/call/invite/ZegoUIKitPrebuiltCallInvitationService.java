@@ -17,10 +17,6 @@ public class ZegoUIKitPrebuiltCallInvitationService {
         CallInvitationServiceImpl.getInstance().setCallInvitationConfig(config);
     }
 
-    public static void init(Application application, long appID, String appSign, String userID, String userName) {
-        init(application, appID, appSign, userID, userName, null);
-    }
-
     public static void unInit() {
         CallInvitationServiceImpl.getInstance().unInit();
     }
