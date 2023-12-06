@@ -8,12 +8,14 @@ import android.content.pm.ResolveInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.Log;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallNotificationManager;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZIMPushMessage;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import timber.log.Timber;
 
 /**
  * foreground service, only used to keep process foreground to receive messages
@@ -30,6 +32,9 @@ public class OffLineCallNotificationService extends Service {
         if (intent == null) {
             return super.onStartCommand(intent, flags, startId);
         }
+
+        Timber.d("onStartCommand() called with: intent.getAction() = [" + intent.getAction() + "]");
+
         ZIMPushMessage zimPushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
         if (CallNotificationManager.ACTION_DECLINE_CALL.equals(intent.getAction())) {
             if (zimPushMessage == null) {
@@ -46,7 +51,8 @@ public class OffLineCallNotificationService extends Service {
                         .refuseInvitation(callInvitationData.inviter.userID, jsonObject.toString(), null);
                 }
             } else {
-                CallInvitationServiceImpl.getInstance().setNotificationClickAction(intent.getAction(), zimPushMessage.invitationID);
+                CallInvitationServiceImpl.getInstance()
+                    .setNotificationClickAction(intent.getAction(), zimPushMessage.invitationID);
                 CallInvitationServiceImpl.getInstance().autoInitAndLoginUser(getApplication());
                 CallInvitationServiceImpl.getInstance().parsePayload();
             }

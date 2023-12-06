@@ -115,6 +115,8 @@ public class CallInvitationServiceImpl {
     private ZegoUIKitSignalingPluginInvitationListener invitationListener = new ZegoUIKitSignalingPluginInvitationListener() {
         @Override
         public void onInvitationReceived(ZegoUIKitUser inviter, int type, String data) {
+            Timber.d("onInvitationReceived() called with: inviter = [" + inviter + "], type = [" + type + "], data = ["
+                + data + "] ");
             JSONObject jsonObject = new JSONObject();
             String invitationID = null;
             try {
@@ -130,6 +132,7 @@ public class CallInvitationServiceImpl {
                 //                    return;
                 //                }
                 if (callState > 0) {
+                    Timber.d("onInvitationReceived auto refuseInvitation because callState = " + callState);
                     ZegoUIKit.getSignalingPlugin().refuseInvitation(inviter.userID, jsonObject.toString(), null);
                     return;
                 }
@@ -149,6 +152,8 @@ public class CallInvitationServiceImpl {
             setCallState(INCOMING);
 
             Activity topActivity = appActivityManager.getTopActivity();
+            Timber.d("onInvitationReceived topActivity = [" + topActivity + "], pushMessage = [" + pushMessage
+                + "], notificationAction = [" + notificationAction + "]");
             if (pushMessage == null) {
                 if (topActivity != null) {
                     if (isBackground(topActivity)) {
@@ -591,6 +596,7 @@ public class CallInvitationServiceImpl {
         if (callState <= 0) {
             clearInvitationData();
         }
+        Timber.d("setCallState() called with: before = [" + before + "],after:" + callState);
         if (before != callState && callStateListeners != null) {
             for (CallStateListener callStateListener : callStateListeners) {
                 callStateListener.onStateChanged(before, callState);
@@ -702,9 +708,11 @@ public class CallInvitationServiceImpl {
     }
 
     public void joinRoom(String roomID, ZegoUIKitCallback callback) {
+        Timber.d("joinRoom() called with: roomID = [" + roomID + "], callback = [" + callback + "]");
         ZegoUIKit.joinRoom(roomID, new ZegoUIKitCallback() {
             @Override
             public void onResult(int errorCode) {
+                Timber.d("joinRoom onResult:" + errorCode);
                 inRoom = errorCode == 0;
                 if (inRoom) {
                     startTimeCount();
@@ -718,6 +726,7 @@ public class CallInvitationServiceImpl {
     }
 
     public void leaveRoom() {
+        Timber.d("leaveRoom() called alreadyInit: roomID = [" + alreadyInit + "], callState = [" + callState + "]");
         if (alreadyInit) {
             if (callState == OUTGOING) {
                 if (callInvitationData != null) {
@@ -732,9 +741,10 @@ public class CallInvitationServiceImpl {
                     }
                 }
             }
-            if (CallInvitationServiceImpl.getInstance().getCallState() > 0) {
-                CallInvitationServiceImpl.getInstance().setCallState(CallInvitationServiceImpl.NONE);
-            }
+        }
+
+        if (CallInvitationServiceImpl.getInstance().getCallState() > 0) {
+            CallInvitationServiceImpl.getInstance().setCallState(CallInvitationServiceImpl.NONE);
         }
         clearInvitationData();
         inRoom = false;
@@ -984,6 +994,7 @@ public class CallInvitationServiceImpl {
 
         @Override
         public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
+
         }
 
         @Override

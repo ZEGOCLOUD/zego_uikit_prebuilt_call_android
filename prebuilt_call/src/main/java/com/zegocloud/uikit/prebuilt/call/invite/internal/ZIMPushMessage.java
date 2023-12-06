@@ -13,4 +13,14 @@ public class ZIMPushMessage {
         this.body = body;
         this.payLoad = payLoad;
     }
+
+    @Override
+    public String toString() {
+        return "ZIMPushMessage{" +
+            "invitationID='" + invitationID + '\'' +
+            ", title='" + title + '\'' +
+            ", body='" + body + '\'' +
+            ", payLoad='" + payLoad + '\'' +
+            '}';
+    }
 }

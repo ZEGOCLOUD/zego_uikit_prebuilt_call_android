@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
@@ -21,6 +22,7 @@ import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import java.util.Map;
+import timber.log.Timber;
 
 /**
  * show waiting page and call page for call-invite
@@ -108,6 +110,7 @@ public class CallInviteActivity extends AppCompatActivity {
         }
 
         String intentAction = getIntent().getAction();
+        Timber.d("onCreate() called with: intentAction = [" + intentAction + "]");
         if (CallNotificationManager.ACTION_ACCEPT_CALL.equals(intentAction)) {
             if (pushMessage != null) {
                 ZegoUIKit.getSignalingPlugin().callAccept(pushMessage.invitationID, "", new PluginCallbackListener() {

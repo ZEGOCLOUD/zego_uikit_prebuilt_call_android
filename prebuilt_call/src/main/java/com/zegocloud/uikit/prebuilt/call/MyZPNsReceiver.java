@@ -21,7 +21,9 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
 
         ZIMPushMessage zimPushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
         Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
-        Timber.d("onThroughMessageReceived() called with: topActivity = [" + topActivity + "], message = [" + message + "]");
+
+        Timber.d("onThroughMessageReceived() called with: topActivity = [" + topActivity + "], pushMessage = [" + pushMessage + "]");
+
         // if app have background activity,we assume that app has already login in.In this
         // case,offline message is ignored.
         // else we assume that app is not started,offline message is effective

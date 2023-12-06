@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationCompat.Action;
 import androidx.core.app.NotificationManagerCompat;
@@ -27,6 +28,7 @@ import com.zegocloud.uikit.prebuilt.call.invite.OffLineCallNotificationService;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import java.util.List;
+import timber.log.Timber;
 
 public class CallNotificationManager {
 
@@ -43,11 +45,13 @@ public class CallNotificationManager {
     private boolean isNotificationShowed;
 
     public void showCallNotification(Context context) {
+        Timber.d("showCallNotification() called with: context = [" + context + "]");
         ContextCompat.startForegroundService(context, new Intent(context, OffLineCallNotificationService.class));
         isNotificationShowed = true;
     }
 
     public void showCallBackgroundNotification(Context context) {
+        Timber.d("showCallBackgroundNotification() called with: context = [" + context + "]");
         Notification callNotification = CallInvitationServiceImpl.getInstance().getCallNotification(context);
         NotificationManagerCompat.from(context).notify(callNotificationID, callNotification);
         isNotificationShowed = true;
