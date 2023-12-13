@@ -196,7 +196,9 @@ public class CallNotificationManager {
         PendingIntent acceptIntent = getAcceptIntent(context);
         PendingIntent declineIntent = getDeclineIntent(context);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && canShowFullOnLockScreen) {
             android.app.Person caller = new android.app.Person.Builder().setName(title).setImportant(true).build();
             Notification.CallStyle callStyle = Notification.CallStyle.forIncomingCall(caller, declineIntent,
                 acceptIntent);
@@ -206,8 +208,8 @@ public class CallNotificationManager {
                 .setContentText(body).setContentIntent(clickIntent).setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setCategory(NotificationCompat.CATEGORY_CALL).setOngoing(true).setStyle(callStyle).setAutoCancel(true);
             Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
-            boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
-            if (zimPushMessage == null && topActivity != null && canShowFullOnLockScreen) {
+
+            if (zimPushMessage == null && topActivity != null) {
                 PendingIntent lockScreenIntent = getLockScreenIntent(context);
                 builder.setFullScreenIntent(lockScreenIntent, true);
             }
@@ -221,7 +223,6 @@ public class CallNotificationManager {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC).setCategory(NotificationCompat.CATEGORY_CALL)
                 .setOngoing(true).setAutoCancel(true);
             Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
-            boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
             if (zimPushMessage == null && topActivity != null && canShowFullOnLockScreen) {
                 PendingIntent lockScreenIntent = getLockScreenIntent(context);
                 builder.setFullScreenIntent(lockScreenIntent, true);
