@@ -427,6 +427,8 @@ public class CallInvitationServiceImpl {
             String preUserID = mmkv.getString("userID", "");
             String preUserName = mmkv.getString("userName", "");
             initAndLoginUser(application, preAppID, preAppSign, preUserID, preUserName);
+
+            ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
         }
     }
 
@@ -525,6 +527,7 @@ public class CallInvitationServiceImpl {
     }
 
     public void unInitToReceiveOffline() {
+        Timber.d("unInitToReceiveOffline() called");
         if (application != null) {
             this.application.unregisterActivityLifecycleCallbacks(appActivityManager);
             this.application = null;
@@ -561,6 +564,7 @@ public class CallInvitationServiceImpl {
 
 
     public void unInit() {
+        Timber.d("unInit() called");
         leaveRoom();
         if (invitationConfig != null) {
             ZegoUIKit.logout();
