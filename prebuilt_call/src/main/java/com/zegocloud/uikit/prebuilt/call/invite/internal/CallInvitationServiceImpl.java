@@ -232,10 +232,11 @@ public class CallInvitationServiceImpl {
         public void onInvitationTimeout(ZegoUIKitUser inviter, String data) {
             String invitationID = getStringFromJson(getJsonObjectFromString(data), "invitationID");
             if (callInvitationData != null && callInvitationData.invitationID.equals(invitationID)) {
+                String callID = callInvitationData.callID;
                 hideDialog();
                 dismissCallNotification();
                 setCallState(NONE_RECEIVE_MISSED);
-                notifyIncomingCallTimeout(inviter);
+                notifyIncomingCallTimeout(inviter,callID);
             }
         }
 
@@ -243,6 +244,7 @@ public class CallInvitationServiceImpl {
         public void onInvitationResponseTimeout(List<ZegoUIKitUser> invitees, String data) {
             String invitationID = getStringFromJson(getJsonObjectFromString(data), "invitationID");
             if (callInvitationData != null && callInvitationData.invitationID.equals(invitationID)) {
+                String callID = callInvitationData.callID;
                 for (ZegoUIKitUser invitee : invitees) {
                     changeUserState(invitee, CallInvitationState.TIMEOUT);
                 }
@@ -260,7 +262,7 @@ public class CallInvitationServiceImpl {
                 } else {
                     setCallState(NONE_CALL_NO_REPLY);
                 }
-                notifyOutgoingCallTimeout(invitees);
+                notifyOutgoingCallTimeout(invitees,callID);
                 clearPushMessage();
             }
         }
@@ -269,10 +271,11 @@ public class CallInvitationServiceImpl {
         public void onInvitationAccepted(ZegoUIKitUser invitee, String data) {
             String invitationID = getStringFromJson(getJsonObjectFromString(data), "invitationID");
             if (callInvitationData != null && callInvitationData.invitationID.equals(invitationID)) {
+                String callID = callInvitationData.callID;
                 changeUserState(invitee, CallInvitationState.ACCEPT);
                 setCallState(CONNECTED);
                 RingtoneManager.stopRingTone();
-                notifyOutgoingCallAccepted(invitee);
+                notifyOutgoingCallAccepted(invitee,callID);
             }
         }
 
@@ -281,6 +284,7 @@ public class CallInvitationServiceImpl {
             String invitationID = getStringFromJson(getJsonObjectFromString(data), "invitationID");
             if (callInvitationData != null && callInvitationData.invitationID.equals(invitationID)) {
                 changeUserState(invitee, CallInvitationState.REFUSE);
+                String callID = callInvitationData.callID;
                 if (callInvitationData.invitees.size() > 1) {
                     boolean allChecked = true;
                     for (ZegoUIKitUser uiKitUser : callInvitationData.invitees) {
@@ -295,7 +299,7 @@ public class CallInvitationServiceImpl {
                 } else {
                     setCallState(NONE_REJECTED);
                 }
-                notifyOutgoingCallRejected0rDeclined(invitee, data);
+                notifyOutgoingCallRejected0rDeclined(invitee, data, callID);
             }
         }
 
@@ -303,6 +307,7 @@ public class CallInvitationServiceImpl {
         public void onInvitationCanceled(ZegoUIKitUser inviter, String data) {
             String invitationID = getStringFromJson(getJsonObjectFromString(data), "invitationID");
             if (callInvitationData != null && callInvitationData.invitationID.equals(invitationID)) {
+                String callID = callInvitationData.callID;
                 hideDialog();
                 dismissCallNotification();
                 clearPushMessage();
@@ -310,7 +315,7 @@ public class CallInvitationServiceImpl {
                     return;
                 }
                 setCallState(NONE_CANCELED);
-                notifyIncomingCallCanceled(inviter);
+                notifyIncomingCallCanceled(inviter,callID);
             }
         }
     };
@@ -944,37 +949,37 @@ public class CallInvitationServiceImpl {
         }
     }
 
-    public void notifyIncomingCallCanceled(ZegoUIKitUser inviter) {
+    public void notifyIncomingCallCanceled(ZegoUIKitUser inviter, String callID) {
         if (invitationCallListener != null) {
             ZegoCallUser inviteCaller = new ZegoCallUser(inviter.userID, inviter.userName);
-            invitationCallListener.onIncomingCallCanceled(callInvitationData.callID, inviteCaller);
+            invitationCallListener.onIncomingCallCanceled(callID, inviteCaller);
         }
     }
 
-    public void notifyIncomingCallTimeout(ZegoUIKitUser inviter) {
+    public void notifyIncomingCallTimeout(ZegoUIKitUser inviter,String callID) {
         if (invitationCallListener != null) {
             ZegoCallUser inviteCaller = new ZegoCallUser(inviter.userID, inviter.userName);
-            invitationCallListener.onIncomingCallTimeout(callInvitationData.callID, inviteCaller);
+            invitationCallListener.onIncomingCallTimeout(callID, inviteCaller);
         }
     }
 
-    public void notifyOutgoingCallAccepted(ZegoUIKitUser uiKitUser) {
+    public void notifyOutgoingCallAccepted(ZegoUIKitUser uiKitUser,String callID) {
         if (invitationCallListener != null) {
             ZegoCallUser inviteCaller = new ZegoCallUser(uiKitUser.userID, uiKitUser.userName);
-            invitationCallListener.onOutgoingCallAccepted(callInvitationData.callID, inviteCaller);
+            invitationCallListener.onOutgoingCallAccepted(callID, inviteCaller);
         }
     }
 
-    public void notifyOutgoingCallRejected0rDeclined(ZegoUIKitUser uiKitUser, String data) {
+    public void notifyOutgoingCallRejected0rDeclined(ZegoUIKitUser uiKitUser, String data, String callID) {
         if (invitationCallListener != null) {
             try {
                 JSONObject jsonObject = new JSONObject(data);
                 String reason = getStringFromJson(jsonObject, "reason");
                 ZegoCallUser inviteCaller = new ZegoCallUser(uiKitUser.userID, uiKitUser.userName);
                 if ("busy".equals(reason)) {
-                    invitationCallListener.onOutgoingCallRejectedCauseBusy(callInvitationData.callID, inviteCaller);
+                    invitationCallListener.onOutgoingCallRejectedCauseBusy(callID, inviteCaller);
                 } else {
-                    invitationCallListener.onOutgoingCallDeclined(callInvitationData.callID, inviteCaller);
+                    invitationCallListener.onOutgoingCallDeclined(callID, inviteCaller);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -982,13 +987,13 @@ public class CallInvitationServiceImpl {
         }
     }
 
-    public void notifyOutgoingCallTimeout(List<ZegoUIKitUser> invitees) {
+    public void notifyOutgoingCallTimeout(List<ZegoUIKitUser> invitees,String callID) {
         if (invitationCallListener != null) {
             List<ZegoCallUser> callees = new ArrayList<>();
             for (ZegoUIKitUser user : invitees) {
                 callees.add(new ZegoCallUser(user.userID, user.userName));
             }
-            invitationCallListener.onOutgoingCallTimeout(callInvitationData.callID, callees);
+            invitationCallListener.onOutgoingCallTimeout(callID, callees);
         }
     }
 
