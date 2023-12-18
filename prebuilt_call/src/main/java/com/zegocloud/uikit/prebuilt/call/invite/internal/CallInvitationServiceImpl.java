@@ -236,7 +236,7 @@ public class CallInvitationServiceImpl {
                 hideDialog();
                 dismissCallNotification();
                 setCallState(NONE_RECEIVE_MISSED);
-                notifyIncomingCallTimeout(inviter,callID);
+                notifyIncomingCallTimeout(inviter, callID);
             }
         }
 
@@ -262,7 +262,7 @@ public class CallInvitationServiceImpl {
                 } else {
                     setCallState(NONE_CALL_NO_REPLY);
                 }
-                notifyOutgoingCallTimeout(invitees,callID);
+                notifyOutgoingCallTimeout(invitees, callID);
                 clearPushMessage();
             }
         }
@@ -275,7 +275,7 @@ public class CallInvitationServiceImpl {
                 changeUserState(invitee, CallInvitationState.ACCEPT);
                 setCallState(CONNECTED);
                 RingtoneManager.stopRingTone();
-                notifyOutgoingCallAccepted(invitee,callID);
+                notifyOutgoingCallAccepted(invitee, callID);
             }
         }
 
@@ -315,7 +315,7 @@ public class CallInvitationServiceImpl {
                     return;
                 }
                 setCallState(NONE_CANCELED);
-                notifyIncomingCallCanceled(inviter,callID);
+                notifyIncomingCallCanceled(inviter, callID);
             }
         }
     };
@@ -580,10 +580,10 @@ public class CallInvitationServiceImpl {
     }
 
     public boolean canShowFullOnLockScreen() {
-        if (Build.MANUFACTURER.equalsIgnoreCase("xiaomi")) {
-            // xiaomi
-            return false;
-        }
+//        if (Build.MANUFACTURER.equalsIgnoreCase("xiaomi")) {
+//            // xiaomi
+//            return false;
+//        }
         return true;
     }
 
@@ -956,14 +956,14 @@ public class CallInvitationServiceImpl {
         }
     }
 
-    public void notifyIncomingCallTimeout(ZegoUIKitUser inviter,String callID) {
+    public void notifyIncomingCallTimeout(ZegoUIKitUser inviter, String callID) {
         if (invitationCallListener != null) {
             ZegoCallUser inviteCaller = new ZegoCallUser(inviter.userID, inviter.userName);
             invitationCallListener.onIncomingCallTimeout(callID, inviteCaller);
         }
     }
 
-    public void notifyOutgoingCallAccepted(ZegoUIKitUser uiKitUser,String callID) {
+    public void notifyOutgoingCallAccepted(ZegoUIKitUser uiKitUser, String callID) {
         if (invitationCallListener != null) {
             ZegoCallUser inviteCaller = new ZegoCallUser(uiKitUser.userID, uiKitUser.userName);
             invitationCallListener.onOutgoingCallAccepted(callID, inviteCaller);
@@ -987,7 +987,7 @@ public class CallInvitationServiceImpl {
         }
     }
 
-    public void notifyOutgoingCallTimeout(List<ZegoUIKitUser> invitees,String callID) {
+    public void notifyOutgoingCallTimeout(List<ZegoUIKitUser> invitees, String callID) {
         if (invitationCallListener != null) {
             List<ZegoCallUser> callees = new ArrayList<>();
             for (ZegoUIKitUser user : invitees) {
@@ -1023,15 +1023,26 @@ public class CallInvitationServiceImpl {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.setAction(CallNotificationManager.ACTION_CLICK);
                     activity.startActivity(intent);
+
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(!(topActivity instanceof CallInviteActivity) && topActivity != null){
+                                RingtoneManager.playRingTone(true);
+                                invitationDialog = new CallInvitationDialog(topActivity, callInvitationData);
+                                invitationDialog.show();
+                            }
+                        }
+                    },800);
                 }
             }
-            boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
             if (!(topActivity instanceof CallInviteActivity)) {
                 //if click app directly
                 if (notificationAction == null) {
                     setZIMPushMessage(null);
                 }
             }
+            boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
             if (canShowFullOnLockScreen) {
                 if (!(topActivity instanceof CallInviteActivity)) {
                     dismissCallNotification();
@@ -1043,6 +1054,7 @@ public class CallInvitationServiceImpl {
 
         @Override
         public void onActivityPaused(@NonNull Activity activity) {
+            Timber.d("onActivityPaused() called with: activity = [" + activity + "]");
         }
 
         @Override
