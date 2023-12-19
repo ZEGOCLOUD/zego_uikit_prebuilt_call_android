@@ -115,8 +115,11 @@ public class CallInvitationServiceImpl {
     private ZegoUIKitSignalingPluginInvitationListener invitationListener = new ZegoUIKitSignalingPluginInvitationListener() {
         @Override
         public void onInvitationReceived(ZegoUIKitUser inviter, int type, String data) {
+            Activity topActivity = appActivityManager.getTopActivity();
             Timber.d("onInvitationReceived() called with: inviter = [" + inviter + "], type = [" + type + "], data = ["
-                + data + "] ");
+                + data + "], topActivity = [" + topActivity + "], pushMessage = [" + pushMessage
+                + "], notificationAction = [" + notificationAction + "],callState: " + callState);
+
             JSONObject jsonObject = new JSONObject();
             String invitationID = null;
             try {
@@ -132,7 +135,6 @@ public class CallInvitationServiceImpl {
                 //                    return;
                 //                }
                 if (callState > 0) {
-                    Timber.d("onInvitationReceived auto refuseInvitation because callState = " + callState);
                     ZegoUIKit.getSignalingPlugin().refuseInvitation(inviter.userID, jsonObject.toString(), null);
                     return;
                 }
@@ -151,9 +153,6 @@ public class CallInvitationServiceImpl {
             }
             setCallState(INCOMING);
 
-            Activity topActivity = appActivityManager.getTopActivity();
-            Timber.d("onInvitationReceived topActivity = [" + topActivity + "], pushMessage = [" + pushMessage
-                + "], notificationAction = [" + notificationAction + "]");
             if (pushMessage == null) {
                 if (topActivity != null) {
                     if (isBackground(topActivity)) {
@@ -580,10 +579,10 @@ public class CallInvitationServiceImpl {
     }
 
     public boolean canShowFullOnLockScreen() {
-//        if (Build.MANUFACTURER.equalsIgnoreCase("xiaomi")) {
-//            // xiaomi
-//            return false;
-//        }
+        //        if (Build.MANUFACTURER.equalsIgnoreCase("xiaomi")) {
+        //            // xiaomi
+        //            return false;
+        //        }
         return true;
     }
 
@@ -1012,6 +1011,7 @@ public class CallInvitationServiceImpl {
 
         @Override
         public void onActivityResumed(@NonNull Activity activity) {
+            Timber.d("onActivityResumed() called with: activity = [" + activity + "]");
             topActivity = activity;
             boolean notificationShowed = isNotificationShowed();
             if (notificationShowed && pushMessage == null) {
@@ -1027,13 +1027,13 @@ public class CallInvitationServiceImpl {
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            if(!(topActivity instanceof CallInviteActivity) && topActivity != null){
+                            if (!(topActivity instanceof CallInviteActivity) && topActivity != null) {
                                 RingtoneManager.playRingTone(true);
                                 invitationDialog = new CallInvitationDialog(topActivity, callInvitationData);
                                 invitationDialog.show();
                             }
                         }
-                    },800);
+                    }, 800);
                 }
             }
             if (!(topActivity instanceof CallInviteActivity)) {
