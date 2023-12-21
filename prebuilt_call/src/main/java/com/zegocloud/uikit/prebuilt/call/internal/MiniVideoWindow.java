@@ -93,13 +93,14 @@ public class MiniVideoWindow {
                 updatePosition(lp.x, lp.y - distanceY);
                 lastX = currentX;
                 lastY = currentY;
-                if (Math.abs(currentX - downX) > scaledTouchSlop || Math.abs(currentY - distanceY) > scaledTouchSlop) {
+                if (Math.abs(currentX - downX) > scaledTouchSlop || Math.abs(currentY - downY) > scaledTouchSlop) {
                     isClick = false;
                 }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (System.currentTimeMillis() - downTime > longPressTimeout) {
+                long time = System.currentTimeMillis() - downTime;
+                if (time > longPressTimeout) {
                     isClick = false;
                 }
                 if (isClick) {
