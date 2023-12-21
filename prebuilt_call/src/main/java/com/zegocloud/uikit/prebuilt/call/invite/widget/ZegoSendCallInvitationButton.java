@@ -167,10 +167,10 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
     private ZegoSignalingPluginNotificationConfig getSendInvitationConfig() {
 
         String offlineResourceID;
-        String offlineMessage = CallInvitationServiceImpl.getInstance().getNotificationMessage(isVideoCall, invitees.size() > 1);
+        String offlineMessage = CallInvitationServiceImpl.getInstance().getCallNotificationMessage(isVideoCall, invitees.size() > 1);
 
         ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
-        String offlineTitle = CallInvitationServiceImpl.getInstance().getNotificationTitle(isVideoCall, invitees.size() > 1, uiKitUser.userName);
+        String offlineTitle = CallInvitationServiceImpl.getInstance().getCallNotificationTitle(isVideoCall, invitees.size() > 1, uiKitUser.userName);
 
         if (TextUtils.isEmpty(resourceID)) {
             offlineResourceID = "zegouikit_call";

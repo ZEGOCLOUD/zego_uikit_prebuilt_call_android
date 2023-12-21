@@ -13,6 +13,7 @@
     <activity
       android:name="com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity"
       android:configChanges="locale|keyboardHidden|fontScale|orientation|screenSize|screenLayout|layoutDirection|density|uiMode"
+      android:excludeFromRecents="true"
       android:exported="true"
       android:showOnLockScreen="true"
       android:taskAffinity=":zego" />

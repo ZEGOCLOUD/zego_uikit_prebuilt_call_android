@@ -2,7 +2,10 @@ package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManager.AppTask;
+import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Application;
 import android.app.Application.ActivityLifecycleCallbacks;
 import android.app.Notification;
@@ -25,6 +28,7 @@ import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.config.DurationUpdateListener;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallConfigProvider;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
@@ -36,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.json.JSONArray;
@@ -532,11 +537,6 @@ public class CallInvitationServiceImpl {
 
     public void unInitToReceiveOffline() {
         Timber.d("unInitToReceiveOffline() called");
-        if (application != null) {
-            this.application.unregisterActivityLifecycleCallbacks(appActivityManager);
-            this.application = null;
-            this.appActivityManager = null;
-        }
         ZegoUIKit.getSignalingPlugin().removeInvitationListener(invitationListener);
         ZegoUIKit.getSignalingPlugin().destroy();
 
@@ -554,7 +554,6 @@ public class CallInvitationServiceImpl {
         alreadyInit = false;
         alreadyLogin = false;
         inRoom = false;
-        application = null;
         appID = 0;
         appSign = null;
         userID = null;
@@ -643,15 +642,15 @@ public class CallInvitationServiceImpl {
         callNotificationManager.dismissCallNotification(context);
     }
 
-    public boolean isNotificationShowed() {
-        return callNotificationManager.isNotificationShowed();
+    public boolean isCallNotificationShowed() {
+        return callNotificationManager.isCallNotificationShowed();
     }
 
-    public String getNotificationMessage(boolean isVideoCall, boolean isGroup) {
+    public String getCallNotificationMessage(boolean isVideoCall, boolean isGroup) {
         return callNotificationManager.getBackgroundNotificationMessage(isVideoCall, isGroup);
     }
 
-    public String getNotificationTitle(boolean isVideoCall, boolean isGroup, String userName) {
+    public String getCallNotificationTitle(boolean isVideoCall, boolean isGroup, String userName) {
         return callNotificationManager.getBackgroundNotificationTitle(isVideoCall, isGroup, userName);
     }
 
@@ -1013,7 +1012,7 @@ public class CallInvitationServiceImpl {
         public void onActivityResumed(@NonNull Activity activity) {
             Timber.d("onActivityResumed() called with: activity = [" + activity + "]");
             topActivity = activity;
-            boolean notificationShowed = isNotificationShowed();
+            boolean notificationShowed = isCallNotificationShowed();
             if (notificationShowed && pushMessage == null) {
                 if (!(topActivity instanceof CallInviteActivity)) {
                     Intent intent = new Intent(activity, CallInviteActivity.class);
@@ -1049,6 +1048,56 @@ public class CallInvitationServiceImpl {
                 }
             } else {
                 dismissCallNotification();
+            }
+
+            ActivityManager am = (ActivityManager) topActivity.getSystemService(Context.ACTIVITY_SERVICE);
+            if (am != null) {
+                if (!(topActivity instanceof CallInviteActivity)) {
+                    if (inRoom) {
+                        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance()
+                            .getCallConfig();
+                        boolean hasMiniButton =
+                            callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
+                                || callConfig.topMenuBarConfig.buttons.contains(
+                                ZegoMenuBarButtonName.MINIMIZING_BUTTON);
+                        if (!hasMiniButton) {
+                            List<ActivityManager.AppTask> tasks = am.getAppTasks();
+                            if (tasks != null && tasks.size() > 0) {
+                                for (AppTask task : tasks) {
+                                    RecentTaskInfo taskInfo = task.getTaskInfo();
+                                    if (taskInfo.baseIntent.getComponent().toShortString()
+                                        .contains(CallInviteActivity.class.getName())) {
+                                        task.moveToFront();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    } else if (callInvitationData != null) {
+                        boolean isActivityStarted = false;
+                        List<RunningTaskInfo> runningTasks = am.getRunningTasks(Integer.MAX_VALUE);
+                        for (RunningTaskInfo runningTask : runningTasks) {
+                            if (Objects.equals(runningTask.topActivity.getClassName(),
+                                CallInviteActivity.class.getName())) {
+                                isActivityStarted = true;
+                                break;
+                            }
+                        }
+                        if (isActivityStarted) {
+                            List<ActivityManager.AppTask> tasks = am.getAppTasks();
+                            if (tasks != null && tasks.size() > 0) {
+                                for (AppTask task : tasks) {
+                                    RecentTaskInfo taskInfo = task.getTaskInfo();
+                                    if (taskInfo.baseIntent.getComponent().toShortString()
+                                        .contains(CallInviteActivity.class.getName())) {
+                                        task.moveToFront();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

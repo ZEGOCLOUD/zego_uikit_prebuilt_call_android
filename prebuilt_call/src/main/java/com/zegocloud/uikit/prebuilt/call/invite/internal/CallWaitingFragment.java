@@ -189,7 +189,7 @@ public class CallWaitingFragment extends Fragment {
     private void requestPermissionIfNeeded(List<String> permissions, RequestCallback requestCallback) {
         boolean allGranted = true;
         for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(getContext(), permission) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(requireActivity(), permission) != PackageManager.PERMISSION_GRANTED) {
                 allGranted = false;
             }
         }

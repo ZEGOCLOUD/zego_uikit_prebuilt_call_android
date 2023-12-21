@@ -16,7 +16,6 @@ import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationCompat.Action;
 import androidx.core.app.NotificationManagerCompat;
@@ -152,7 +151,7 @@ public class CallNotificationManager {
         NotificationManagerCompat.from(context).cancel(callNotificationID);
     }
 
-    public boolean isNotificationShowed() {
+    public boolean isCallNotificationShowed() {
         return isNotificationShowed;
     }
 

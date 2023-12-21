@@ -151,14 +151,14 @@ public class CallInviteActivity extends AppCompatActivity {
         // if activity is show on lock screen,keep notification until user clicked
         // accept or reject.
         if (!CallNotificationManager.SHOW_FULL_ON_LOCK_SCREEN.equals(intentAction)) {
-            CallInvitationServiceImpl.getInstance().dismissCallNotification();
+            CallInvitationServiceImpl.getInstance().dismissCallNotification(this);
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        CallInvitationServiceImpl.getInstance().dismissCallNotification();
+        CallInvitationServiceImpl.getInstance().dismissCallNotification(this);
         CallInvitationServiceImpl.getInstance().removeCallStateListener(callStateListener);
     }
 
