@@ -42,8 +42,8 @@ public class ZegoCallInvitationData implements Serializable {
                 String user_name = invitee.getString("user_name");
                 list.add(new ZegoUIKitUser(user_id, user_name));
             }
-            String call_id = jsonObject.getString("call_id");
-            String customData = jsonObject.getString("custom_data");
+            String call_id = getStringFromJson(jsonObject,"call_id");
+            String customData = getStringFromJson(jsonObject,"custom_data");
 
             invitationData = new ZegoCallInvitationData();
             invitationData.callID = call_id;
@@ -54,4 +54,18 @@ public class ZegoCallInvitationData implements Serializable {
         }
         return invitationData;
     }
+
+    private String getStringFromJson(JSONObject jsonObject, String key) {
+        try {
+            if (jsonObject.has(key)) {
+                return jsonObject.getString(key);
+            } else {
+                return null;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }

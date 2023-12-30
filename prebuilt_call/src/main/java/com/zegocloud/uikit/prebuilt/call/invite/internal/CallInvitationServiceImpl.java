@@ -692,7 +692,7 @@ public class CallInvitationServiceImpl {
             JSONObject jsonObject = new JSONObject(pushMessage.payLoad);
             ZegoCallInvitationData invitationData;
             if (jsonObject.has("data")) {
-                invitationData = ZegoCallInvitationData.parseString(jsonObject.getString("data"));
+                invitationData = ZegoCallInvitationData.parseString(getStringFromJson(jsonObject,"data"));
                 if (jsonObject.has("type")) {
                     int type = jsonObject.getInt("type");
                     invitationData.type = type;
