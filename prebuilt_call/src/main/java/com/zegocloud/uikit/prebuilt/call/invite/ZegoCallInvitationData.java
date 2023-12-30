@@ -55,7 +55,7 @@ public class ZegoCallInvitationData implements Serializable {
         return invitationData;
     }
 
-    private String getStringFromJson(JSONObject jsonObject, String key) {
+    private static String getStringFromJson(JSONObject jsonObject, String key) {
         try {
             if (jsonObject.has(key)) {
                 return jsonObject.getString(key);
