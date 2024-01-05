@@ -67,5 +67,4 @@ public class ZegoCallInvitationData implements Serializable {
             return null;
         }
     }
-
 }

@@ -569,6 +569,7 @@ public class CallInvitationServiceImpl {
     public void unInit() {
         Timber.d("unInit() called");
         leaveRoom();
+        finishCallInviteActivity();
         if (invitationConfig != null) {
             ZegoUIKit.logout();
             ZegoUIKit.getSignalingPlugin().logout();
@@ -759,7 +760,9 @@ public class CallInvitationServiceImpl {
         updateListener = null;
         clearPushMessage();
         ZegoUIKit.leaveRoom();
+    }
 
+    public void finishCallInviteActivity(){
         if (leaveRoomListener != null) {
             leaveRoomListener.onLeaveRoom();
             leaveRoomListener = null;

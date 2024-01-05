@@ -223,6 +223,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 requireActivity().unregisterReceiver(configurationChangeReceiver);
                 configurationChangeReceiver = null;
             }
+            leaveRoom();
             CallInvitationServiceImpl.getInstance().setZegoUIKitPrebuiltCallFragment(null);
         }
 
