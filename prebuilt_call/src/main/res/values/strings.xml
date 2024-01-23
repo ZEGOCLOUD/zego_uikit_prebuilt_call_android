@@ -28,4 +28,5 @@
 
   <string name="call_chat_hint">Send a message to everyone</string>
   <string name="call_inroom_chat">Chat</string>
+  <string name="login_error_tips">please call ZegoUIKit.login(String,String) first</string>
 </resources>

@@ -4,25 +4,21 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.zegocloud.uikit.ZegoUIKit;
-import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
-import com.zegocloud.uikit.plugin.invitation.components.ZegoStartInvitationButton;
 import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginNotificationConfig;
 import com.zegocloud.uikit.plugin.adapter.utils.GenericUtils;
+import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
+import com.zegocloud.uikit.plugin.invitation.components.ZegoStartInvitationButton;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ClickListener;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallUser;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,9 +29,9 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
     private String customData = "";
 
     /**
-     * resourceID can be used to specify the ringtone of an offline call invitation,
-     * which must be set to the same value as the Push Resource ID in ZEGOCLOUD Admin Console.
-     * This only takes effect when the notifyWhenAppRunningInBackgroundOrQuit is true.
+     * resourceID can be used to specify the ringtone of an offline call invitation, which must be set to the same value
+     * as the Push Resource ID in ZEGOCLOUD Admin Console. This only takes effect when the
+     * notifyWhenAppRunningInBackgroundOrQuit is true.
      */
     private String resourceID = "";
     private ClickListener sendInvitationListener;
@@ -106,49 +102,47 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
         data = jsonObject.toString();
         List<String> idList = GenericUtils.map(invitees, uiKitUser -> uiKitUser.userID);
         CallInvitationServiceImpl.getInstance().sendInvitation(idList, timeout, type, data, notificationConfig, result -> {
-            int code = (int) result.get("code");
-            String message = (String) result.get("message");
-            List<ZegoUIKitUser> errorInvitees = (List<ZegoUIKitUser>) result.get("errorInvitees");
-            if (code == 0) {
-                if (errorInvitees.isEmpty() || errorInvitees.size() != invitees.size()) {
-                    ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
-                    if (uiKitUser != null) {
-                        CallInviteActivity.startOutgoingPage(getContext());
-                    } else {
-                        Toast.makeText(getContext(), "please call ZegoUIKit.login(String,String) first",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-                if (!errorInvitees.isEmpty()) {
-                    StringBuilder sb = new StringBuilder(getContext().getString(R.string.call_invite_error_offline));
-                    int count = 0;
-                    for (ZegoUIKitUser errorInvitee : errorInvitees) {
-                        sb.append(errorInvitee.userID);
-                        sb.append(" ");
-                        count += 1;
-                        if (count == 5) {
-                            sb.append("...");
-                            break;
+                int code = (int) result.get("code");
+                String message = (String) result.get("message");
+                List<ZegoUIKitUser> errorInvitees = (List<ZegoUIKitUser>) result.get("errorInvitees");
+                if (code == 0) {
+                    if (errorInvitees.isEmpty() || errorInvitees.size() != invitees.size()) {
+                        ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
+                        if (uiKitUser != null) {
+                            CallInviteActivity.startOutgoingPage(getContext());
+                        } else {
+                            showError(getContext().getString(R.string.login_error_tips));
                         }
                     }
-                    Toast.makeText(getContext(), sb.toString(), Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(getContext(), getContext().getString(R.string.call_invite_error, code, message),
-                        Toast.LENGTH_SHORT).show();
-            }
-
-            if (sendInvitationListener != null) {
-                List<ZegoCallUser> callbackErrorInvitees = new ArrayList<>();
-                if (errorInvitees != null && errorInvitees.size() > 0) {
-                    for (ZegoUIKitUser errorInvitee : errorInvitees) {
-                        ZegoCallUser zegoCallUser = new ZegoCallUser(errorInvitee.userID, errorInvitee.userName);
-                        callbackErrorInvitees.add(zegoCallUser);
+                    if (!errorInvitees.isEmpty()) {
+                        StringBuilder sb = new StringBuilder(getContext().getString(R.string.call_invite_error_offline));
+                        int count = 0;
+                        for (ZegoUIKitUser errorInvitee : errorInvitees) {
+                            sb.append(errorInvitee.userID);
+                            sb.append(" ");
+                            count += 1;
+                            if (count == 5) {
+                                sb.append("...");
+                                break;
+                            }
+                        }
+                        showError(sb.toString());
                     }
+                } else {
+                    showError(getContext().getString(R.string.call_invite_error, code, message));
                 }
-                sendInvitationListener.onClick(code, message, callbackErrorInvitees);
-            }
-        });
+
+                if (sendInvitationListener != null) {
+                    List<ZegoCallUser> callbackErrorInvitees = new ArrayList<>();
+                    if (errorInvitees != null && errorInvitees.size() > 0) {
+                        for (ZegoUIKitUser errorInvitee : errorInvitees) {
+                            ZegoCallUser zegoCallUser = new ZegoCallUser(errorInvitee.userID, errorInvitee.userName);
+                            callbackErrorInvitees.add(zegoCallUser);
+                        }
+                    }
+                    sendInvitationListener.onClick(code, message, callbackErrorInvitees);
+                }
+            });
     }
 
     public void setOnClickListener(ClickListener listener) {
@@ -167,10 +161,12 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
     private ZegoSignalingPluginNotificationConfig getSendInvitationConfig() {
 
         String offlineResourceID;
-        String offlineMessage = CallInvitationServiceImpl.getInstance().getCallNotificationMessage(isVideoCall, invitees.size() > 1);
+        String offlineMessage = CallInvitationServiceImpl.getInstance()
+            .getCallNotificationMessage(isVideoCall, invitees.size() > 1);
 
         ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
-        String offlineTitle = CallInvitationServiceImpl.getInstance().getCallNotificationTitle(isVideoCall, invitees.size() > 1, uiKitUser.userName);
+        String offlineTitle = CallInvitationServiceImpl.getInstance()
+            .getCallNotificationTitle(isVideoCall, invitees.size() > 1, uiKitUser.userName);
 
         if (TextUtils.isEmpty(resourceID)) {
             offlineResourceID = "zegouikit_call";
@@ -185,4 +181,7 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
         return notificationConfig;
     }
 
+    protected void showError(String errorMessage) {
+        Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
+    }
 }

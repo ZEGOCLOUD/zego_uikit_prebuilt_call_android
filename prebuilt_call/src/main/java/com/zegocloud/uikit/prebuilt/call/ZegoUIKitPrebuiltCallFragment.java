@@ -316,10 +316,13 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         });
 
         ZegoUIKit.addOnOnlySelfInRoomListener(() -> {
+            Timber.d("addOnOnlySelfInRoomListener() called");
             if (onlySelfInRoomListener != null) {
                 onlySelfInRoomListener.onOnlySelfInRoom();
             } else {
                 leaveRoom();
+                dismissMiniVideoWindow();
+                requireActivity().finish();
             }
         });
         CallInvitationServiceImpl.getInstance().setLeaveRoomListener(new LeaveRoomListener() {
@@ -527,6 +530,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                     config.leaveCallListener.onLeaveCall();
                 } else {
                     leaveRoom();
+                    dismissMiniVideoWindow();
+                    requireActivity().finish();
                 }
             }
         });
@@ -537,6 +542,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                     config.leaveCallListener.onLeaveCall();
                 } else {
                     leaveRoom();
+                    dismissMiniVideoWindow();
+                    requireActivity().finish();
                 }
             }
         });
@@ -599,6 +606,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                     onBackPressedCallback.setEnabled(false);
                 }
                 leaveRoom();
+                dismissMiniVideoWindow();
                 requireActivity().onBackPressed();
             }
         });
@@ -613,7 +621,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void leaveRoom() {
-        Timber.d("leaveRoom() called");
         CallInvitationServiceImpl.getInstance().leaveRoom();
     }
 
