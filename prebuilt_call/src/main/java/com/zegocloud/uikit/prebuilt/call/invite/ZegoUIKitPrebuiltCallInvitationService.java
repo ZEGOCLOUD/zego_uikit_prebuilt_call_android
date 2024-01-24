@@ -11,6 +11,8 @@ import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoInvitationCallListe
 
 public class ZegoUIKitPrebuiltCallInvitationService {
 
+    public static Events events = new Events();
+
     public static void init(Application application, long appID, String appSign, String userID, String userName,
         ZegoUIKitPrebuiltCallInvitationConfig config) {
         CallInvitationServiceImpl.getInstance().initAndLoginUser(application, appID, appSign, userID, userName);
@@ -46,5 +48,10 @@ public class ZegoUIKitPrebuiltCallInvitationService {
         if (prebuiltCallFragment != null) {
             prebuiltCallFragment.requireActivity().finish();
         }
+    }
+
+    public static void minimizeCall() {
+        ZegoUIKitPrebuiltCallFragment callFragment = ZegoUIKitPrebuiltCallInvitationService.getPrebuiltCallFragment();
+        callFragment.requireActivity().moveTaskToBack(false);
     }
 }

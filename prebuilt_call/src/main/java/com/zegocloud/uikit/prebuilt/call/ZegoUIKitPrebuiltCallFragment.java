@@ -41,6 +41,8 @@ import com.zegocloud.uikit.prebuilt.call.internal.MiniVideoView;
 import com.zegocloud.uikit.prebuilt.call.internal.MiniVideoWindow;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoAudioVideoForegroundView;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoScreenShareForegroundView;
+import com.zegocloud.uikit.prebuilt.call.invite.BackPressEvent;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.LeaveRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoMeRemovedFromRoomListener;
@@ -179,13 +181,19 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         onBackPressedCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (callConfig.hangUpConfirmDialogInfo != null) {
-                    handleFragmentBackPressed(callConfig.hangUpConfirmDialogInfo);
+                BackPressEvent backPressEvent = ZegoUIKitPrebuiltCallInvitationService.events.getBackPressEvent();
+                if (backPressEvent != null && backPressEvent.onBackPressed()) {
+
                 } else {
-                    setEnabled(false);
-                    leaveRoom();
-                    requireActivity().onBackPressed();
+                    if (callConfig.hangUpConfirmDialogInfo != null) {
+                        handleFragmentBackPressed(callConfig.hangUpConfirmDialogInfo);
+                    } else {
+                        setEnabled(false);
+                        leaveRoom();
+                        requireActivity().onBackPressed();
+                    }
                 }
+
             }
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);

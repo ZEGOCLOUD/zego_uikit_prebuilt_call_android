@@ -1056,7 +1056,9 @@ public class CallInvitationServiceImpl {
             if (am != null) {
                 if (!(topActivity instanceof CallInviteActivity)) {
                     if (inRoom) {
-                        //对应普通call的情况。
+                        // call entered the room, then switched to the background, but there is no minimize .
+                        // Now, when returning to the app, it is necessary to bring the CallInviteActivity to the foreground
+                        // (because the CallInviteActivity was hidden in the recent apps, it won't show up if not brought to the foreground).
                         ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
                         ZegoUIKitPrebuiltCallFragment callFragment = CallInvitationServiceImpl.getInstance()
                             .getZegoUIKitPrebuiltCallFragment();
@@ -1078,7 +1080,6 @@ public class CallInvitationServiceImpl {
                             }
                         }
                     } else if (callInvitationData != null) {
-                        // 对应最小化的情况
                         boolean isCallInviteActivityStarted = false;
                         List<RunningTaskInfo> runningTasks = am.getRunningTasks(Integer.MAX_VALUE);
                         for (RunningTaskInfo runningTask : runningTasks) {
