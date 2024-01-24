@@ -34,16 +34,24 @@ public class ZegoCallInvitationData implements Serializable {
         ZegoCallInvitationData invitationData;
         try {
             JSONObject jsonObject = new JSONObject(string);
-            JSONArray inviteUsers = jsonObject.getJSONArray("invitees");
-            List<ZegoUIKitUser> list = new ArrayList<>();
-            for (int i = 0; i < inviteUsers.length(); i++) {
-                JSONObject invitee = inviteUsers.getJSONObject(i);
-                String user_id = invitee.getString("user_id");
-                String user_name = invitee.getString("user_name");
-                list.add(new ZegoUIKitUser(user_id, user_name));
+
+            JSONArray inviteUsers;
+            if (jsonObject.has("invitees")) {
+                inviteUsers = jsonObject.getJSONArray("invitees");
+            } else {
+                inviteUsers = null;
             }
-            String call_id = getStringFromJson(jsonObject,"call_id");
-            String customData = getStringFromJson(jsonObject,"custom_data");
+            List<ZegoUIKitUser> list = new ArrayList<>();
+            if (inviteUsers != null) {
+                for (int i = 0; i < inviteUsers.length(); i++) {
+                    JSONObject invitee = inviteUsers.getJSONObject(i);
+                    String user_id = invitee.getString("user_id");
+                    String user_name = invitee.getString("user_name");
+                    list.add(new ZegoUIKitUser(user_id, user_name));
+                }
+            }
+            String call_id = getStringFromJson(jsonObject, "call_id");
+            String customData = getStringFromJson(jsonObject, "custom_data");
 
             invitationData = new ZegoCallInvitationData();
             invitationData.callID = call_id;

@@ -19,6 +19,7 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltAudioVideoViewConfig
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltVideoConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoMiniVideoConfig;
+import com.zegocloud.uikit.service.defines.ZegoMeRemovedFromRoomListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,7 +44,7 @@ public class ZegoUIKitPrebuiltCallConfig {
     public ZegoBeautyPluginConfig beautyConfig = new ZegoBeautyPluginConfig();
     public ZegoInRoomChatConfig inRoomChatConfig = new ZegoInRoomChatConfig();
     public ZegoMiniVideoConfig miniVideoConfig = new ZegoMiniVideoConfig();
-
+    public transient ZegoMeRemovedFromRoomListener removedFromRoomListener;
 
     public ZegoUIKitPrebuiltCallConfig() {
 

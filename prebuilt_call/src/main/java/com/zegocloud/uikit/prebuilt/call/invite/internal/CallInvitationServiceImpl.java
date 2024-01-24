@@ -125,6 +125,9 @@ public class CallInvitationServiceImpl {
                 + data + "], topActivity = [" + topActivity + "], pushMessage = [" + pushMessage
                 + "], notificationAction = [" + notificationAction + "],callState: " + callState);
 
+            if (type != ZegoCallType.VOICE_CALL.value() && type != ZegoCallType.VIDEO_CALL.value()) {
+                return;
+            }
             JSONObject jsonObject = new JSONObject();
             String invitationID = null;
             try {
@@ -133,13 +136,9 @@ public class CallInvitationServiceImpl {
                 invitationID = getStringFromJson(dataJson, "invitationID");
                 jsonObject.put("invitationID", invitationID);
 
-                //                if (pushMessage != null && pushMessage.invitationID.equals(invitationID)
-                //
-                //                ) {
-                //                    // receive both zim call-receive callback and zpns offline message
-                //                    return;
-                //                }
-                if (callState > 0) {
+                String currentRoomID = ZegoUIKit.getRoom().roomID;
+
+                if (callState > 0 || !TextUtils.isEmpty(currentRoomID)) {
                     ZegoUIKit.getSignalingPlugin().refuseInvitation(inviter.userID, jsonObject.toString(), null);
                     return;
                 }
@@ -460,7 +459,7 @@ public class CallInvitationServiceImpl {
         mmkv.putLong("appID", appID);
         mmkv.putString("appSign", appSign);
 
-        ZegoUIKit.init(application, appID, appSign, ZegoScenario.DEFAULT);
+        ZegoUIKit.init(application, appID, appSign, ZegoScenario.GENERAL);
         ZegoUIKit.getSignalingPlugin().addInvitationListener(invitationListener);
         if (appActivityManager == null) {
             appActivityManager = new AppActivityManager();
@@ -693,7 +692,7 @@ public class CallInvitationServiceImpl {
             JSONObject jsonObject = new JSONObject(pushMessage.payLoad);
             ZegoCallInvitationData invitationData;
             if (jsonObject.has("data")) {
-                invitationData = ZegoCallInvitationData.parseString(getStringFromJson(jsonObject,"data"));
+                invitationData = ZegoCallInvitationData.parseString(getStringFromJson(jsonObject, "data"));
                 if (jsonObject.has("type")) {
                     int type = jsonObject.getInt("type");
                     invitationData.type = type;
@@ -762,7 +761,7 @@ public class CallInvitationServiceImpl {
         ZegoUIKit.leaveRoom();
     }
 
-    public void finishCallInviteActivity(){
+    public void finishCallInviteActivity() {
         if (leaveRoomListener != null) {
             leaveRoomListener.onLeaveRoom();
             leaveRoomListener = null;
@@ -1057,13 +1056,15 @@ public class CallInvitationServiceImpl {
             if (am != null) {
                 if (!(topActivity instanceof CallInviteActivity)) {
                     if (inRoom) {
-                        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance()
-                            .getCallConfig();
+                        //对应普通call的情况。
+                        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
+                        ZegoUIKitPrebuiltCallFragment callFragment = CallInvitationServiceImpl.getInstance()
+                            .getZegoUIKitPrebuiltCallFragment();
                         boolean hasMiniButton =
                             callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
                                 || callConfig.topMenuBarConfig.buttons.contains(
                                 ZegoMenuBarButtonName.MINIMIZING_BUTTON);
-                        if (!hasMiniButton) {
+                        if (!hasMiniButton && callFragment != null) {
                             List<ActivityManager.AppTask> tasks = am.getAppTasks();
                             if (tasks != null && tasks.size() > 0) {
                                 for (AppTask task : tasks) {
@@ -1077,16 +1078,17 @@ public class CallInvitationServiceImpl {
                             }
                         }
                     } else if (callInvitationData != null) {
-                        boolean isActivityStarted = false;
+                        // 对应最小化的情况
+                        boolean isCallInviteActivityStarted = false;
                         List<RunningTaskInfo> runningTasks = am.getRunningTasks(Integer.MAX_VALUE);
                         for (RunningTaskInfo runningTask : runningTasks) {
                             if (Objects.equals(runningTask.topActivity.getClassName(),
                                 CallInviteActivity.class.getName())) {
-                                isActivityStarted = true;
+                                isCallInviteActivityStarted = true;
                                 break;
                             }
                         }
-                        if (isActivityStarted) {
+                        if (isCallInviteActivityStarted) {
                             List<ActivityManager.AppTask> tasks = am.getAppTasks();
                             if (tasks != null && tasks.size() > 0) {
                                 for (AppTask task : tasks) {

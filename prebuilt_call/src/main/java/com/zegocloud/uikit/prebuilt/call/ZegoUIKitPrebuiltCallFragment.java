@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
@@ -44,6 +43,7 @@ import com.zegocloud.uikit.prebuilt.call.internal.ZegoAudioVideoForegroundView;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoScreenShareForegroundView;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.LeaveRoomListener;
+import com.zegocloud.uikit.service.defines.ZegoMeRemovedFromRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
@@ -224,6 +224,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 configurationChangeReceiver = null;
             }
             leaveRoom();
+            CallInvitationServiceImpl.getInstance().setLeaveRoomListener(null);
             CallInvitationServiceImpl.getInstance().setZegoUIKitPrebuiltCallFragment(null);
         }
 
@@ -331,6 +332,16 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 Timber.d("onLeaveRoom() called");
                 dismissMiniVideoWindow();
                 requireActivity().finish();
+            }
+        });
+
+        ZegoUIKit.addOnMeRemovedFromRoomListener(new ZegoMeRemovedFromRoomListener() {
+            @Override
+            public void onMeRemovedFromRoom() {
+                if (callConfig.removedFromRoomListener == null) {
+                    leaveRoom();
+                    requireActivity().finish();
+                }
             }
         });
     }
