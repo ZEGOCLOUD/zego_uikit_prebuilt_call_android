@@ -242,15 +242,25 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     public void onStop() {
         super.onStop();
         if (!requireActivity().isFinishing()) {
-            boolean isCallInvite = CallInvitationServiceImpl.getInstance().getCallInvitationConfig() != null;
-            boolean isInRoom = CallInvitationServiceImpl.getInstance().isInRoom();
-            ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
-            boolean hasMiniButton =
-                callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
-                    || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON);
-            if (isInRoom && isCallInvite && checkAlertWindowPermission() && hasMiniButton) {
+            if (canShowMiniWindow()) {
                 showMiniVideoWindow();
             }
+        }
+    }
+
+    private boolean canShowMiniWindow() {
+        boolean isCallInvite = CallInvitationServiceImpl.getInstance().getCallInvitationConfig() != null;
+        boolean isInRoom = CallInvitationServiceImpl.getInstance().isInRoom();
+        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
+        boolean hasMiniButton =
+            callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
+                || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON);
+        return isInRoom && isCallInvite && checkAlertWindowPermission() && hasMiniButton;
+    }
+
+    public void minimizeCall(){
+        if(canShowMiniWindow()){
+            requireActivity().moveTaskToBack(true);
         }
     }
 

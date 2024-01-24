@@ -1,8 +1,6 @@
 package com.zegocloud.uikit.prebuilt.call.invite;
 
 import android.app.Application;
-import android.content.Context;
-import android.content.Intent;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.IncomingCallButtonListener;
@@ -52,6 +50,8 @@ public class ZegoUIKitPrebuiltCallInvitationService {
 
     public static void minimizeCall() {
         ZegoUIKitPrebuiltCallFragment callFragment = ZegoUIKitPrebuiltCallInvitationService.getPrebuiltCallFragment();
-        callFragment.requireActivity().moveTaskToBack(false);
+        if (callFragment != null) {
+            callFragment.minimizeCall();
+        }
     }
 }
