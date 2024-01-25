@@ -64,7 +64,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     private List<View> bottomMenuBarBtns = new ArrayList<>();
     private List<View> topMenuBarBtns = new ArrayList<>();
     private OnBackPressedCallback onBackPressedCallback;
-    private ZegoOnlySelfInRoomListener onlySelfInRoomListener;
     private IntentFilter configurationChangeFilter;
     private BroadcastReceiver configurationChangeReceiver;
     private MiniVideoWindow miniVideoWindow;
@@ -335,12 +334,11 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         });
 
         ZegoUIKit.addOnOnlySelfInRoomListener(() -> {
-            Timber.d("addOnOnlySelfInRoomListener() called");
-            if (onlySelfInRoomListener != null) {
-                onlySelfInRoomListener.onOnlySelfInRoom();
+            ZegoOnlySelfInRoomListener selfInRoomListener = ZegoUIKitPrebuiltCallInvitationService.events.getOnlySelfInRoomListener();
+            if (selfInRoomListener != null) {
+                selfInRoomListener.onOnlySelfInRoom();
             } else {
                 leaveRoom();
-                dismissMiniVideoWindow();
                 requireActivity().finish();
             }
         });
@@ -559,7 +557,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                     config.leaveCallListener.onLeaveCall();
                 } else {
                     leaveRoom();
-                    dismissMiniVideoWindow();
                     requireActivity().finish();
                 }
             }
@@ -571,7 +568,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                     config.leaveCallListener.onLeaveCall();
                 } else {
                     leaveRoom();
-                    dismissMiniVideoWindow();
                     requireActivity().finish();
                 }
             }
@@ -635,7 +631,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                     onBackPressedCallback.setEnabled(false);
                 }
                 leaveRoom();
-                dismissMiniVideoWindow();
                 requireActivity().onBackPressed();
             }
         });
@@ -650,6 +645,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void leaveRoom() {
+        dismissMiniVideoWindow();
         CallInvitationServiceImpl.getInstance().leaveRoom();
     }
 
@@ -668,7 +664,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     public void setOnOnlySelfInRoomListener(ZegoOnlySelfInRoomListener listener) {
-        this.onlySelfInRoomListener = listener;
+        ZegoUIKitPrebuiltCallInvitationService.events.setOnlySelfInRoomListener(listener);
     }
 
     public interface LeaveCallListener {
