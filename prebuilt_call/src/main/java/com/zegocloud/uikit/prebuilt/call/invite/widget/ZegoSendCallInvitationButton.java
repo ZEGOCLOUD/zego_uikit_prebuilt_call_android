@@ -35,6 +35,7 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
      */
     private String resourceID = "";
     private ClickListener sendInvitationListener;
+    private boolean showErrorToast = true;
 
     public ZegoSendCallInvitationButton(@NonNull Context context) {
         super(context);
@@ -101,46 +102,51 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
         ZegoSignalingPluginNotificationConfig notificationConfig = getSendInvitationConfig();
         data = jsonObject.toString();
         List<String> idList = GenericUtils.map(invitees, uiKitUser -> uiKitUser.userID);
-        CallInvitationServiceImpl.getInstance().sendInvitation(idList, timeout, type, data, notificationConfig, result -> {
-                int code = (int) result.get("code");
-                String message = (String) result.get("message");
-                List<ZegoUIKitUser> errorInvitees = (List<ZegoUIKitUser>) result.get("errorInvitees");
-                if (code == 0) {
-                    if (errorInvitees.isEmpty() || errorInvitees.size() != invitees.size()) {
-                        ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
-                        if (uiKitUser != null) {
-                            CallInviteActivity.startOutgoingPage(getContext());
-                        } else {
-                            showError(getContext().getString(R.string.login_error_tips));
-                        }
-                    }
-                    if (!errorInvitees.isEmpty()) {
-                        StringBuilder sb = new StringBuilder(getContext().getString(R.string.call_invite_error_offline));
-                        int count = 0;
-                        for (ZegoUIKitUser errorInvitee : errorInvitees) {
-                            sb.append(errorInvitee.userID);
-                            sb.append(" ");
-                            count += 1;
-                            if (count == 5) {
-                                sb.append("...");
-                                break;
-                            }
-                        }
-                        showError(sb.toString());
+        CallInvitationServiceImpl.getInstance()
+            .sendInvitation(idList, timeout, type, data, notificationConfig, result -> {
+                ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
+                if (uiKitUser == null) {
+                    String message = getContext().getString(R.string.login_error_tips);
+                    showError(-1, message);
+                    if (sendInvitationListener != null) {
+                        sendInvitationListener.onClick(-1, message, new ArrayList<>());
                     }
                 } else {
-                    showError(getContext().getString(R.string.call_invite_error, code, message));
-                }
-
-                if (sendInvitationListener != null) {
-                    List<ZegoCallUser> callbackErrorInvitees = new ArrayList<>();
-                    if (errorInvitees != null && errorInvitees.size() > 0) {
-                        for (ZegoUIKitUser errorInvitee : errorInvitees) {
-                            ZegoCallUser zegoCallUser = new ZegoCallUser(errorInvitee.userID, errorInvitee.userName);
-                            callbackErrorInvitees.add(zegoCallUser);
+                    int code = (int) result.get("code");
+                    String message = (String) result.get("message");
+                    List<ZegoUIKitUser> errorInvitees = (List<ZegoUIKitUser>) result.get("errorInvitees");
+                    if (code == 0) {
+                        if (errorInvitees.isEmpty() || errorInvitees.size() != invitees.size()) {
+                            CallInviteActivity.startOutgoingPage(getContext());
                         }
+                        if (!errorInvitees.isEmpty()) {
+                            StringBuilder sb = new StringBuilder(
+                                getContext().getString(R.string.call_invite_error_offline));
+                            int count = 0;
+                            for (ZegoUIKitUser errorInvitee : errorInvitees) {
+                                sb.append(errorInvitee.userID);
+                                sb.append(" ");
+                                count += 1;
+                                if (count == 5) {
+                                    sb.append("...");
+                                    break;
+                                }
+                            }
+                            showError(-2, sb.toString());
+                        }
+                    } else {
+                        showError(code, getContext().getString(R.string.call_invite_error, code, message));
                     }
-                    sendInvitationListener.onClick(code, message, callbackErrorInvitees);
+                    if (sendInvitationListener != null) {
+                        List<ZegoCallUser> callbackErrorInvitees = new ArrayList<>();
+                        if (errorInvitees != null && errorInvitees.size() > 0) {
+                            for (ZegoUIKitUser errorInvitee : errorInvitees) {
+                                ZegoCallUser zegoCallUser = new ZegoCallUser(errorInvitee.userID, errorInvitee.userName);
+                                callbackErrorInvitees.add(zegoCallUser);
+                            }
+                        }
+                        sendInvitationListener.onClick(code, message, callbackErrorInvitees);
+                    }
                 }
             });
     }
@@ -181,7 +187,13 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
         return notificationConfig;
     }
 
-    protected void showError(String errorMessage) {
-        Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
+    protected void showError(int errorCode, String errorMessage) {
+        if (showErrorToast) {
+            Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void showErrorToast(boolean showErrorToast) {
+        this.showErrorToast = showErrorToast;
     }
 }
