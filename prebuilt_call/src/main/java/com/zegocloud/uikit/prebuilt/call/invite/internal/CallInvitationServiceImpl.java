@@ -578,10 +578,10 @@ public class CallInvitationServiceImpl {
     }
 
     public boolean canShowFullOnLockScreen() {
-        //        if (Build.MANUFACTURER.equalsIgnoreCase("xiaomi")) {
-        //            // xiaomi
-        //            return false;
-        //        }
+        if (Build.MANUFACTURER.equalsIgnoreCase("xiaomi")) {
+            // xiaomi
+            return false;
+        }
         return true;
     }
 

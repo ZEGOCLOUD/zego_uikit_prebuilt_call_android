@@ -1,7 +1,9 @@
 package com.zegocloud.uikit.prebuilt.call.internal;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.AppTask;
+import android.app.ActivityManager.RecentTaskInfo;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.view.Gravity;
@@ -11,7 +13,9 @@ import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
 import com.zegocloud.uikit.utils.Utils;
+import java.util.List;
 
 public class MiniVideoWindow {
 
@@ -104,9 +108,21 @@ public class MiniVideoWindow {
                     isClick = false;
                 }
                 if (isClick) {
-                    Intent intent2 = new Intent(context, context.getClass());
-                    intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent2);
+//                    Intent intent2 = new Intent(context, context.getClass());
+//                    intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    context.startActivity(intent2);
+                    ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+                    List<AppTask> tasks = am.getAppTasks();
+                    if (tasks != null && tasks.size() > 0) {
+                        for (AppTask task : tasks) {
+                            RecentTaskInfo taskInfo = task.getTaskInfo();
+                            if (taskInfo.baseIntent.getComponent().toShortString()
+                                .contains(CallInviteActivity.class.getName())) {
+                                task.moveToFront();
+                                break;
+                            }
+                        }
+                    }
                 }
                 widthPixels = context.getResources().getDisplayMetrics().widthPixels;
                 if (lp.x + contentView.getWidth() / 2 < widthPixels / 2) {

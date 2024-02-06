@@ -212,15 +212,13 @@ public class CallNotificationManager {
             if (zimPushMessage == null && topActivity != null && canShowFullOnLockScreen) {
                 PendingIntent lockScreenIntent = getLockScreenIntent(context);
                 builder.setFullScreenIntent(lockScreenIntent, true);
-            }
 
-            if (canShowFullOnLockScreen) {
                 //callStyle need foreground service or fullscreen intent
                 android.app.Person caller = new android.app.Person.Builder().setName(title).setImportant(true).build();
                 Notification.CallStyle callStyle = Notification.CallStyle.forIncomingCall(caller, declineIntent,
                     acceptIntent);
                 builder.setStyle(callStyle);
-            } else {
+            }else {
                 Notification.Action.Builder acceptAction = new Notification.Action.Builder(
                     // The icon that will be displayed on the button (or not, depends on the Android version)
                     Icon.createWithResource(context, R.drawable.call_selector_dialog_voice_accept),
