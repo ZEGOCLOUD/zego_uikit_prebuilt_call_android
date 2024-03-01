@@ -104,7 +104,9 @@ public class CallInviteActivity extends AppCompatActivity {
         ZIMPushMessage pushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
 
         ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
+        Timber.d("onCreate() called with: callInvitationData = [" + callInvitationData + "]");
         if (callInvitationData == null) {
+            CallInvitationServiceImpl.getInstance().leaveRoom();
             finish();
             return;
         }
@@ -158,6 +160,7 @@ public class CallInviteActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Timber.d("onDestroy() called");
         CallInvitationServiceImpl.getInstance().dismissCallNotification(this);
         CallInvitationServiceImpl.getInstance().removeCallStateListener(callStateListener);
     }
