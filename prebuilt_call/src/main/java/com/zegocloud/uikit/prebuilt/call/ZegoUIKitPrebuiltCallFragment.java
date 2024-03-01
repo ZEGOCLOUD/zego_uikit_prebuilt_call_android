@@ -44,7 +44,6 @@ import com.zegocloud.uikit.prebuilt.call.internal.ZegoScreenShareForegroundView;
 import com.zegocloud.uikit.prebuilt.call.invite.BackPressEvent;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.LeaveRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoMeRemovedFromRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
@@ -56,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import timber.log.Timber;
 
 public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
@@ -231,10 +229,20 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 configurationChangeReceiver = null;
             }
             leaveRoom();
-            CallInvitationServiceImpl.getInstance().setLeaveRoomListener(null);
             CallInvitationServiceImpl.getInstance().setZegoUIKitPrebuiltCallFragment(null);
         }
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (configurationChangeReceiver != null) {
+            requireActivity().unregisterReceiver(configurationChangeReceiver);
+            configurationChangeReceiver = null;
+        }
+        leaveRoom();
+        CallInvitationServiceImpl.getInstance().setZegoUIKitPrebuiltCallFragment(null);
     }
 
     @Override
@@ -342,14 +350,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 requireActivity().finish();
             }
         });
-        CallInvitationServiceImpl.getInstance().setLeaveRoomListener(new LeaveRoomListener() {
-            @Override
-            public void onLeaveRoom() {
-                Timber.d("onLeaveRoom() called");
-                dismissMiniVideoWindow();
-                requireActivity().finish();
-            }
-        });
 
         ZegoUIKit.addOnMeRemovedFromRoomListener(new ZegoMeRemovedFromRoomListener() {
             @Override
@@ -381,24 +381,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         if (miniVideoWindow == null) {
             miniVideoWindow = new MiniVideoWindow(context);
             contentView = new MiniVideoView(context);
-            //            contentView.setOnClickListener(v -> {
-            //                //                // 获取当前任务的ID
-            //                //                ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-            //                //                List<AppTask> appTasks = activityManager.getAppTasks();
-            //
-            //                //                if (VERSION.SDK_INT >= VERSION_CODES.M) {
-            //                //                    for (int index = appTasks.size(); index > 0; index--) {
-            //                //                        RecentTaskInfo taskInfo = appTasks.get(index).getTaskInfo();
-            //                //                        if (!Objects.equals(taskInfo.topActivity, requireActivity().getComponentName())) {
-            //                //                            activityManager.moveTaskToFront(taskInfo.taskId, ActivityManager.MOVE_TASK_WITH_HOME);
-            //                //                        }
-            //                //                    }
-            //                //                }
-            //
-            //                Intent intent2 = new Intent(context, context.getClass());
-            //                intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            //                context.startActivity(intent2);
-            //            });
         }
 
         long startTimeLocal = CallInvitationServiceImpl.getInstance().getStartTimeLocal();

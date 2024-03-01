@@ -108,9 +108,6 @@ public class MiniVideoWindow {
                     isClick = false;
                 }
                 if (isClick) {
-//                    Intent intent2 = new Intent(context, context.getClass());
-//                    intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    context.startActivity(intent2);
                     ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
                     List<AppTask> tasks = am.getAppTasks();
                     if (tasks != null && tasks.size() > 0) {

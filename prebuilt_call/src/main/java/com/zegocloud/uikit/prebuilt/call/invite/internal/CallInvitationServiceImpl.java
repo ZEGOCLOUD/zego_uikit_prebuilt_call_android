@@ -32,6 +32,7 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallConfigProvider;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 import com.zegocloud.uikit.service.defines.ZegoScenario;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitSignalingPluginInvitationListener;
@@ -92,7 +93,6 @@ public class CallInvitationServiceImpl {
     private String userName;
     private ZegoUIKitPrebuiltCallInvitationConfig invitationConfig;
     private ZegoUIKitPrebuiltCallConfig callConfig;
-    private LeaveRoomListener leaveRoomListener;
     private ZIMPushMessage pushMessage;
     private long elapsedTime;
     private long startTimeLocal;
@@ -559,7 +559,6 @@ public class CallInvitationServiceImpl {
         userName = null;
         invitationConfig = null;
         callConfig = null;
-        leaveRoomListener = null;
         elapsedTime = 0;
         startTimeLocal = 0;
     }
@@ -568,7 +567,10 @@ public class CallInvitationServiceImpl {
     public void unInit() {
         Timber.d("unInit() called");
         leaveRoom();
-        finishCallInviteActivity();
+        ZegoUIKitPrebuiltCallFragment callFragment = ZegoUIKitPrebuiltCallInvitationService.getPrebuiltCallFragment();
+        if (callFragment != null) {
+            callFragment.requireActivity().finish();
+        }
         if (invitationConfig != null) {
             ZegoUIKit.logout();
             ZegoUIKit.getSignalingPlugin().logout();
@@ -759,17 +761,6 @@ public class CallInvitationServiceImpl {
         updateListener = null;
         clearPushMessage();
         ZegoUIKit.leaveRoom();
-    }
-
-    public void finishCallInviteActivity() {
-        if (leaveRoomListener != null) {
-            leaveRoomListener.onLeaveRoom();
-            leaveRoomListener = null;
-        }
-    }
-
-    public void setLeaveRoomListener(LeaveRoomListener leaveRoomListener) {
-        this.leaveRoomListener = leaveRoomListener;
     }
 
     public void sendInvitation(List<String> invitees, int timeout, int type, String data,
@@ -1059,7 +1050,8 @@ public class CallInvitationServiceImpl {
                         // call entered the room, then switched to the background, but there is no minimize .
                         // Now, when returning to the app, it is necessary to bring the CallInviteActivity to the foreground
                         // (because the CallInviteActivity was hidden in the recent apps, it won't show up if not brought to the foreground).
-                        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
+                        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance()
+                            .getCallConfig();
                         ZegoUIKitPrebuiltCallFragment callFragment = CallInvitationServiceImpl.getInstance()
                             .getZegoUIKitPrebuiltCallFragment();
                         boolean hasMiniButton =
