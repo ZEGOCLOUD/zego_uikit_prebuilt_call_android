@@ -67,24 +67,19 @@ public class ZegoUIKitPrebuiltCallInvitationService {
     }
 
     public static void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType type, String customData,
-        int timeout, PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance()
-            .sendInvitation(invitees, type, customData, timeout, null, null, callbackListener);
-    }
-
-    public static void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType type, String customData,
-        int timeout, String callID, PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance()
-            .sendInvitation(invitees, type, customData, timeout, callID, null, callbackListener);
-    }
-
-    public static void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType type, String customData,
-        int timeout, String callID, String resourceID, PluginCallbackListener callbackListener) {
+        String resourceID, PluginCallbackListener callbackListener) {
         ZegoSignalingPluginNotificationConfig pluginNotificationConfig = new ZegoSignalingPluginNotificationConfig();
         pluginNotificationConfig.setResourceID(resourceID);
 
         CallInvitationServiceImpl.getInstance()
-            .sendInvitation(invitees, type, customData, timeout, callID, pluginNotificationConfig, callbackListener);
+            .sendInvitation(invitees, type, customData, 60, null, pluginNotificationConfig, callbackListener);
+    }
+
+    public static void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType type, String customData,
+        int timeout, ZegoSignalingPluginNotificationConfig pluginNotificationConfig,
+        PluginCallbackListener callbackListener) {
+        CallInvitationServiceImpl.getInstance()
+            .sendInvitation(invitees, type, customData, timeout, null, pluginNotificationConfig, callbackListener);
     }
 
     public static void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType type, String customData,

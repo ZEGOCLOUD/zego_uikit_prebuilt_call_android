@@ -80,7 +80,7 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
     @Override
     protected void invokedWhenClick() {
         ZegoInvitationType invitationType = ZegoInvitationType.getZegoInvitationType(type);
-        ZegoUIKitPrebuiltCallInvitationService.sendInvitation(invitees, invitationType, customData, timeout, null,
+        ZegoUIKitPrebuiltCallInvitationService.sendInvitation(invitees, invitationType, customData, timeout,
             getSendInvitationConfig(), new PluginCallbackListener() {
                 @Override
                 public void callback(Map<String, Object> result) {
