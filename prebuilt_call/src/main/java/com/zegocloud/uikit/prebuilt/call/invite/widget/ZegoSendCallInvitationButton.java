@@ -21,7 +21,6 @@ import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import timber.log.Timber;
 
 public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
 
@@ -84,7 +83,6 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
             getSendInvitationConfig(), new PluginCallbackListener() {
                 @Override
                 public void callback(Map<String, Object> result) {
-                    Timber.d("callback() called with: result = [" + result + "]");
                     ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
                     if (uiKitUser == null) {
                         String message = getContext().getString(R.string.login_error_tips);

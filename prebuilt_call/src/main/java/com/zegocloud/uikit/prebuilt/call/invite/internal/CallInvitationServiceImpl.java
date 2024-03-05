@@ -766,6 +766,28 @@ public class CallInvitationServiceImpl {
         ZegoUIKit.leaveRoom();
     }
 
+    public void sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees,
+        ZegoInvitationType invitationType, String customData, int timeout, String callID,
+        ZegoSignalingPluginNotificationConfig notificationConfig, PluginCallbackListener callbackListener) {
+        sendInvitation(invitees, invitationType, customData, timeout, callID, notificationConfig,
+            new PluginCallbackListener() {
+                @Override
+                public void callback(Map<String, Object> result) {
+                    int code = (int) result.get("code");
+                    String message = (String) result.get("message");
+                    List<ZegoUIKitUser> errorInvitees = (List<ZegoUIKitUser>) result.get("errorInvitees");
+                    if (code == 0) {
+                        if (errorInvitees.isEmpty() || errorInvitees.size() != invitees.size()) {
+                            CallInviteActivity.startOutgoingPage(activity);
+                        }
+                    }
+                    if (callbackListener != null) {
+                        callbackListener.callback(result);
+                    }
+                }
+            });
+    }
+
     public void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType invitationType, String customData,
         int timeout, String callID, ZegoSignalingPluginNotificationConfig notificationConfig,
         PluginCallbackListener callbackListener) {

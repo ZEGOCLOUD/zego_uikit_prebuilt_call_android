@@ -1,5 +1,6 @@
 package com.zegocloud.uikit.prebuilt.call.invite;
 
+import android.app.Activity;
 import android.app.Application;
 import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginNotificationConfig;
 import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
@@ -58,6 +59,12 @@ public class ZegoUIKitPrebuiltCallInvitationService {
         if (callFragment != null) {
             callFragment.minimizeCall();
         }
+    }
+
+    public static void sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees, ZegoInvitationType type,
+        String customData, PluginCallbackListener callbackListener) {
+        CallInvitationServiceImpl.getInstance()
+            .sendInvitationWithUIChange(activity,invitees, type, customData, 60, null, null, callbackListener);
     }
 
     public static void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType type, String customData,
