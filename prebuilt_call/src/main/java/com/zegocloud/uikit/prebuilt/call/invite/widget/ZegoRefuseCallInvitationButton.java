@@ -5,9 +5,7 @@ import android.util.AttributeSet;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.zegocloud.uikit.plugin.invitation.components.ZegoRefuseInvitationButton;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 
 public class ZegoRefuseCallInvitationButton extends ZegoRefuseInvitationButton {
 
@@ -21,12 +19,6 @@ public class ZegoRefuseCallInvitationButton extends ZegoRefuseInvitationButton {
 
     @Override
     protected void invokedWhenClick() {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("reason", "decline");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        CallInvitationServiceImpl.getInstance().refuseInvitation(inviterID, jsonObject.toString(), null);
+        ZegoUIKitPrebuiltCallInvitationService.rejectInvitation(null);
     }
 }

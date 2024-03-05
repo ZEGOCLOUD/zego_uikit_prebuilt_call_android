@@ -20,6 +20,7 @@ import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import java.util.Map;
 import timber.log.Timber;
@@ -122,13 +123,12 @@ public class CallInviteActivity extends AppCompatActivity {
                     }
                 });
             } else {
-                CallInvitationServiceImpl.getInstance()
-                    .acceptInvitation(callInvitationData.inviter.userID, "", new PluginCallbackListener() {
-                        @Override
-                        public void callback(Map<String, Object> result) {
-                            showCallFragment();
-                        }
-                    });
+                ZegoUIKitPrebuiltCallInvitationService.acceptInvitation(new PluginCallbackListener() {
+                    @Override
+                    public void callback(Map<String, Object> result) {
+                        showCallFragment();
+                    }
+                });
             }
         } else if (CallNotificationManager.ACTION_DECLINE_CALL.equals(intentAction)) {
 

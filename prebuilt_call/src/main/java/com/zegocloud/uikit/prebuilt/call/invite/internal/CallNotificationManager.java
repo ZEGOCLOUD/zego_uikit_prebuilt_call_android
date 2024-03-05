@@ -143,7 +143,6 @@ public class CallNotificationManager {
     }
 
     public void dismissCallNotification(Context context) {
-        Timber.d("dismissCallNotification() called with: context = [" + context + "]");
         Intent intent = new Intent(context, OffLineCallNotificationService.class);
         isNotificationShowed = false;
         context.stopService(intent);

@@ -8,13 +8,10 @@ import android.content.pm.ResolveInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.util.Log;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallNotificationManager;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZIMPushMessage;
 import java.util.List;
-import org.json.JSONException;
-import org.json.JSONObject;
 import timber.log.Timber;
 
 /**
@@ -41,14 +38,7 @@ public class OffLineCallNotificationService extends Service {
                 ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance()
                     .getCallInvitationData();
                 if (callInvitationData != null) {
-                    JSONObject jsonObject = new JSONObject();
-                    try {
-                        jsonObject.put("reason", "decline");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    CallInvitationServiceImpl.getInstance()
-                        .refuseInvitation(callInvitationData.inviter.userID, jsonObject.toString(), null);
+                    ZegoUIKitPrebuiltCallInvitationService.rejectInvitation(null);
                 }
             } else {
                 CallInvitationServiceImpl.getInstance()

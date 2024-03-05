@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.text.TextUtils;
 import com.tencent.mmkv.MMKV;
+import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZIMPushMessage;
@@ -26,6 +27,8 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
         ZIMPushMessage zimPushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
         Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
 
+        ZegoUIKit.debugMode(context);
+
         Timber.d("onThroughMessageReceived() called with: topActivity = [" + topActivity + "], pushMessage = ["
             + pushMessage + "]");
 
@@ -36,7 +39,7 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
                 if (!TextUtils.isEmpty(receiver)) {
                     com.google.firebase.messaging.RemoteMessage remoteMessage = (com.google.firebase.messaging.RemoteMessage) message.getPushMessage();
                     Intent intent = new Intent(action);
-                    intent.putExtra("remoteMessage",remoteMessage);
+                    intent.putExtra("remoteMessage", remoteMessage);
                     intent.setComponent(new ComponentName(context.getPackageName(), receiver));
                     context.sendBroadcast(intent);
                 }

@@ -24,7 +24,9 @@ import androidx.annotation.Nullable;
 import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginNotificationConfig;
+import com.zegocloud.uikit.plugin.adapter.utils.GenericUtils;
 import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
+import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.config.DurationUpdateListener;
@@ -38,6 +40,7 @@ import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitSignalingPluginInvitationListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -746,7 +749,7 @@ public class CallInvitationServiceImpl {
                         }
                     }
                     if (!waitedUserIDs.isEmpty()) {
-                        cancelInvitation(waitedUserIDs, "", null, null);
+                        ZegoUIKitPrebuiltCallInvitationService.cancelInvitation(waitedUserIDs, null);
                     }
                 }
             }
@@ -763,77 +766,201 @@ public class CallInvitationServiceImpl {
         ZegoUIKit.leaveRoom();
     }
 
-    public void sendInvitation(List<String> invitees, int timeout, int type, String data,
-        ZegoSignalingPluginNotificationConfig notificationConfig, PluginCallbackListener callbackListener) {
+    public void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType invitationType, String customData,
+        int timeout, String callID, ZegoSignalingPluginNotificationConfig notificationConfig,
+        PluginCallbackListener callbackListener) {
+
         if (callState > 0) {
+            if (callbackListener != null) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("code", -3);
+                map.put("message", "User is not idle");
+                map.put("invitationID", "");
+                callbackListener.callback(map);
+            }
             return;
         }
+
+        JSONObject jsonObject = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+
+        try {
+            if (TextUtils.isEmpty(callID)) {
+                jsonObject.put("call_id", generateCallID());
+            } else {
+                jsonObject.put("call_id", callID);
+            }
+            for (ZegoUIKitUser invitee : invitees) {
+                JSONObject tmp = new JSONObject();
+                tmp.put("user_id", invitee.userID);
+                tmp.put("user_name", invitee.userName);
+                jsonArray.put(tmp);
+            }
+            jsonObject.put("invitees", jsonArray);
+            jsonObject.put("custom_data", customData);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        List<String> idList = GenericUtils.map(invitees, uiKitUser -> uiKitUser.userID);
+        String extraData = jsonObject.toString();
+
+        if (notificationConfig == null) {
+            notificationConfig = getSendInvitationConfig(invitees, invitationType);
+            setCallResourceID("zegouikit_call");
+        } else {
+            boolean isVideoCall = invitationType == ZegoInvitationType.VIDEO_CALL;
+            ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
+            if (TextUtils.isEmpty(notificationConfig.getTitle())) {
+                String offlineTitle = CallInvitationServiceImpl.getInstance()
+                    .getCallNotificationTitle(isVideoCall, invitees.size() > 1, uiKitUser.userName);
+                notificationConfig.setTitle(offlineTitle);
+            }
+            if (TextUtils.isEmpty(notificationConfig.getMessage())) {
+                String offlineMessage = CallInvitationServiceImpl.getInstance()
+                    .getCallNotificationMessage(isVideoCall, invitees.size() > 1);
+                notificationConfig.setMessage(offlineMessage);
+            }
+            if (TextUtils.isEmpty(notificationConfig.getResourceID())) {
+                notificationConfig.setResourceID("zegouikit_call");
+            } else {
+                setCallResourceID(callResourceID);
+            }
+        }
         ZegoUIKit.getSignalingPlugin()
-            .sendInvitation(invitees, timeout, type, data, notificationConfig, new PluginCallbackListener() {
+            .sendInvitation(idList, timeout, invitationType.getValue(), extraData, notificationConfig, result -> {
+                int code = (int) result.get("code");
+                List<ZegoUIKitUser> errorInvitees = (List<ZegoUIKitUser>) result.get("errorInvitees");
+                String invitationID = (String) result.get("invitationID");
+                if (code == 0 && errorInvitees != null && errorInvitees.size() < invitees.size()) {
+                    callInvitationData = ZegoCallInvitationData.parseString(extraData);
+                    if (callInvitationData != null) {
+                        callInvitationData.type = invitationType.getValue();
+                        callInvitationData.inviter = ZegoUIKit.getLocalUser();
+                        callInvitationData.invitationID = invitationID;
+                        for (ZegoUIKitUser zegoUIKitUser : callInvitationData.invitees) {
+                            CallInvitationState state;
+                            if (errorInvitees.contains(zegoUIKitUser)) {
+                                state = CallInvitationState.ERROR;
+                            } else {
+                                state = CallInvitationState.WAITING;
+                            }
+                            changeUserState(zegoUIKitUser, state);
+                        }
+                        setCallState(CallInvitationServiceImpl.OUTGOING);
+                        RingtoneManager.playRingTone(false);
+                    }
+                }
+                if (callbackListener != null) {
+                    callbackListener.callback(result);
+                }
+            });
+    }
+
+    private ZegoSignalingPluginNotificationConfig getSendInvitationConfig(List<ZegoUIKitUser> invitees,
+        ZegoInvitationType invitationType) {
+        boolean isVideoCall = invitationType == ZegoInvitationType.VIDEO_CALL;
+
+        String offlineMessage = CallInvitationServiceImpl.getInstance()
+            .getCallNotificationMessage(isVideoCall, invitees.size() > 1);
+
+        ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
+        String offlineTitle = CallInvitationServiceImpl.getInstance()
+            .getCallNotificationTitle(isVideoCall, invitees.size() > 1, uiKitUser.userName);
+
+        String offlineResourceID = "zegouikit_call";
+
+        ZegoSignalingPluginNotificationConfig notificationConfig = new ZegoSignalingPluginNotificationConfig();
+        notificationConfig.setResourceID(offlineResourceID);
+        notificationConfig.setTitle(offlineTitle);
+        notificationConfig.setMessage(offlineMessage);
+        return notificationConfig;
+    }
+
+    private String generateCallID() {
+        String callID = null;
+        String userID = ZegoUIKit.getLocalUser().userID;
+        if (userID != null) {
+            callID = "call_" + userID + "_" + System.currentTimeMillis();
+        }
+        return callID;
+    }
+
+    public void cancelInvitation(PluginCallbackListener callbackListener) {
+        if (callInvitationData != null) {
+            List<String> idList = GenericUtils.map(callInvitationData.invitees, uiKitUser -> uiKitUser.userID);
+            cancelInvitation(idList, callInvitationData.invitationID, "", null, callbackListener);
+        }
+    }
+
+    public void cancelInvitation(List<String> invitees, PluginCallbackListener callbackListener) {
+        if (callInvitationData != null) {
+            cancelInvitation(invitees, callInvitationData.invitationID, "", null, callbackListener);
+        }
+    }
+
+    public void cancelInvitation(String data, PluginCallbackListener callbackListener) {
+        if (callInvitationData != null) {
+            List<String> idList = GenericUtils.map(callInvitationData.invitees, uiKitUser -> uiKitUser.userID);
+            cancelInvitation(idList, callInvitationData.invitationID, data, null, callbackListener);
+        }
+    }
+
+    public void cancelInvitation(List<String> invitees, String data, PluginCallbackListener callbackListener) {
+        if (callInvitationData != null) {
+            cancelInvitation(invitees, callInvitationData.invitationID, data, null, callbackListener);
+        }
+    }
+
+    public void cancelInvitation(List<String> invitees, String invitationID, String data,
+        ZegoSignalingPluginNotificationConfig pushConfig, PluginCallbackListener callbackListener) {
+
+        if (pushConfig == null) {
+            pushConfig = new ZegoSignalingPluginNotificationConfig();
+            if (TextUtils.isEmpty(callResourceID)) {
+                pushConfig.setResourceID("zegouikit_call");
+            } else {
+                pushConfig.setResourceID(callResourceID);
+            }
+        }
+
+        ZegoUIKit.getSignalingPlugin()
+            .callCancel(invitees, invitationID, data, pushConfig, new PluginCallbackListener() {
                 @Override
                 public void callback(Map<String, Object> result) {
-                    int code = (int) result.get("code");
-                    List<ZegoUIKitUser> errorInvitees = (List<ZegoUIKitUser>) result.get("errorInvitees");
-                    String invitationID = (String) result.get("invitationID");
-                    if (code == 0 && errorInvitees != null && errorInvitees.size() < invitees.size()) {
-                        callInvitationData = ZegoCallInvitationData.parseString(data);
-                        if (callInvitationData != null) {
-                            callInvitationData.type = type;
-                            callInvitationData.inviter = ZegoUIKit.getLocalUser();
-                            callInvitationData.invitationID = invitationID;
-                            for (ZegoUIKitUser zegoUIKitUser : callInvitationData.invitees) {
-                                CallInvitationState state;
-                                if (errorInvitees.contains(zegoUIKitUser)) {
-                                    state = CallInvitationState.ERROR;
-                                } else {
-                                    state = CallInvitationState.WAITING;
-                                }
-                                changeUserState(zegoUIKitUser, state);
-                            }
-                            setCallState(CallInvitationServiceImpl.OUTGOING);
-                            RingtoneManager.playRingTone(false);
-                        }
-                    }
                     if (callbackListener != null) {
                         callbackListener.callback(result);
                     }
                 }
             });
-
-    }
-
-    public void cancelInvitation(List<String> invitees, String data, ZegoSignalingPluginNotificationConfig pushConfig,
-        PluginCallbackListener callbackListener) {
-        ZegoUIKit.getSignalingPlugin().cancelInvitation(invitees, data, pushConfig, new PluginCallbackListener() {
-            @Override
-            public void callback(Map<String, Object> result) {
-                if (callbackListener != null) {
-                    callbackListener.callback(result);
-                }
-            }
-        });
         for (Entry<ZegoUIKitUser, CallInvitationState> entry : callUserStates.entrySet()) {
             if (invitees.contains(entry.getKey().userID)) {
                 entry.setValue(CallInvitationState.CANCEL);
             }
         }
-        if (callInvitationData == null || callInvitationData.invitees.size() == 1) {
-            setCallState(NONE_CANCELED);
-        }
+        setCallState(NONE_CANCELED);
         RingtoneManager.stopRingTone();
     }
 
-    public void callCancel(List<String> invitees, String invitationID, String data,
-        ZegoSignalingPluginNotificationConfig pushConfig, PluginCallbackListener callbackListener) {
-        ZegoUIKit.getSignalingPlugin().callCancel(invitees, invitationID, data, pushConfig, callbackListener);
-        if (callInvitationData == null || callInvitationData.invitees.size() == 1) {
-            setCallState(NONE_CANCELED);
+    public void rejectInvitation(PluginCallbackListener callbackListener) {
+        if (callInvitationData != null) {
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("reason", "decline");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            rejectInvitation(callInvitationData.invitationID, jsonObject.toString(), callbackListener);
         }
-        RingtoneManager.stopRingTone();
     }
 
-    public void refuseInvitation(String inviterID, String data, PluginCallbackListener callbackListener) {
-        ZegoUIKit.getSignalingPlugin().refuseInvitation(inviterID, data, new PluginCallbackListener() {
+    public void rejectInvitation(String data, PluginCallbackListener callbackListener) {
+        if (callInvitationData != null) {
+            rejectInvitation(callInvitationData.invitationID, data, callbackListener);
+        }
+    }
+
+    public void rejectInvitation(String invitationID, String data, PluginCallbackListener callbackListener) {
+        ZegoUIKit.getSignalingPlugin().callReject(invitationID, data, new PluginCallbackListener() {
             @Override
             public void callback(Map<String, Object> result) {
                 if (callbackListener != null) {
@@ -845,14 +972,20 @@ public class CallInvitationServiceImpl {
         RingtoneManager.stopRingTone();
     }
 
-    public void callReject(String invitationID, String data, PluginCallbackListener callbackListener) {
-        ZegoUIKit.getSignalingPlugin().callReject(invitationID, data, callbackListener);
-        setCallState(NONE_REJECTED);
-        RingtoneManager.stopRingTone();
+    public void acceptInvitation(PluginCallbackListener callbackListener) {
+        if (callInvitationData != null) {
+            acceptInvitation(callInvitationData.invitationID, "", callbackListener);
+        }
     }
 
-    public void acceptInvitation(String inviterID, String data, PluginCallbackListener callbackListener) {
-        ZegoUIKit.getSignalingPlugin().acceptInvitation(inviterID, data, new PluginCallbackListener() {
+    public void acceptInvitation(String data, PluginCallbackListener callbackListener) {
+        if (callInvitationData != null) {
+            acceptInvitation(callInvitationData.invitationID, data, callbackListener);
+        }
+    }
+
+    public void acceptInvitation(String invitationID, String data, PluginCallbackListener callbackListener) {
+        ZegoUIKit.getSignalingPlugin().callAccept(invitationID, data, new PluginCallbackListener() {
             @Override
             public void callback(Map<String, Object> result) {
                 if (callbackListener != null) {
@@ -860,12 +993,6 @@ public class CallInvitationServiceImpl {
                 }
             }
         });
-        setCallState(CONNECTED);
-        RingtoneManager.stopRingTone();
-    }
-
-    public void callAccept(String invitationID, String data, PluginCallbackListener callbackListener) {
-        ZegoUIKit.getSignalingPlugin().callAccept(invitationID, data, callbackListener);
         setCallState(CONNECTED);
         RingtoneManager.stopRingTone();
     }
@@ -1115,11 +1242,6 @@ public class CallInvitationServiceImpl {
 
         @Override
         public void onActivityDestroyed(@NonNull Activity activity) {
-        }
-
-        private boolean isActivityAlive(final Activity activity) {
-            return activity != null && !activity.isFinishing() && (
-                Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 || !activity.isDestroyed());
         }
 
         public Activity getTopActivity() {

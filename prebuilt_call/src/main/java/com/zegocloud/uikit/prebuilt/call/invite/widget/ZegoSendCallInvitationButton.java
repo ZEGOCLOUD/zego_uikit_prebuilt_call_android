@@ -8,10 +8,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginNotificationConfig;
-import com.zegocloud.uikit.plugin.adapter.utils.GenericUtils;
+import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.plugin.invitation.components.ZegoStartInvitationButton;
 import com.zegocloud.uikit.prebuilt.call.R;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ClickListener;
@@ -19,9 +20,8 @@ import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallUser;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Map;
+import timber.log.Timber;
 
 public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
 
@@ -79,73 +79,56 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
 
     @Override
     protected void invokedWhenClick() {
-        if (invitees.isEmpty()) {
-            return;
-        }
-        JSONObject jsonObject = new JSONObject();
-        JSONArray jsonArray = new JSONArray();
-        String callID = generateCallID();
-
-        try {
-            jsonObject.put("call_id", callID);
-            for (ZegoUIKitUser invitee : invitees) {
-                JSONObject tmp = new JSONObject();
-                tmp.put("user_id", invitee.userID);
-                tmp.put("user_name", invitee.userName);
-                jsonArray.put(tmp);
-            }
-            jsonObject.put("invitees", jsonArray);
-            jsonObject.put("custom_data", customData);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        ZegoSignalingPluginNotificationConfig notificationConfig = getSendInvitationConfig();
-        data = jsonObject.toString();
-        List<String> idList = GenericUtils.map(invitees, uiKitUser -> uiKitUser.userID);
-        CallInvitationServiceImpl.getInstance()
-            .sendInvitation(idList, timeout, type, data, notificationConfig, result -> {
-                ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
-                if (uiKitUser == null) {
-                    String message = getContext().getString(R.string.login_error_tips);
-                    showError(-1, message);
-                    if (sendInvitationListener != null) {
-                        sendInvitationListener.onClick(-1, message, new ArrayList<>());
-                    }
-                } else {
-                    int code = (int) result.get("code");
-                    String message = (String) result.get("message");
-                    List<ZegoUIKitUser> errorInvitees = (List<ZegoUIKitUser>) result.get("errorInvitees");
-                    if (code == 0) {
-                        if (errorInvitees.isEmpty() || errorInvitees.size() != invitees.size()) {
-                            CallInviteActivity.startOutgoingPage(getContext());
-                        }
-                        if (!errorInvitees.isEmpty()) {
-                            StringBuilder sb = new StringBuilder(
-                                getContext().getString(R.string.call_invite_error_offline));
-                            int count = 0;
-                            for (ZegoUIKitUser errorInvitee : errorInvitees) {
-                                sb.append(errorInvitee.userID);
-                                sb.append(" ");
-                                count += 1;
-                                if (count == 5) {
-                                    sb.append("...");
-                                    break;
-                                }
-                            }
-                            showError(-2, sb.toString());
+        ZegoInvitationType invitationType = ZegoInvitationType.getZegoInvitationType(type);
+        ZegoUIKitPrebuiltCallInvitationService.sendInvitation(invitees, invitationType, customData, timeout, null,
+            getSendInvitationConfig(), new PluginCallbackListener() {
+                @Override
+                public void callback(Map<String, Object> result) {
+                    Timber.d("callback() called with: result = [" + result + "]");
+                    ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
+                    if (uiKitUser == null) {
+                        String message = getContext().getString(R.string.login_error_tips);
+                        showError(-4, message);
+                        if (sendInvitationListener != null) {
+                            sendInvitationListener.onClick(-1, message, new ArrayList<>());
                         }
                     } else {
-                        showError(code, getContext().getString(R.string.call_invite_error, code, message));
-                    }
-                    if (sendInvitationListener != null) {
-                        List<ZegoCallUser> callbackErrorInvitees = new ArrayList<>();
-                        if (errorInvitees != null && errorInvitees.size() > 0) {
-                            for (ZegoUIKitUser errorInvitee : errorInvitees) {
-                                ZegoCallUser zegoCallUser = new ZegoCallUser(errorInvitee.userID, errorInvitee.userName);
-                                callbackErrorInvitees.add(zegoCallUser);
+                        int code = (int) result.get("code");
+                        String message = (String) result.get("message");
+                        List<ZegoUIKitUser> errorInvitees = (List<ZegoUIKitUser>) result.get("errorInvitees");
+                        if (code == 0) {
+                            if (errorInvitees.isEmpty() || errorInvitees.size() != invitees.size()) {
+                                CallInviteActivity.startOutgoingPage(getContext());
                             }
+                            if (!errorInvitees.isEmpty()) {
+                                StringBuilder sb = new StringBuilder(
+                                    getContext().getString(R.string.call_invite_error_offline));
+                                int count = 0;
+                                for (ZegoUIKitUser errorInvitee : errorInvitees) {
+                                    sb.append(errorInvitee.userID);
+                                    sb.append(" ");
+                                    count += 1;
+                                    if (count == 5) {
+                                        sb.append("...");
+                                        break;
+                                    }
+                                }
+                                showError(-5, sb.toString());
+                            }
+                        } else {
+                            showError(code, getContext().getString(R.string.call_invite_error, code, message));
                         }
-                        sendInvitationListener.onClick(code, message, callbackErrorInvitees);
+                        if (sendInvitationListener != null) {
+                            List<ZegoCallUser> callbackErrorInvitees = new ArrayList<>();
+                            if (errorInvitees != null && errorInvitees.size() > 0) {
+                                for (ZegoUIKitUser errorInvitee : errorInvitees) {
+                                    ZegoCallUser zegoCallUser = new ZegoCallUser(errorInvitee.userID,
+                                        errorInvitee.userName);
+                                    callbackErrorInvitees.add(zegoCallUser);
+                                }
+                            }
+                            sendInvitationListener.onClick(code, message, callbackErrorInvitees);
+                        }
                     }
                 }
             });
