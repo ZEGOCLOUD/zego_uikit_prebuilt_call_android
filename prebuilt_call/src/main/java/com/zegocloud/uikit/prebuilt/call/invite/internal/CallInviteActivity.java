@@ -123,7 +123,7 @@ public class CallInviteActivity extends AppCompatActivity {
                     }
                 });
             } else {
-                ZegoUIKitPrebuiltCallInvitationService.acceptInvitation(new PluginCallbackListener() {
+                CallInvitationServiceImpl.getInstance().acceptInvitation(new PluginCallbackListener() {
                     @Override
                     public void callback(Map<String, Object> result) {
                         showCallFragment();

@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.zegocloud.uikit.plugin.invitation.components.ZegoCancelInvitationButton;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 
 public class ZegoCancelCallInvitationButton extends ZegoCancelInvitationButton {
 
@@ -21,6 +22,6 @@ public class ZegoCancelCallInvitationButton extends ZegoCancelInvitationButton {
 
     @Override
     protected void invokedWhenClick() {
-        ZegoUIKitPrebuiltCallInvitationService.cancelInvitation(null);
+        CallInvitationServiceImpl.getInstance().cancelInvitation(null);
     }
 }

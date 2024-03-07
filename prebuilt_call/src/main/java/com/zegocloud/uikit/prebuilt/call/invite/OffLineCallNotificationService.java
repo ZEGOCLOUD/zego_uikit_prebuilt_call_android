@@ -38,7 +38,7 @@ public class OffLineCallNotificationService extends Service {
                 ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance()
                     .getCallInvitationData();
                 if (callInvitationData != null) {
-                    ZegoUIKitPrebuiltCallInvitationService.rejectInvitation(null);
+                    CallInvitationServiceImpl.getInstance().rejectInvitation(null);
                 }
             } else {
                 CallInvitationServiceImpl.getInstance()

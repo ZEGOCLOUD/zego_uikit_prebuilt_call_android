@@ -747,7 +747,7 @@ public class CallInvitationServiceImpl {
                         }
                     }
                     if (!waitedUserIDs.isEmpty()) {
-                        ZegoUIKitPrebuiltCallInvitationService.cancelInvitation(waitedUserIDs, null);
+                        CallInvitationServiceImpl.getInstance().cancelInvitation(waitedUserIDs, null);
                     }
                 }
             }
