@@ -488,14 +488,12 @@ public class CallInvitationServiceImpl {
         } else {
             this.invitationConfig = invitationConfig;
         }
-        if (invitationConfig != null) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
-                }
-            }, 500);
-        }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
+            }
+        }, 500);
     }
 
     public ZegoUIKitPrebuiltCallInvitationConfig getCallInvitationConfig() {

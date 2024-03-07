@@ -61,84 +61,25 @@ public class ZegoUIKitPrebuiltCallInvitationService {
         }
     }
 
-    public static void sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees, ZegoInvitationType type,
-        String customData, PluginCallbackListener callbackListener) {
+    public static void sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees,
+        ZegoInvitationType type, PluginCallbackListener callbackListener) {
         CallInvitationServiceImpl.getInstance()
-            .sendInvitationWithUIChange(activity,invitees, type, customData, 60, null, null, callbackListener);
+            .sendInvitationWithUIChange(activity, invitees, type, "", 60, null, null, callbackListener);
     }
 
-    public static void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType type, String customData,
-        PluginCallbackListener callbackListener) {
+    public static void sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees,
+        ZegoInvitationType type, String resourceID, PluginCallbackListener callbackListener) {
+        ZegoSignalingPluginNotificationConfig notificationConfig = new ZegoSignalingPluginNotificationConfig();
+        notificationConfig.setResourceID(resourceID);
         CallInvitationServiceImpl.getInstance()
-            .sendInvitation(invitees, type, customData, 60, null, null, callbackListener);
+            .sendInvitationWithUIChange(activity, invitees, type, "", 60, null, notificationConfig, callbackListener);
     }
 
-    public static void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType type, String customData,
-        String resourceID, PluginCallbackListener callbackListener) {
-        ZegoSignalingPluginNotificationConfig pluginNotificationConfig = new ZegoSignalingPluginNotificationConfig();
-        pluginNotificationConfig.setResourceID(resourceID);
-
+    public static void sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees,
+        ZegoInvitationType type, String customData, String callID,
+        ZegoSignalingPluginNotificationConfig notificationConfig, PluginCallbackListener callbackListener) {
         CallInvitationServiceImpl.getInstance()
-            .sendInvitation(invitees, type, customData, 60, null, pluginNotificationConfig, callbackListener);
-    }
-
-    public static void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType type, String customData,
-        int timeout, ZegoSignalingPluginNotificationConfig pluginNotificationConfig,
-        PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance()
-            .sendInvitation(invitees, type, customData, timeout, null, pluginNotificationConfig, callbackListener);
-    }
-
-    public static void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType type, String customData,
-        int timeout, String callID, ZegoSignalingPluginNotificationConfig pluginNotificationConfig,
-        PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance()
-            .sendInvitation(invitees, type, customData, timeout, callID, pluginNotificationConfig, callbackListener);
-    }
-
-    public static void acceptInvitation(PluginCallbackListener pluginCallbackListener) {
-        CallInvitationServiceImpl.getInstance().acceptInvitation(pluginCallbackListener);
-    }
-
-    public static void acceptInvitation(String data, PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance().acceptInvitation(data, callbackListener);
-    }
-
-    public static void acceptInvitation(String invitationID, String data, PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance().acceptInvitation(invitationID, data, callbackListener);
-    }
-
-    public static void rejectInvitation(PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance().rejectInvitation(callbackListener);
-    }
-
-    public static void rejectInvitation(String data, PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance().rejectInvitation(data, callbackListener);
-    }
-
-    public static void rejectInvitation(String invitationID, String data, PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance().rejectInvitation(invitationID, data, callbackListener);
-    }
-
-    public static void cancelInvitation(PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance().cancelInvitation(callbackListener);
-    }
-
-    public static void cancelInvitation(String data, PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance().cancelInvitation(data, callbackListener);
-    }
-
-    public static void cancelInvitation(List<String> invitees, PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance().cancelInvitation(invitees, callbackListener);
-    }
-
-    public static void cancelInvitation(List<String> invitees, String data, PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance().cancelInvitation(invitees, data, callbackListener);
-    }
-
-    public static void cancelInvitation(List<String> invitees, String invitationID, String data,
-        ZegoSignalingPluginNotificationConfig pushConfig, PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance()
-            .cancelInvitation(invitees, invitationID, data, pushConfig, callbackListener);
+            .sendInvitationWithUIChange(activity, invitees, type, customData, 60, callID, notificationConfig,
+                callbackListener);
     }
 }
