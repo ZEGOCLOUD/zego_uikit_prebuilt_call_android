@@ -20,7 +20,6 @@ import com.zegocloud.uikit.components.audiovideo.ZegoToggleCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleMicrophoneButton;
 import com.zegocloud.uikit.components.common.ZegoScreenSharingToggleButton;
 import com.zegocloud.uikit.prebuilt.call.R;
-import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCallListener;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoInRoomChatConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMemberListConfig;
@@ -33,7 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class TopMenuBar extends FrameLayout {
 
@@ -48,7 +46,6 @@ public class TopMenuBar extends FrameLayout {
     private ZegoPrebuiltVideoConfig screenSharingVideoConfig;
     private ZegoMemberListConfig memberListConfig;
     private ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo;
-    private LeaveCallListener leaveCallListener;
     private Dialog beautyDialog;
     private ZegoInRoomChatConfig inRoomChatConfig;
     private Map<ZegoMenuBarButtonName, View> enumViewMap = new HashMap<>();
@@ -167,13 +164,6 @@ public class TopMenuBar extends FrameLayout {
                 break;
             case HANG_UP_BUTTON:
                 view = new ZegoLeaveCallButton(getContext());
-                if (hangUpConfirmDialogInfo != null) {
-                    ((ZegoLeaveCallButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
-                }
-                if (leaveCallListener != null) {
-                    ((ZegoLeaveCallButton) view).setLeaveListener(leaveCallListener);
-                }
-
                 ((ZegoLeaveCallButton) view).setIcon(R.drawable.call_icon_top_leave);
                 break;
             case SWITCH_AUDIO_OUTPUT_BUTTON:
@@ -303,13 +293,5 @@ public class TopMenuBar extends FrameLayout {
 
     public void setMemberListConfig(ZegoMemberListConfig memberListConfig) {
         this.memberListConfig = memberListConfig;
-    }
-
-    public void setHangUpConfirmDialogInfo(ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo) {
-        this.hangUpConfirmDialogInfo = hangUpConfirmDialogInfo;
-    }
-
-    public void setLeaveCallListener(LeaveCallListener leaveCallListener) {
-        this.leaveCallListener = leaveCallListener;
     }
 }

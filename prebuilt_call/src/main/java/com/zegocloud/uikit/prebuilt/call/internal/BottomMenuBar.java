@@ -141,12 +141,6 @@ public class BottomMenuBar extends LinearLayout {
                 break;
             case HANG_UP_BUTTON:
                 view = new ZegoLeaveCallButton(getContext());
-                if (hangUpConfirmDialogInfo != null) {
-                    ((ZegoLeaveCallButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
-                }
-                if (leaveCallListener != null) {
-                    ((ZegoLeaveCallButton) view).setLeaveListener(leaveCallListener);
-                }
                 break;
             case SWITCH_AUDIO_OUTPUT_BUTTON:
                 view = new ZegoSwitchAudioOutputButton(getContext());
@@ -328,34 +322,6 @@ public class BottomMenuBar extends LinearLayout {
 
     public void setMemberListConfig(ZegoMemberListConfig memberListConfig) {
         this.memberListConfig = memberListConfig;
-    }
-
-    public void setHangUpConfirmDialogInfo(ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo) {
-        this.hangUpConfirmDialogInfo = hangUpConfirmDialogInfo;
-        for (View view : showList) {
-            if (view instanceof ZegoLeaveCallButton) {
-                ((ZegoLeaveCallButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
-            }
-        }
-        for (View view : hideList) {
-            if (view instanceof ZegoLeaveCallButton) {
-                ((ZegoLeaveCallButton) view).setHangUpConfirmInfo(hangUpConfirmDialogInfo);
-            }
-        }
-    }
-
-    public void setLeaveCallListener(LeaveCallListener leaveCallListener) {
-        this.leaveCallListener = leaveCallListener;
-        for (View view : showList) {
-            if (view instanceof ZegoLeaveCallButton) {
-                ((ZegoLeaveCallButton) view).setLeaveListener(leaveCallListener);
-            }
-        }
-        for (View view : hideList) {
-            if (view instanceof ZegoLeaveCallButton) {
-                ((ZegoLeaveCallButton) view).setLeaveListener(leaveCallListener);
-            }
-        }
     }
 
     public void setInRoomChatConfig(ZegoInRoomChatConfig inRoomChatConfig) {

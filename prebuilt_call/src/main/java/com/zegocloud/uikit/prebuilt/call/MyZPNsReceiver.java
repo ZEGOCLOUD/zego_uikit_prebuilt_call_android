@@ -8,7 +8,7 @@ import android.content.pm.ResolveInfo;
 import android.text.TextUtils;
 import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
-import com.zegocloud.uikit.prebuilt.call.invite.ZegoCallInvitationData;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZIMPushMessage;
 import im.zego.zpns.ZPNsMessageReceiver;

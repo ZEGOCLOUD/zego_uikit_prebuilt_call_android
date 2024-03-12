@@ -11,6 +11,7 @@ import android.os.Looper;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallNotificationManager;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZIMPushMessage;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallInvitationData;
 import java.util.List;
 import timber.log.Timber;
 

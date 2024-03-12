@@ -18,6 +18,9 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltAudioVideoViewConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltVideoConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig;
+import com.zegocloud.uikit.prebuilt.call.event.BackPressEvent;
+import com.zegocloud.uikit.prebuilt.call.event.CallEndListener;
+import com.zegocloud.uikit.prebuilt.call.event.CallEvents;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoMiniVideoConfig;
 import com.zegocloud.uikit.service.defines.ZegoMeRemovedFromRoomListener;
 import java.util.ArrayList;
@@ -44,6 +47,12 @@ public class ZegoUIKitPrebuiltCallConfig {
     public ZegoBeautyPluginConfig beautyConfig = new ZegoBeautyPluginConfig();
     public ZegoInRoomChatConfig inRoomChatConfig = new ZegoInRoomChatConfig();
     public ZegoMiniVideoConfig miniVideoConfig = new ZegoMiniVideoConfig();
+
+    /**
+     * use ZegoUIKitPrebuiltCallInvitationService.events.callEvents.setCallEndListener() instead;
+     *
+     * @deprecated use {@link CallEvents#setCallEndListener(CallEndListener)} instead.
+     */
     public transient ZegoMeRemovedFromRoomListener removedFromRoomListener;
 
     public ZegoUIKitPrebuiltCallConfig() {

@@ -8,13 +8,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zegocloud.uikit.components.audiovideo.ZegoLeaveButton;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
-import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment.LeaveCallListener;
+import com.zegocloud.uikit.prebuilt.call.event.CallEndListener;
+import com.zegocloud.uikit.prebuilt.call.event.ZegoCallEndReason;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 
 public class ZegoLeaveCallButton extends ZegoLeaveButton {
-
-    private ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo;
-    private LeaveCallListener leaveCallListener;
 
     public ZegoLeaveCallButton(@NonNull Context context) {
         super(context);
@@ -24,24 +26,27 @@ public class ZegoLeaveCallButton extends ZegoLeaveButton {
         super(context, attrs);
     }
 
-    public void setHangUpConfirmInfo(ZegoHangUpConfirmDialogInfo info) {
-        hangUpConfirmDialogInfo = info;
-    }
-
     @Override
     public void invokedWhenClick() {
         boolean isActivity = getContext() instanceof Activity;
-        if (isActivity && hangUpConfirmDialogInfo != null) {
-            showQuitDialog(hangUpConfirmDialogInfo);
+        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
+        if (isActivity && callConfig.hangUpConfirmDialogInfo != null) {
+            showQuitDialog(callConfig.hangUpConfirmDialogInfo);
         } else {
-            if (leaveCallListener != null) {
-                leaveCallListener.onLeaveCall();
+            if (callConfig.leaveCallListener != null) {
+                callConfig.leaveCallListener.onLeaveCall();
+            } else {
+                ZegoUIKitPrebuiltCallFragment callFragment = CallInvitationServiceImpl.getInstance().getZegoUIKitPrebuiltCallFragment();
+                if (callFragment != null) {
+                    callFragment.endCall();
+                }
+                CallInvitationServiceImpl.getInstance().leaveRoom();
+                CallEndListener callEndListener = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getCallEndListener();
+                if (callEndListener != null) {
+                    callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);
+                }
             }
         }
-    }
-
-    public void setLeaveListener(LeaveCallListener listener) {
-        this.leaveCallListener = listener;
     }
 
     private void showQuitDialog(ZegoHangUpConfirmDialogInfo dialogInfo) {
@@ -51,8 +56,19 @@ public class ZegoLeaveCallButton extends ZegoLeaveButton {
         builder.setPositiveButton(dialogInfo.confirmButtonName, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if (leaveCallListener != null) {
-                    leaveCallListener.onLeaveCall();
+                ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
+                if (callConfig.leaveCallListener != null) {
+                    callConfig.leaveCallListener.onLeaveCall();
+                } else {
+                    ZegoUIKitPrebuiltCallFragment callFragment = CallInvitationServiceImpl.getInstance().getZegoUIKitPrebuiltCallFragment();
+                    if (callFragment != null) {
+                        callFragment.endCall();
+                    }
+                    CallInvitationServiceImpl.getInstance().leaveRoom();
+                    CallEndListener callEndListener = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getCallEndListener();
+                    if (callEndListener != null) {
+                        callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);
+                    }
                 }
             }
         });

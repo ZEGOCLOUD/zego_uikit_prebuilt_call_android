@@ -37,11 +37,14 @@ import com.zegocloud.uikit.prebuilt.call.config.DurationUpdateListener;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallFragmentCallBinding;
+import com.zegocloud.uikit.prebuilt.call.event.BackPressEvent;
+import com.zegocloud.uikit.prebuilt.call.event.CallEndListener;
+import com.zegocloud.uikit.prebuilt.call.event.CallEvents;
+import com.zegocloud.uikit.prebuilt.call.event.ZegoCallEndReason;
 import com.zegocloud.uikit.prebuilt.call.internal.MiniVideoView;
 import com.zegocloud.uikit.prebuilt.call.internal.MiniVideoWindow;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoAudioVideoForegroundView;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoScreenShareForegroundView;
-import com.zegocloud.uikit.prebuilt.call.invite.BackPressEvent;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.service.defines.ZegoMeRemovedFromRoomListener;
@@ -127,7 +130,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         String userID = arguments.getString("userID");
         String userName = arguments.getString("userName");
         if (appID != 0) {
-            CallInvitationServiceImpl.getInstance().initAndLoginUser(application, appID, appSign, userID, userName);
+            CallInvitationServiceImpl.getInstance().init(application, appID, appSign);
+            CallInvitationServiceImpl.getInstance().loginUser(userID, userName);
         }
 
         ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
@@ -178,16 +182,20 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         onBackPressedCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                BackPressEvent backPressEvent = ZegoUIKitPrebuiltCallInvitationService.events.getBackPressEvent();
+                BackPressEvent backPressEvent = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getBackPressEvent();
                 if (backPressEvent != null && backPressEvent.onBackPressed()) {
 
                 } else {
                     if (callConfig.hangUpConfirmDialogInfo != null) {
                         handleFragmentBackPressed(callConfig.hangUpConfirmDialogInfo);
                     } else {
+                        CallEndListener callEndListener = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getCallEndListener();
+                        if (callEndListener != null) {
+                            callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);
+                        }
                         setEnabled(false);
-                        leaveRoom();
-                        requireActivity().onBackPressed();
+                        endCall();
+                        CallInvitationServiceImpl.getInstance().leaveRoom();
                     }
                 }
 
@@ -228,8 +236,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 requireActivity().unregisterReceiver(configurationChangeReceiver);
                 configurationChangeReceiver = null;
             }
-            leaveRoom();
-            CallInvitationServiceImpl.getInstance().setZegoUIKitPrebuiltCallFragment(null);
+            dismissMiniVideoWindow();
+            CallInvitationServiceImpl.getInstance().leaveRoom();
         }
 
     }
@@ -240,8 +248,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         if (configurationChangeReceiver != null) {
             requireActivity().unregisterReceiver(configurationChangeReceiver);
             configurationChangeReceiver = null;
-            leaveRoom();
-            CallInvitationServiceImpl.getInstance().setZegoUIKitPrebuiltCallFragment(null);
+            dismissMiniVideoWindow();
+            CallInvitationServiceImpl.getInstance().leaveRoom();
         }
     }
 
@@ -259,14 +267,13 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         boolean isCallInvite = CallInvitationServiceImpl.getInstance().getCallInvitationConfig() != null;
         boolean isInRoom = CallInvitationServiceImpl.getInstance().isInRoom();
         ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
-        boolean hasMiniButton =
-            callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
-                || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON);
+        boolean hasMiniButton = callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
+            || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON);
         return isInRoom && isCallInvite && checkAlertWindowPermission() && hasMiniButton;
     }
 
-    public void minimizeCall(){
-        if(canShowMiniWindow()){
+    public void minimizeCall() {
+        if (canShowMiniWindow()) {
             requireActivity().moveTaskToBack(true);
         }
     }
@@ -342,12 +349,16 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         });
 
         ZegoUIKit.addOnOnlySelfInRoomListener(() -> {
-            ZegoOnlySelfInRoomListener selfInRoomListener = ZegoUIKitPrebuiltCallInvitationService.events.getOnlySelfInRoomListener();
+            ZegoOnlySelfInRoomListener selfInRoomListener = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getOnlySelfInRoomListener();
             if (selfInRoomListener != null) {
                 selfInRoomListener.onOnlySelfInRoom();
             } else {
-                leaveRoom();
-                requireActivity().finish();
+                CallEndListener callEndListener = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getCallEndListener();
+                if (callEndListener != null) {
+                    callEndListener.onCallEnd(ZegoCallEndReason.REMOTE_HANGUP, "");
+                }
+                endCall();
+                CallInvitationServiceImpl.getInstance().leaveRoom();
             }
         });
 
@@ -355,8 +366,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             @Override
             public void onMeRemovedFromRoom() {
                 if (callConfig.removedFromRoomListener == null) {
-                    leaveRoom();
-                    requireActivity().finish();
+                    endCall();
+                    CallInvitationServiceImpl.getInstance().leaveRoom();
                 }
             }
         });
@@ -529,32 +540,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         binding.topMenuBar.setScreenShareVideoConfig(config.screenSharingVideoConfig);
         binding.bottomMenuBar.setScreenShareVideoConfig(config.screenSharingVideoConfig);
 
-        binding.topMenuBar.setHangUpConfirmDialogInfo(config.hangUpConfirmDialogInfo);
-        binding.bottomMenuBar.setHangUpConfirmDialogInfo(config.hangUpConfirmDialogInfo);
-
-        binding.bottomMenuBar.setLeaveCallListener(new LeaveCallListener() {
-            @Override
-            public void onLeaveCall() {
-                if (config.leaveCallListener != null) {
-                    config.leaveCallListener.onLeaveCall();
-                } else {
-                    leaveRoom();
-                    requireActivity().finish();
-                }
-            }
-        });
-        binding.topMenuBar.setLeaveCallListener(new LeaveCallListener() {
-            @Override
-            public void onLeaveCall() {
-                if (config.leaveCallListener != null) {
-                    config.leaveCallListener.onLeaveCall();
-                } else {
-                    leaveRoom();
-                    requireActivity().finish();
-                }
-            }
-        });
-
         if (bottomMenuBarBtns.size() > 0) {
             binding.bottomMenuBar.addButtons(bottomMenuBarBtns);
         }
@@ -612,8 +597,13 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 if (onBackPressedCallback != null) {
                     onBackPressedCallback.setEnabled(false);
                 }
-                leaveRoom();
-                requireActivity().onBackPressed();
+                dialog.dismiss();
+                CallEndListener callEndListener = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getCallEndListener();
+                if (callEndListener != null) {
+                    callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);
+                }
+                endCall();
+                CallInvitationServiceImpl.getInstance().leaveRoom();
             }
         });
         builder.setNegativeButton(negativeText, new DialogInterface.OnClickListener() {
@@ -626,9 +616,9 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         builder.show();
     }
 
-    private void leaveRoom() {
+    public void endCall() {
         dismissMiniVideoWindow();
-        CallInvitationServiceImpl.getInstance().leaveRoom();
+        requireActivity().finish();
     }
 
     public void addButtonToBottomMenuBar(List<View> viewList) {
@@ -645,8 +635,14 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         }
     }
 
+    /**
+     * use ZegoUIKitPrebuiltCallInvitationService.events.callEvents.setOnlySelfInRoomListener() instead;
+     *
+     * @deprecated use {@link CallEvents#setOnlySelfInRoomListener(ZegoOnlySelfInRoomListener)} instead.
+     */
+    @Deprecated
     public void setOnOnlySelfInRoomListener(ZegoOnlySelfInRoomListener listener) {
-        ZegoUIKitPrebuiltCallInvitationService.events.setOnlySelfInRoomListener(listener);
+        ZegoUIKitPrebuiltCallInvitationService.events.callEvents.setOnlySelfInRoomListener(listener);
     }
 
     public interface LeaveCallListener {

@@ -3,6 +3,7 @@ package com.zegocloud.uikit.prebuilt.call.invite;
 import android.graphics.drawable.Drawable;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoNotificationConfig;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoInnerText;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoUIKitPrebuiltCallConfigProvider;
 
 public class ZegoUIKitPrebuiltCallInvitationConfig {
 

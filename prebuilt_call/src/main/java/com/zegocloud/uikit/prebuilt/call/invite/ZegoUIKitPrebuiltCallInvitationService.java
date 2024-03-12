@@ -6,6 +6,7 @@ import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginN
 import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
+import com.zegocloud.uikit.prebuilt.call.event.Events;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.IncomingCallButtonListener;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.OutgoingCallButtonListener;
@@ -17,9 +18,21 @@ public class ZegoUIKitPrebuiltCallInvitationService {
 
     public static Events events = new Events();
 
+    /**
+     * ZEGO SDK will init and login,only after init and login,SDK can send/receive call to/from others.Please make sure SDK
+     * init success and login success.
+     *
+     * @param application
+     * @param appID
+     * @param appSign
+     * @param userID
+     * @param userName
+     * @param config
+     */
     public static void init(Application application, long appID, String appSign, String userID, String userName,
         ZegoUIKitPrebuiltCallInvitationConfig config) {
-        CallInvitationServiceImpl.getInstance().initAndLoginUser(application, appID, appSign, userID, userName);
+        CallInvitationServiceImpl.getInstance().init(application, appID, appSign);
+        CallInvitationServiceImpl.getInstance().loginUser(userID, userName);
         CallInvitationServiceImpl.getInstance().setCallInvitationConfig(config);
     }
 
@@ -27,31 +40,70 @@ public class ZegoUIKitPrebuiltCallInvitationService {
         CallInvitationServiceImpl.getInstance().unInit();
     }
 
+    /**
+     * use ZegoUIKitPrebuiltCallInvitationService.events.invitationEvents.setIncomingCallButtonListener() instead;
+     *
+     * @deprecated use
+     * {@link
+     * com.zegocloud.uikit.prebuilt.call.event.InvitationEvents#setIncomingCallButtonListener(IncomingCallButtonListener)}
+     * instead.
+     */
+    @Deprecated
     public static void addIncomingCallButtonListener(IncomingCallButtonListener listener) {
-        CallInvitationServiceImpl.getInstance().addIncomingCallButtonListener(listener);
+        events.invitationEvents.setIncomingCallButtonListener(listener);
     }
 
+    /**
+     * use ZegoUIKitPrebuiltCallInvitationService.events.invitationEvents.setOutgoingCallButtonListener() instead;
+     *
+     * @deprecated use
+     * {@link
+     * com.zegocloud.uikit.prebuilt.call.event.InvitationEvents#setOutgoingCallButtonListener(OutgoingCallButtonListener)}
+     * instead.
+     */
+    @Deprecated
     public static void addOutgoingCallButtonListener(OutgoingCallButtonListener listener) {
-        CallInvitationServiceImpl.getInstance().addOutgoingCallButtonListener(listener);
+        events.invitationEvents.setOutgoingCallButtonListener(listener);
     }
 
+    /**
+     * use ZegoUIKitPrebuiltCallInvitationService.events.invitationEvents.setInvitationListener() instead;
+     *
+     * @param listener
+     * @deprecated use
+     * {@link
+     * com.zegocloud.uikit.prebuilt.call.event.InvitationEvents#setInvitationListener(ZegoInvitationCallListener)}
+     * instead.
+     */
+    @Deprecated
     public static void addInvitationCallListener(ZegoInvitationCallListener listener) {
-        CallInvitationServiceImpl.getInstance().addInvitationCallListener(listener);
+        events.invitationEvents.setInvitationListener(listener);
     }
 
+    /**
+     * use ZegoUIKitPrebuiltCallInvitationService.events.invitationEvents.setInvitationListener() instead;
+     *
+     * @deprecated use
+     * {@link
+     * com.zegocloud.uikit.prebuilt.call.event.InvitationEvents#setInvitationListener(ZegoInvitationCallListener)}
+     * instead.
+     */
+    @Deprecated
     public static void removeInvitationCallListener() {
-        CallInvitationServiceImpl.getInstance().removeInvitationCallListener();
+        events.invitationEvents.setInvitationListener(null);
     }
 
     public static ZegoUIKitPrebuiltCallFragment getPrebuiltCallFragment() {
         return CallInvitationServiceImpl.getInstance().getZegoUIKitPrebuiltCallFragment();
     }
 
+
     public static void endCall() {
         ZegoUIKitPrebuiltCallFragment prebuiltCallFragment = getPrebuiltCallFragment();
         if (prebuiltCallFragment != null) {
-            prebuiltCallFragment.requireActivity().finish();
+            prebuiltCallFragment.endCall();
         }
+        CallInvitationServiceImpl.getInstance().leaveRoom();
     }
 
     public static void minimizeCall() {
