@@ -4,8 +4,8 @@ public interface CallEndListener {
 
     /**
      * @param callEndReason
-     * @param jsonObject    when callEndReason is KICK_OUT,this value means who kick out you.if the value is empty,means
-     *                      you are kicked out by server
+     * @param jsonObject    when callEndReason is KICK_OUT,this value means who kick out you
+     *                      .if the value is empty,means you are kicked out by server
      */
     void onCallEnd(ZegoCallEndReason callEndReason, String jsonObject);
 }

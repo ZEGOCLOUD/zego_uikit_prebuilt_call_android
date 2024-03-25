@@ -6,21 +6,26 @@ import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginN
 import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.event.Events;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.IncomingCallButtonListener;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.OutgoingCallButtonListener;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoInvitationCallListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.List;
 
+/**
+ * @deprecated use {@link ZegoUIKitPrebuiltCallService } instead
+ */
+@Deprecated
 public class ZegoUIKitPrebuiltCallInvitationService {
 
-    public static Events events = new Events();
+    @Deprecated
+    public static Events events = ZegoUIKitPrebuiltCallService.events;
 
     /**
-     * ZEGO SDK will init and login,only after init and login,SDK can send/receive call to/from others.Please make sure SDK
-     * init success and login success.
+     * ZEGO SDK will init and login,only after init and login,SDK can send/receive call to/from others.Please make sure
+     * SDK init success and login success.
      *
      * @param application
      * @param appID
@@ -29,15 +34,15 @@ public class ZegoUIKitPrebuiltCallInvitationService {
      * @param userName
      * @param config
      */
+    @Deprecated
     public static void init(Application application, long appID, String appSign, String userID, String userName,
         ZegoUIKitPrebuiltCallInvitationConfig config) {
-        CallInvitationServiceImpl.getInstance().init(application, appID, appSign);
-        CallInvitationServiceImpl.getInstance().loginUser(userID, userName);
-        CallInvitationServiceImpl.getInstance().setCallInvitationConfig(config);
+        ZegoUIKitPrebuiltCallService.init(application, appID, appSign, userID, userName, config);
     }
 
+    @Deprecated
     public static void unInit() {
-        CallInvitationServiceImpl.getInstance().unInit();
+        ZegoUIKitPrebuiltCallService.unInit();
     }
 
     /**
@@ -93,45 +98,78 @@ public class ZegoUIKitPrebuiltCallInvitationService {
         events.invitationEvents.setInvitationListener(null);
     }
 
+    /**
+     * if you are in a call ,then ZegoUIKitPrebuiltCallFragment will be returned else null will be returned.
+     *
+     * @deprecated use {@link ZegoUIKitPrebuiltCallService#getPrebuiltCallFragment()} instead.
+     */
+    @Deprecated
     public static ZegoUIKitPrebuiltCallFragment getPrebuiltCallFragment() {
-        return CallInvitationServiceImpl.getInstance().getZegoUIKitPrebuiltCallFragment();
+        return ZegoUIKitPrebuiltCallService.getPrebuiltCallFragment();
     }
 
 
+    /**
+     * end and leave current call.
+     *
+     * @deprecated use {@link ZegoUIKitPrebuiltCallService#endCall()} instead.
+     */
+    @Deprecated
     public static void endCall() {
-        ZegoUIKitPrebuiltCallFragment prebuiltCallFragment = getPrebuiltCallFragment();
-        if (prebuiltCallFragment != null) {
-            prebuiltCallFragment.endCall();
-        }
-        CallInvitationServiceImpl.getInstance().leaveRoom();
+        ZegoUIKitPrebuiltCallService.endCall();
     }
 
+    /**
+     * if you have configured Minimize button in top or bottom bars,and have granted related permissions,you can use
+     * this method to minimize the current call activity to a float window.
+     *
+     * @deprecated use {@link ZegoUIKitPrebuiltCallService#minimizeCall()} instead.
+     */
+    @Deprecated
     public static void minimizeCall() {
-        ZegoUIKitPrebuiltCallFragment callFragment = ZegoUIKitPrebuiltCallInvitationService.getPrebuiltCallFragment();
-        if (callFragment != null) {
-            callFragment.minimizeCall();
-        }
+        ZegoUIKitPrebuiltCallService.minimizeCall();
     }
 
+    /**
+     * use this method to sendInvitation to other users and auto navigate to call waiting page.
+     *
+     * @deprecated use
+     * {@link ZegoUIKitPrebuiltCallService#sendInvitationWithUIChange(Activity, List, ZegoInvitationType,
+     * PluginCallbackListener)} instead.
+     */
+    @Deprecated
     public static void sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees,
         ZegoInvitationType type, PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance()
-            .sendInvitationWithUIChange(activity, invitees, type, "", 60, null, null, callbackListener);
+        ZegoUIKitPrebuiltCallService.sendInvitationWithUIChange(activity, invitees, type, callbackListener);
     }
 
+    /**
+     * use this method to sendInvitation to other users and auto navigate to call waiting page.
+     *
+     * @deprecated use
+     * {@link ZegoUIKitPrebuiltCallService#sendInvitationWithUIChange(Activity, List, ZegoInvitationType, String,
+     * String, ZegoSignalingPluginNotificationConfig, PluginCallbackListener)} instead.
+     */
+    @Deprecated
     public static void sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees,
         ZegoInvitationType type, String resourceID, PluginCallbackListener callbackListener) {
         ZegoSignalingPluginNotificationConfig notificationConfig = new ZegoSignalingPluginNotificationConfig();
         notificationConfig.setResourceID(resourceID);
-        CallInvitationServiceImpl.getInstance()
-            .sendInvitationWithUIChange(activity, invitees, type, "", 60, null, notificationConfig, callbackListener);
+        ZegoUIKitPrebuiltCallService.sendInvitationWithUIChange(activity, invitees, type, resourceID, callbackListener);
     }
 
+    /**
+     * use this method to sendInvitation to other users and auto navigate to call waiting page.
+     *
+     * @deprecated use
+     * {@link ZegoUIKitPrebuiltCallService#sendInvitationWithUIChange(Activity, List, ZegoInvitationType,
+     * PluginCallbackListener)}  instead.
+     */
+    @Deprecated
     public static void sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees,
         ZegoInvitationType type, String customData, String callID,
         ZegoSignalingPluginNotificationConfig notificationConfig, PluginCallbackListener callbackListener) {
-        CallInvitationServiceImpl.getInstance()
-            .sendInvitationWithUIChange(activity, invitees, type, customData, 60, callID, notificationConfig,
-                callbackListener);
+        ZegoUIKitPrebuiltCallService.sendInvitationWithUIChange(activity, invitees, type, customData, callID,
+            notificationConfig, callbackListener);
     }
 }

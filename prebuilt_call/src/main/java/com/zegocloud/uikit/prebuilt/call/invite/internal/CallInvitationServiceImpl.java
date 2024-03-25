@@ -461,6 +461,40 @@ public class CallInvitationServiceImpl {
         return false;
     }
 
+    public void openCamera(boolean open) {
+        ZegoUIKit.openCamera(open);
+    }
+
+    public void openMicrophone(boolean open) {
+        ZegoUIKit.openMicrophone(open);
+    }
+
+    public boolean isMicrophoneOn(String userID) {
+        return ZegoUIKit.isMicrophoneOn(userID);
+    }
+
+    public boolean isMicrophoneOn() {
+        if (ZegoUIKit.getLocalUser() == null) {
+            return false;
+        }
+        return ZegoUIKit.isMicrophoneOn(ZegoUIKit.getLocalUser().userID);
+    }
+
+    public boolean isCameraOn() {
+        if (ZegoUIKit.getLocalUser() == null) {
+            return false;
+        }
+        return ZegoUIKit.isCameraOn(ZegoUIKit.getLocalUser().userID);
+    }
+
+    public boolean isCameraOn(String userID) {
+        return ZegoUIKit.isCameraOn(userID);
+    }
+
+    public ZegoUIKitUser getLocalUser() {
+        return ZegoUIKit.getLocalUser();
+    }
+
     public ZegoCallInvitationData getCallInvitationData() {
         return callInvitationData;
     }
@@ -1200,7 +1234,10 @@ public class CallInvitationServiceImpl {
             Timber.d("onActivityResumed() called with: activity = [" + activity + "]");
             topActivity = activity;
             boolean notificationShowed = isCallNotificationShowed();
+            // if app is online and background,received a call notification
             if (notificationShowed && pushMessage == null) {
+                // if app's topActivity is not CallInviteActivity.then start it
+                // with incoming page
                 if (!(topActivity instanceof CallInviteActivity)) {
                     Intent intent = new Intent(activity, CallInviteActivity.class);
                     Bundle bundle = new Bundle();
@@ -1213,6 +1250,8 @@ public class CallInvitationServiceImpl {
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
+                            // for some devices,if app is background and cannot start CallInviteActivity,
+                            // then start a call invite dialog
                             if (!(topActivity instanceof CallInviteActivity) && topActivity != null) {
                                 RingtoneManager.playRingTone(true);
                                 invitationDialog = new CallInvitationDialog(topActivity, callInvitationData);
@@ -1222,11 +1261,12 @@ public class CallInvitationServiceImpl {
                     }, 800);
                 }
             }
-            if (!(topActivity instanceof CallInviteActivity)) {
-                //if click app directly
-                if (notificationAction == null) {
-                    setZIMPushMessage(null);
-                }
+            // if app was at front,and topActivity is not CallInviteActivity，
+            // for example,received a offline notification, not click notification
+            // but directly click app icon instead
+            if (!(topActivity instanceof CallInviteActivity) && notificationAction == null) {
+                //clear push message will make app start normally auto sign in
+                setZIMPushMessage(null);
             }
             boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
             if (canShowFullOnLockScreen) {

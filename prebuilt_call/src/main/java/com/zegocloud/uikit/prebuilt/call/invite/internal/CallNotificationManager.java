@@ -286,7 +286,7 @@ public class CallNotificationManager {
             }
             return openIntent;
         } else {
-
+            // remember action and start app, auto accept and start callInviteActivity
             Intent intent = new Intent(context, OffLineCallNotificationService.class);
             intent.setAction(ACTION_ACCEPT_CALL);
 
@@ -298,24 +298,6 @@ public class CallNotificationManager {
                 pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
             return pendingIntent;
-
-            //             if use offline service,click notification will not dismiss notification dialog,so we
-            //             go to activity directly here
-            //            Intent intent = new Intent();
-            //            try {
-            //                intent = new Intent(context, Class.forName(getLauncherActivity(context)));
-            //            } catch (ClassNotFoundException e) {
-            //                e.printStackTrace();
-            //            }
-            //            intent.setAction(ACTION_ACCEPT_CALL);
-            //            PendingIntent pendingIntent;
-            //            if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
-            //                pendingIntent = PendingIntent.getActivity(context, 0, intent,
-            //                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-            //            } else {
-            //                pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            //            }
-            //            return pendingIntent;
         }
     }
 
