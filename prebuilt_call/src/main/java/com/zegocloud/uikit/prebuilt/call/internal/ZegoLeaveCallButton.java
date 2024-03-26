@@ -10,10 +10,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zegocloud.uikit.components.audiovideo.ZegoLeaveButton;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.event.CallEndListener;
 import com.zegocloud.uikit.prebuilt.call.event.ZegoCallEndReason;
-import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 
 public class ZegoLeaveCallButton extends ZegoLeaveButton {
@@ -41,7 +41,7 @@ public class ZegoLeaveCallButton extends ZegoLeaveButton {
                     callFragment.endCall();
                 }
                 CallInvitationServiceImpl.getInstance().leaveRoom();
-                CallEndListener callEndListener = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getCallEndListener();
+                CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
                 if (callEndListener != null) {
                     callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);
                 }
@@ -65,7 +65,7 @@ public class ZegoLeaveCallButton extends ZegoLeaveButton {
                         callFragment.endCall();
                     }
                     CallInvitationServiceImpl.getInstance().leaveRoom();
-                    CallEndListener callEndListener = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getCallEndListener();
+                    CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
                     if (callEndListener != null) {
                         callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);
                     }

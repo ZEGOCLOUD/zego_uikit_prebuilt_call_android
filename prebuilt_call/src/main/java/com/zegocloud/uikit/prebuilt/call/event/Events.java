@@ -4,14 +4,12 @@ import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 
 public class Events {
 
-    // invitationEvent (外面 + onSignalPluginConnectionStateChanged）
-    // CallEvent (room, + BackPress + ExpressEvent)
     public CallEvents callEvents = new CallEvents();
     public InvitationEvents invitationEvents = new InvitationEvents();
     private ErrorEventsListener errorEventsListener;
 
     /**
-     * use ZegoUIKitPrebuiltCallInvitationService.events.callEvents.setBackPressEvent() instead;
+     * use ZegoUIKitPrebuiltCallService.events.callEvents.setBackPressEvent() instead;
      *
      * @deprecated use {@link CallEvents#setBackPressEvent(BackPressEvent)} instead.
      */
@@ -21,7 +19,7 @@ public class Events {
     }
 
     /**
-     * use ZegoUIKitPrebuiltCallInvitationService.events.callEvents.setOnlySelfInRoomListener() instead;
+     * use ZegoUIKitPrebuiltCallService.events.callEvents.setOnlySelfInRoomListener() instead;
      *
      * @deprecated use {@link CallEvents#setOnlySelfInRoomListener(ZegoOnlySelfInRoomListener)} instead.
      */

@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog.Builder;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallDialogInvitationBinding;
 import com.zegocloud.uikit.prebuilt.call.event.InvitationEvents;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
@@ -52,7 +53,7 @@ public class CallInvitationDialog {
         binding.dialogCallName.setText(invitationData.inviter.userName);
         binding.dialogCallAccept.setInviterID(invitationData.inviter.userID);
         binding.dialogCallAccept.setOnClickListener(v -> {
-            IncomingCallButtonListener incomingCallButtonListener = ZegoUIKitPrebuiltCallInvitationService.events.invitationEvents.getIncomingCallButtonListener();
+            IncomingCallButtonListener incomingCallButtonListener = ZegoUIKitPrebuiltCallService.events.invitationEvents.getIncomingCallButtonListener();
             if (incomingCallButtonListener != null) {
                 incomingCallButtonListener.onIncomingCallAcceptButtonPressed();
             }
@@ -76,7 +77,7 @@ public class CallInvitationDialog {
         }
         binding.dialogCallDecline.setInviterID(invitationData.inviter.userID);
         binding.dialogCallDecline.setOnClickListener(v -> {
-            IncomingCallButtonListener incomingCallButtonListener = ZegoUIKitPrebuiltCallInvitationService.events.invitationEvents.getIncomingCallButtonListener();
+            IncomingCallButtonListener incomingCallButtonListener = ZegoUIKitPrebuiltCallService.events.invitationEvents.getIncomingCallButtonListener();
             if (incomingCallButtonListener != null) {
                 incomingCallButtonListener.onIncomingCallDeclineButtonPressed();
             }

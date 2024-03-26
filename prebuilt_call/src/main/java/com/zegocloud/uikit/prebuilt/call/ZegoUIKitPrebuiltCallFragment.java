@@ -182,14 +182,14 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         onBackPressedCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                BackPressEvent backPressEvent = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getBackPressEvent();
+                BackPressEvent backPressEvent = ZegoUIKitPrebuiltCallService.events.callEvents.getBackPressEvent();
                 if (backPressEvent != null && backPressEvent.onBackPressed()) {
 
                 } else {
                     if (callConfig.hangUpConfirmDialogInfo != null) {
                         handleFragmentBackPressed(callConfig.hangUpConfirmDialogInfo);
                     } else {
-                        CallEndListener callEndListener = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getCallEndListener();
+                        CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
                         if (callEndListener != null) {
                             callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);
                         }
@@ -349,11 +349,11 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         });
 
         ZegoUIKit.addOnOnlySelfInRoomListener(() -> {
-            ZegoOnlySelfInRoomListener selfInRoomListener = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getOnlySelfInRoomListener();
+            ZegoOnlySelfInRoomListener selfInRoomListener = ZegoUIKitPrebuiltCallService.events.callEvents.getOnlySelfInRoomListener();
             if (selfInRoomListener != null) {
                 selfInRoomListener.onOnlySelfInRoom();
             } else {
-                CallEndListener callEndListener = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getCallEndListener();
+                CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
                 if (callEndListener != null) {
                     callEndListener.onCallEnd(ZegoCallEndReason.REMOTE_HANGUP, "");
                 }
@@ -598,7 +598,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                     onBackPressedCallback.setEnabled(false);
                 }
                 dialog.dismiss();
-                CallEndListener callEndListener = ZegoUIKitPrebuiltCallInvitationService.events.callEvents.getCallEndListener();
+                CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
                 if (callEndListener != null) {
                     callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);
                 }
@@ -636,13 +636,13 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     /**
-     * use ZegoUIKitPrebuiltCallInvitationService.events.callEvents.setOnlySelfInRoomListener() instead;
+     * use ZegoUIKitPrebuiltCallService.events.callEvents.setOnlySelfInRoomListener() instead;
      *
      * @deprecated use {@link CallEvents#setOnlySelfInRoomListener(ZegoOnlySelfInRoomListener)} instead.
      */
     @Deprecated
     public void setOnOnlySelfInRoomListener(ZegoOnlySelfInRoomListener listener) {
-        ZegoUIKitPrebuiltCallInvitationService.events.callEvents.setOnlySelfInRoomListener(listener);
+        ZegoUIKitPrebuiltCallService.events.callEvents.setOnlySelfInRoomListener(listener);
     }
 
     public interface LeaveCallListener {

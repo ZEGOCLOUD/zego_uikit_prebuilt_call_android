@@ -23,6 +23,7 @@ import com.zegocloud.uikit.components.audiovideo.ZegoAvatarViewProvider;
 import com.zegocloud.uikit.plugin.adapter.utils.GenericUtils;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallLayoutWaitingBinding;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
@@ -148,14 +149,14 @@ public class CallWaitingFragment extends Fragment {
         binding.callWaitingRefuse.setInviterID(inviter.userID);
         binding.callWaitingCancel.setInvitees(GenericUtils.map(invitees, uiKitUser -> uiKitUser.userID));
         binding.callWaitingCancel.setOnClickListener(v -> {
-            OutgoingCallButtonListener outgoingCallButtonListener = ZegoUIKitPrebuiltCallInvitationService.events.invitationEvents.getOutgoingCallButtonListener();
+            OutgoingCallButtonListener outgoingCallButtonListener = ZegoUIKitPrebuiltCallService.events.invitationEvents.getOutgoingCallButtonListener();
             if (outgoingCallButtonListener != null) {
                 outgoingCallButtonListener.onOutgoingCallCancelButtonPressed();
             }
             requireActivity().finish();
         });
         binding.callWaitingRefuse.setOnClickListener(v -> {
-            IncomingCallButtonListener incomingCallButtonListener = ZegoUIKitPrebuiltCallInvitationService.events.invitationEvents.getIncomingCallButtonListener();
+            IncomingCallButtonListener incomingCallButtonListener = ZegoUIKitPrebuiltCallService.events.invitationEvents.getIncomingCallButtonListener();
             if (incomingCallButtonListener != null) {
                 incomingCallButtonListener.onIncomingCallDeclineButtonPressed();
             }
@@ -164,7 +165,7 @@ public class CallWaitingFragment extends Fragment {
             CallInvitationServiceImpl.getInstance().clearPushMessage();
         });
         binding.callWaitingAccept.setOnClickListener(v -> {
-            IncomingCallButtonListener incomingCallButtonListener = ZegoUIKitPrebuiltCallInvitationService.events.invitationEvents.getIncomingCallButtonListener();
+            IncomingCallButtonListener incomingCallButtonListener = ZegoUIKitPrebuiltCallService.events.invitationEvents.getIncomingCallButtonListener();
             if (incomingCallButtonListener != null) {
                 incomingCallButtonListener.onIncomingCallAcceptButtonPressed();
             }

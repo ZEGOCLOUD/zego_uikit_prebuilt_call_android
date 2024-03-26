@@ -49,7 +49,7 @@ public class ZegoUIKitPrebuiltCallConfig {
     public ZegoMiniVideoConfig miniVideoConfig = new ZegoMiniVideoConfig();
 
     /**
-     * use ZegoUIKitPrebuiltCallInvitationService.events.callEvents.setCallEndListener() instead;
+     * use ZegoUIKitPrebuiltCallService.events.callEvents.setCallEndListener() instead;
      *
      * @deprecated use {@link CallEvents#setCallEndListener(CallEndListener)} instead.
      */

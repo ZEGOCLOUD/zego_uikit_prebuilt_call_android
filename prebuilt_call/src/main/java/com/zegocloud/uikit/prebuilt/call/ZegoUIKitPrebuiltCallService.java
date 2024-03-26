@@ -17,8 +17,8 @@ public class ZegoUIKitPrebuiltCallService {
     public static Events events = new Events();
 
     /**
-     * ZEGO SDK will init and login,only after init and login,SDK can send/receive call to/from others.Please make sure
-     * SDK init success and login success.
+     * ZEGO SDK will init and login.Only after init and login,SDK can send/receive call to/from others. Please make sure
+     * SDK init success and login success.This method should be called as soon as user login this own business.
      *
      * @param application
      * @param appID
@@ -34,6 +34,9 @@ public class ZegoUIKitPrebuiltCallService {
         CallInvitationServiceImpl.getInstance().setCallInvitationConfig(config);
     }
 
+    /**
+     * Should call this method as soon as the user logout from  app
+     */
     public static void unInit() {
         CallInvitationServiceImpl.getInstance().unInit();
     }
@@ -50,7 +53,7 @@ public class ZegoUIKitPrebuiltCallService {
     }
 
     /**
-     * if you are in a call ,then ZegoUIKitPrebuiltCallFragment will be returned else null will be returned.
+     * This function can be used to get `ZegoUIKitPrebuiltCallFragment` when in a call.If not in a call,and null will be returned.
      *
      * @return ZegoUIKitPrebuiltCallFragment or null.
      */
@@ -59,8 +62,9 @@ public class ZegoUIKitPrebuiltCallService {
     }
 
     /**
-     * if you have configured Minimize button in top or bottom bars,and have granted related permissions,you can use
-     * this method to minimize the current call activity to a float window.
+     * This function is used to minimize the current call.usually it can be used with backpressed Listener to minimize
+     * call when press back button.To make it work,you should have Overlays permission and has
+     * ZegoMenuBarButtonName.MINIMIZING_BUTTON and use ZEGO call invite service.
      */
     public static void minimizeCall() {
         ZegoUIKitPrebuiltCallFragment callFragment = ZegoUIKitPrebuiltCallInvitationService.getPrebuiltCallFragment();
@@ -130,6 +134,7 @@ public class ZegoUIKitPrebuiltCallService {
     public static boolean isMicrophoneOn() {
         return CallInvitationServiceImpl.getInstance().isMicrophoneOn();
     }
+
     public static boolean isCameraOn() {
         return CallInvitationServiceImpl.getInstance().isCameraOn();
     }

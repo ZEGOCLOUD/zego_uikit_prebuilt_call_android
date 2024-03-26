@@ -33,6 +33,9 @@ public class ZegoUIKitPrebuiltCallInvitationService {
      * @param userID
      * @param userName
      * @param config
+     * @deprecated use
+     * {@link ZegoUIKitPrebuiltCallService#init(Application, long, String, String, String,
+     * ZegoUIKitPrebuiltCallInvitationConfig)}  instead.
      */
     @Deprecated
     public static void init(Application application, long appID, String appSign, String userID, String userName,
@@ -40,13 +43,16 @@ public class ZegoUIKitPrebuiltCallInvitationService {
         ZegoUIKitPrebuiltCallService.init(application, appID, appSign, userID, userName, config);
     }
 
+    /**
+     * {@link ZegoUIKitPrebuiltCallService#unInit()}   instead.
+     */
     @Deprecated
     public static void unInit() {
         ZegoUIKitPrebuiltCallService.unInit();
     }
 
     /**
-     * use ZegoUIKitPrebuiltCallInvitationService.events.invitationEvents.setIncomingCallButtonListener() instead;
+     * use ZegoUIKitPrebuiltCallService.events.invitationEvents.setIncomingCallButtonListener() instead;
      *
      * @deprecated use
      * {@link
@@ -59,7 +65,7 @@ public class ZegoUIKitPrebuiltCallInvitationService {
     }
 
     /**
-     * use ZegoUIKitPrebuiltCallInvitationService.events.invitationEvents.setOutgoingCallButtonListener() instead;
+     * use ZegoUIKitPrebuiltCallService.events.invitationEvents.setOutgoingCallButtonListener() instead;
      *
      * @deprecated use
      * {@link
@@ -72,7 +78,7 @@ public class ZegoUIKitPrebuiltCallInvitationService {
     }
 
     /**
-     * use ZegoUIKitPrebuiltCallInvitationService.events.invitationEvents.setInvitationListener() instead;
+     * use ZegoUIKitPrebuiltCallService.events.invitationEvents.setInvitationListener() instead;
      *
      * @param listener
      * @deprecated use
@@ -86,7 +92,7 @@ public class ZegoUIKitPrebuiltCallInvitationService {
     }
 
     /**
-     * use ZegoUIKitPrebuiltCallInvitationService.events.invitationEvents.setInvitationListener() instead;
+     * use ZegoUIKitPrebuiltCallService.events.invitationEvents.setInvitationListener() instead;
      *
      * @deprecated use
      * {@link
