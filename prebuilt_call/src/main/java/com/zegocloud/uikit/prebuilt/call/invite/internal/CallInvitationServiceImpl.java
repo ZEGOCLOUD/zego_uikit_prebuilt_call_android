@@ -135,6 +135,10 @@ public class CallInvitationServiceImpl {
             super.onRoomStateChanged(roomID, reason, errorCode, extendedData);
             CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
             if (reason == ZegoRoomStateChangedReason.KICK_OUT) {
+                if (zegoUIKitPrebuiltCallFragment != null) {
+                    zegoUIKitPrebuiltCallFragment.endCall();
+                }
+                CallInvitationServiceImpl.getInstance().leaveRoom();
                 if (callEndListener != null) {
                     callEndListener.onCallEnd(ZegoCallEndReason.KICK_OUT, "");
                 }
@@ -152,6 +156,10 @@ public class CallInvitationServiceImpl {
                     for (int i = 0; i < userIDArray.length(); i++) {
                         String userID = userIDArray.getString(i);
                         if (localUser != null && Objects.equals(userID, localUser.userID)) {
+                            if (zegoUIKitPrebuiltCallFragment != null) {
+                                zegoUIKitPrebuiltCallFragment.endCall();
+                            }
+                            CallInvitationServiceImpl.getInstance().leaveRoom();
                             CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
                             if (callEndListener != null) {
                                 callEndListener.onCallEnd(ZegoCallEndReason.KICK_OUT, fromUser.userID);
@@ -160,7 +168,6 @@ public class CallInvitationServiceImpl {
                     }
                 }
             } catch (JSONException e) {
-                throw new RuntimeException(e);
             }
         }
     };
