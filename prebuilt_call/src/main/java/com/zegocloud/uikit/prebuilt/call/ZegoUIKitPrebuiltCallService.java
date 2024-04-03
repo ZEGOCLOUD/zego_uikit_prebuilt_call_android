@@ -29,7 +29,14 @@ public class ZegoUIKitPrebuiltCallService {
      */
     public static void init(Application application, long appID, String appSign, String userID, String userName,
         ZegoUIKitPrebuiltCallInvitationConfig config) {
-        CallInvitationServiceImpl.getInstance().init(application, appID, appSign);
+        CallInvitationServiceImpl.getInstance().init(application, appID, appSign, null);
+        CallInvitationServiceImpl.getInstance().loginUser(userID, userName);
+        CallInvitationServiceImpl.getInstance().setCallInvitationConfig(config);
+    }
+
+    public static void initWithToken(Application application, long appID, String token, String userID, String userName,
+        ZegoUIKitPrebuiltCallInvitationConfig config) {
+        CallInvitationServiceImpl.getInstance().init(application, appID, null, token);
         CallInvitationServiceImpl.getInstance().loginUser(userID, userName);
         CallInvitationServiceImpl.getInstance().setCallInvitationConfig(config);
     }
@@ -53,7 +60,8 @@ public class ZegoUIKitPrebuiltCallService {
     }
 
     /**
-     * This function can be used to get `ZegoUIKitPrebuiltCallFragment` when in a call.If not in a call,and null will be returned.
+     * This function can be used to get `ZegoUIKitPrebuiltCallFragment` when in a call.If not in a call,and null will be
+     * returned.
      *
      * @return ZegoUIKitPrebuiltCallFragment or null.
      */
@@ -137,5 +145,9 @@ public class ZegoUIKitPrebuiltCallService {
 
     public static boolean isCameraOn() {
         return CallInvitationServiceImpl.getInstance().isCameraOn();
+    }
+
+    public static void renewToken(String token) {
+        CallInvitationServiceImpl.getInstance().renewToken(token);
     }
 }

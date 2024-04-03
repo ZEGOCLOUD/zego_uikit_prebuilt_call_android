@@ -45,7 +45,6 @@ import com.zegocloud.uikit.prebuilt.call.internal.MiniVideoView;
 import com.zegocloud.uikit.prebuilt.call.internal.MiniVideoWindow;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoAudioVideoForegroundView;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoScreenShareForegroundView;
-import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.service.defines.ZegoMeRemovedFromRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
@@ -130,7 +129,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         String userID = arguments.getString("userID");
         String userName = arguments.getString("userName");
         if (appID != 0) {
-            CallInvitationServiceImpl.getInstance().init(application, appID, appSign);
+            CallInvitationServiceImpl.getInstance().init(application, appID, appSign, null);
             CallInvitationServiceImpl.getInstance().loginUser(userID, userName);
         }
 

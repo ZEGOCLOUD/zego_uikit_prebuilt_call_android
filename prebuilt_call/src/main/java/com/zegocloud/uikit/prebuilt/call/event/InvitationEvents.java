@@ -31,8 +31,7 @@ public class InvitationEvents {
         return outgoingCallButtonListener;
     }
 
-    public void setOutgoingCallButtonListener(
-        OutgoingCallButtonListener outgoingCallButtonListener) {
+    public void setOutgoingCallButtonListener(OutgoingCallButtonListener outgoingCallButtonListener) {
         this.outgoingCallButtonListener = outgoingCallButtonListener;
     }
 
@@ -40,8 +39,7 @@ public class InvitationEvents {
         return incomingCallButtonListener;
     }
 
-    public void setIncomingCallButtonListener(
-        IncomingCallButtonListener incomingCallButtonListener) {
+    public void setIncomingCallButtonListener(IncomingCallButtonListener incomingCallButtonListener) {
         this.incomingCallButtonListener = incomingCallButtonListener;
     }
 }

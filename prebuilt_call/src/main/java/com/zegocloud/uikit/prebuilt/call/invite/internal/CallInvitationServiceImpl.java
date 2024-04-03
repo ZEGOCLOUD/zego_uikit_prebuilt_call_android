@@ -101,8 +101,6 @@ public class CallInvitationServiceImpl {
     private Application application;
     private long appID;
     private String appSign;
-    private String userID;
-    private String userName;
     private ZegoUIKitPrebuiltCallInvitationConfig invitationConfig;
     private ZegoUIKitPrebuiltCallConfig callConfig;
     private ZIMPushMessage pushMessage;
@@ -535,14 +533,21 @@ public class CallInvitationServiceImpl {
             String preAppSign = mmkv.getString("appSign", "");
             String preUserID = mmkv.getString("userID", "");
             String preUserName = mmkv.getString("userName", "");
-            init(application, preAppID, preAppSign);
+            String token = mmkv.getString("appToken", "");
+            init(application, preAppID, preAppSign, token);
             loginUser(preUserID, preUserName);
 
             ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
         }
     }
 
-    public boolean init(Application application, long appID, String appSign) {
+    public void renewToken(String token) {
+        ZegoUIKit.renewToken(token);
+        ZegoUIKit.getSignalingPlugin().renewToken(token);
+    }
+
+
+    public boolean init(Application application, long appID, String appSign, String token) {
         if (alreadyInit) {
             // we assume that user not changed his appID and appSign
             ErrorEventsListener errorEvents = ZegoUIKitPrebuiltCallService.events.getErrorEventsListener();
@@ -565,6 +570,11 @@ public class CallInvitationServiceImpl {
 
             mmkv.putLong("appID", appID);
             mmkv.putString("appSign", appSign);
+            mmkv.putString("appToken", token);
+
+            if (!TextUtils.isEmpty(token)) {
+                renewToken(token);
+            }
 
             ZegoUIKit.addEventHandler(expressEventHandler, false);
             ZegoUIKit.getSignalingPlugin().addInvitationListener(invitationListener);
@@ -628,8 +638,6 @@ public class CallInvitationServiceImpl {
         if (alreadyLogin) {
             return;
         }
-        this.userID = userID;
-        this.userName = userName;
         alreadyLogin = true;
         ZegoUIKit.login(userID, userName);
         ZegoUIKit.getSignalingPlugin().login(userID, userName, new ZegoUIKitPluginCallback() {
@@ -670,8 +678,6 @@ public class CallInvitationServiceImpl {
         inRoom = false;
         appID = 0;
         appSign = null;
-        userID = null;
-        userName = null;
         invitationConfig = null;
         callConfig = null;
         elapsedTime = 0;
@@ -834,11 +840,9 @@ public class CallInvitationServiceImpl {
     }
 
     public void joinRoom(String roomID, ZegoUIKitCallback callback) {
-        Timber.d("joinRoom() called with: roomID = [" + roomID + "], callback = [" + callback + "]");
         ZegoUIKit.joinRoom(roomID, new ZegoUIKitCallback() {
             @Override
             public void onResult(int errorCode) {
-                Timber.d("joinRoom onResult:" + errorCode);
                 inRoom = errorCode == 0;
                 if (inRoom) {
                     startTimeCount();
