@@ -541,12 +541,6 @@ public class CallInvitationServiceImpl {
         }
     }
 
-    public void renewToken(String token) {
-        ZegoUIKit.renewToken(token);
-        ZegoUIKit.getSignalingPlugin().renewToken(token);
-    }
-
-
     public boolean init(Application application, long appID, String appSign, String token) {
         if (alreadyInit) {
             // we assume that user not changed his appID and appSign
@@ -573,7 +567,7 @@ public class CallInvitationServiceImpl {
             mmkv.putString("appToken", token);
 
             if (!TextUtils.isEmpty(token)) {
-                renewToken(token);
+                ZegoUIKit.renewToken(token);
             }
 
             ZegoUIKit.addEventHandler(expressEventHandler, false);
