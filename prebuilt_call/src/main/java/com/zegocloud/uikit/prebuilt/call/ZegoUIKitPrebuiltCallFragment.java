@@ -115,6 +115,23 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         return fragment;
     }
 
+    public static ZegoUIKitPrebuiltCallFragment newInstanceWithToken(long appID, @NonNull String appToken,
+        @NonNull String userID, @NonNull String userName, @NonNull String callID,
+        @NonNull ZegoUIKitPrebuiltCallConfig config) {
+        ZegoUIKitPrebuiltCallFragment fragment = new ZegoUIKitPrebuiltCallFragment();
+        Bundle bundle = new Bundle();
+        bundle.putLong("appID", appID);
+        bundle.putString("appToken", appToken);
+        bundle.putString("userID", userID);
+        bundle.putString("userName", userName);
+        bundle.putString("callID", callID);
+        fragment.setArguments(bundle);
+
+        CallInvitationServiceImpl.getInstance().setCallConfig(config);
+        CallInvitationServiceImpl.getInstance().setZegoUIKitPrebuiltCallFragment(fragment);
+        return fragment;
+    }
+
     public ZegoUIKitPrebuiltCallFragment() {
 
     }
@@ -128,8 +145,14 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         String appSign = arguments.getString("appSign");
         String userID = arguments.getString("userID");
         String userName = arguments.getString("userName");
+        String appToken = arguments.getString("appToken");
         if (appID != 0) {
-            CallInvitationServiceImpl.getInstance().init(application, appID, appSign, null);
+            if (!TextUtils.isEmpty(appToken)) {
+                CallInvitationServiceImpl.getInstance().init(application, appID, null, appToken);
+            } else {
+                CallInvitationServiceImpl.getInstance().init(application, appID, appSign, null);
+            }
+
             CallInvitationServiceImpl.getInstance().loginUser(userID, userName);
         }
 
