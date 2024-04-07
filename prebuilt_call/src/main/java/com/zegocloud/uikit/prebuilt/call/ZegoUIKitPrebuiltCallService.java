@@ -146,8 +146,4 @@ public class ZegoUIKitPrebuiltCallService {
     public static boolean isCameraOn() {
         return CallInvitationServiceImpl.getInstance().isCameraOn();
     }
-
-    public static void renewToken(String token) {
-        CallInvitationServiceImpl.getInstance().renewToken(token);
-    }
 }
