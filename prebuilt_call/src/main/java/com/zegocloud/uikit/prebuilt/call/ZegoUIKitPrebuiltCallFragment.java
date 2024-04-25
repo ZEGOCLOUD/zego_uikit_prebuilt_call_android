@@ -389,6 +389,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             public void onMeRemovedFromRoom() {
                 if (callConfig.removedFromRoomListener == null) {
                     endCall();
+                    //callEndListener has been invoked in callInvitationServiceImpl.onIMRecvCustomCommand();
                     CallInvitationServiceImpl.getInstance().leaveRoom();
                 }
             }

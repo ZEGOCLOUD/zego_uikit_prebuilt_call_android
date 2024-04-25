@@ -52,11 +52,7 @@ public class ZegoUIKitPrebuiltCallService {
      * End and leave current call.Current activity will be finished.
      */
     public static void endCall() {
-        ZegoUIKitPrebuiltCallFragment prebuiltCallFragment = getPrebuiltCallFragment();
-        if (prebuiltCallFragment != null) {
-            prebuiltCallFragment.endCall();
-        }
-        CallInvitationServiceImpl.getInstance().leaveRoom();
+        CallInvitationServiceImpl.getInstance().endCallAndInvokeCallback();
     }
 
     /**

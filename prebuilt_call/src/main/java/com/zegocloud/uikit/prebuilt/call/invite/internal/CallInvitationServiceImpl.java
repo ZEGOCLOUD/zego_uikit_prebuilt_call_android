@@ -38,7 +38,6 @@ import com.zegocloud.uikit.prebuilt.call.event.ErrorEventsListener;
 import com.zegocloud.uikit.prebuilt.call.event.SignalPluginConnectListener;
 import com.zegocloud.uikit.prebuilt.call.event.ZegoCallEndReason;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
-import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 import com.zegocloud.uikit.service.defines.ZegoScenario;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitPluginCallback;
@@ -493,6 +492,18 @@ public class CallInvitationServiceImpl {
         return ZegoUIKit.isCameraOn(ZegoUIKit.getLocalUser().userID);
     }
 
+    public void endCallAndInvokeCallback() {
+        if (zegoUIKitPrebuiltCallFragment != null) {
+            CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
+            if (callEndListener != null) {
+                callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);
+            }
+            zegoUIKitPrebuiltCallFragment.endCall();
+            zegoUIKitPrebuiltCallFragment = null;
+        }
+        CallInvitationServiceImpl.getInstance().leaveRoom();
+    }
+
     public boolean isCameraOn(String userID) {
         return ZegoUIKit.isCameraOn(userID);
     }
@@ -682,9 +693,9 @@ public class CallInvitationServiceImpl {
     public void unInit() {
         Timber.d("unInit() called");
         leaveRoom();
-        ZegoUIKitPrebuiltCallFragment callFragment = ZegoUIKitPrebuiltCallInvitationService.getPrebuiltCallFragment();
+        ZegoUIKitPrebuiltCallFragment callFragment = ZegoUIKitPrebuiltCallService.getPrebuiltCallFragment();
         if (callFragment != null) {
-            callFragment.requireActivity().finish();
+            callFragment.endCall();
         }
         ZegoUIKit.removeEventHandler(expressEventHandler);
         ZegoSignalingPlugin.getInstance().unregisterZIMEventHandler(zimEventHandler);
