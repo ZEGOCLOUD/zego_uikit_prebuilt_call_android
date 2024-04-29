@@ -190,9 +190,11 @@ public class TopMenuBar extends FrameLayout {
                 if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
                     ZegoMenuBarButtonConfig buttonConfig = callConfig.bottomMenuBarConfig.buttonConfig;
                     if (buttonConfig != null) {
-                        if (buttonConfig.switchCameraFrontImage != null && buttonConfig.switchCameraBackImage != null) {
-                            ((ZegoSwitchCameraButton) view).setImageDrawable(buttonConfig.switchCameraFrontImage,
-                                buttonConfig.switchCameraBackImage);
+                        if (buttonConfig.switchCameraFrontImage != null) {
+                            ((ZegoSwitchCameraButton) view).setOpenDrawable(buttonConfig.switchCameraFrontImage);
+                        }
+                        if (buttonConfig.switchCameraBackImage != null) {
+                            ((ZegoSwitchCameraButton) view).setCloseDrawable(buttonConfig.switchCameraBackImage);
                         }
                     }
                 }
