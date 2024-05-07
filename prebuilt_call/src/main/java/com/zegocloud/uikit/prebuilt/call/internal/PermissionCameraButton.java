@@ -14,6 +14,9 @@ import com.permissionx.guolindev.PermissionX;
 import com.permissionx.guolindev.callback.RequestCallback;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleCameraButton;
 import com.zegocloud.uikit.prebuilt.call.R;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
+import com.zegocloud.uikit.prebuilt.call.event.ZegoMenuBarButtonClickListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +47,11 @@ public class PermissionCameraButton extends ZegoToggleCameraButton {
                     requestPermissionIfNeeded((allGranted, grantedList, deniedList) -> {
                         if (allGranted) {
                             callOnClick();
+                            ZegoMenuBarButtonClickListener clickListener = ZegoUIKitPrebuiltCallService.events.callEvents.getButtonClickListener();
+                            if (clickListener != null) {
+                                clickListener.onClick(ZegoMenuBarButtonName.TOGGLE_CAMERA_BUTTON,
+                                    PermissionCameraButton.this);
+                            }
                         }
                     });
                 }

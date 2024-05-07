@@ -21,6 +21,7 @@ import com.zegocloud.uikit.components.audiovideo.ZegoToggleMicrophoneButton;
 import com.zegocloud.uikit.components.common.ZegoScreenSharingToggleButton;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoInRoomChatConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMemberListConfig;
@@ -29,6 +30,7 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltVideoConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig;
+import com.zegocloud.uikit.prebuilt.call.event.ZegoMenuBarButtonClickListener;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.utils.Utils;
 import java.util.ArrayList;
@@ -151,7 +153,7 @@ public class TopMenuBar extends FrameLayout {
         View view = null;
         ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
         switch (menuBar) {
-            case TOGGLE_CAMERA_BUTTON:
+            case TOGGLE_CAMERA_BUTTON: {
                 view = new PermissionCameraButton(getContext());
                 ((ZegoToggleCameraButton) view).setIcon(R.drawable.call_icon_top_camera_normal,
                     R.drawable.call_icon_top_camera_off);
@@ -166,8 +168,9 @@ public class TopMenuBar extends FrameLayout {
                         }
                     }
                 }
-                break;
-            case TOGGLE_MICROPHONE_BUTTON:
+            }
+            break;
+            case TOGGLE_MICROPHONE_BUTTON: {
                 view = new PermissionMicrophoneButton(getContext());
                 ((ZegoToggleMicrophoneButton) view).setIcon(R.drawable.call_icon_top_mic_normal,
                     R.drawable.call_icon_top_mic_off);
@@ -182,8 +185,10 @@ public class TopMenuBar extends FrameLayout {
                         }
                     }
                 }
-                break;
-            case SWITCH_CAMERA_BUTTON:
+            }
+
+            break;
+            case SWITCH_CAMERA_BUTTON: {
                 view = new ZegoSwitchCameraButton(getContext());
                 ((ZegoSwitchCameraButton) view).setImageResource(R.drawable.call_icon_top_camera_switch,
                     R.drawable.call_icon_top_camera_switch);
@@ -198,8 +203,10 @@ public class TopMenuBar extends FrameLayout {
                         }
                     }
                 }
-                break;
-            case HANG_UP_BUTTON:
+            }
+
+            break;
+            case HANG_UP_BUTTON: {
                 view = new ZegoLeaveCallButton(getContext());
                 ((ZegoLeaveCallButton) view).setIcon(R.drawable.call_icon_top_leave);
                 if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
@@ -210,8 +217,16 @@ public class TopMenuBar extends FrameLayout {
                         }
                     }
                 }
-                break;
-            case SWITCH_AUDIO_OUTPUT_BUTTON:
+                view.setOnClickListener(v -> {
+                    ZegoMenuBarButtonClickListener clickListener = ZegoUIKitPrebuiltCallService.events.callEvents.getButtonClickListener();
+                    if (clickListener != null) {
+                        clickListener.onClick(ZegoMenuBarButtonName.HANG_UP_BUTTON, v);
+                    }
+                });
+            }
+
+            break;
+            case SWITCH_AUDIO_OUTPUT_BUTTON: {
                 view = new ZegoSwitchAudioOutputButton(getContext());
                 ((ZegoSwitchAudioOutputButton) view).setIcon(R.drawable.call_icon_top_speaker_normal,
                     R.drawable.call_icon_top_speaker_close, R.drawable.call_icon_top_bluetooth);
@@ -233,8 +248,15 @@ public class TopMenuBar extends FrameLayout {
                         }
                     }
                 }
-                break;
-            case SHOW_MEMBER_LIST_BUTTON:
+                view.setOnClickListener(v -> {
+                    ZegoMenuBarButtonClickListener clickListener = ZegoUIKitPrebuiltCallService.events.callEvents.getButtonClickListener();
+                    if (clickListener != null) {
+                        clickListener.onClick(ZegoMenuBarButtonName.SWITCH_AUDIO_OUTPUT_BUTTON, v);
+                    }
+                });
+            }
+            break;
+            case SHOW_MEMBER_LIST_BUTTON: {
                 view = new ImageView(getContext());
                 ((ImageView) view).setImageResource(R.drawable.call_icon_top_member_normal);
                 if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
@@ -251,9 +273,14 @@ public class TopMenuBar extends FrameLayout {
                         memberList.setMemberListConfig(memberListConfig);
                     }
                     memberList.show();
+                    ZegoMenuBarButtonClickListener clickListener = ZegoUIKitPrebuiltCallService.events.callEvents.getButtonClickListener();
+                    if (clickListener != null) {
+                        clickListener.onClick(ZegoMenuBarButtonName.SHOW_MEMBER_LIST_BUTTON, v);
+                    }
                 });
-                break;
-            case SCREEN_SHARING_TOGGLE_BUTTON:
+            }
+            break;
+            case SCREEN_SHARING_TOGGLE_BUTTON: {
                 view = new ZegoScreenSharingToggleButton(getContext());
                 ((ZegoScreenSharingToggleButton) view).topBarStyle();
                 if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
@@ -272,7 +299,14 @@ public class TopMenuBar extends FrameLayout {
                 if (screenSharingVideoConfig != null) {
                     ((ZegoScreenSharingToggleButton) view).setPresetResolution(screenSharingVideoConfig.resolution);
                 }
-                break;
+                view.setOnClickListener(v -> {
+                    ZegoMenuBarButtonClickListener clickListener = ZegoUIKitPrebuiltCallService.events.callEvents.getButtonClickListener();
+                    if (clickListener != null) {
+                        clickListener.onClick(ZegoMenuBarButtonName.SCREEN_SHARING_TOGGLE_BUTTON, v);
+                    }
+                });
+            }
+            break;
             case BEAUTY_BUTTON: {
                 view = new BeautyButton(getContext());
                 if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
@@ -291,6 +325,10 @@ public class TopMenuBar extends FrameLayout {
                     if (beautyDialog != null) {
                         beautyDialog.show();
                     }
+                    ZegoMenuBarButtonClickListener clickListener = ZegoUIKitPrebuiltCallService.events.callEvents.getButtonClickListener();
+                    if (clickListener != null) {
+                        clickListener.onClick(ZegoMenuBarButtonName.BEAUTY_BUTTON, v);
+                    }
                 });
                 if (ZegoUIKit.getBeautyPlugin().isPluginExited()) {
                     view.setVisibility(VISIBLE);
@@ -299,7 +337,7 @@ public class TopMenuBar extends FrameLayout {
                 }
             }
             break;
-            case CHAT_BUTTON:
+            case CHAT_BUTTON: {
                 view = new ImageView(getContext());
                 ((ImageView) view).setImageResource(R.drawable.call_icon_chat_normal);
                 if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
@@ -314,8 +352,13 @@ public class TopMenuBar extends FrameLayout {
                     ZegoInRoomChatDialog inRoomChatDialog = new ZegoInRoomChatDialog(getContext());
                     inRoomChatDialog.setInRoomChatConfig(inRoomChatConfig);
                     inRoomChatDialog.show();
+                    ZegoMenuBarButtonClickListener clickListener = ZegoUIKitPrebuiltCallService.events.callEvents.getButtonClickListener();
+                    if (clickListener != null) {
+                        clickListener.onClick(ZegoMenuBarButtonName.CHAT_BUTTON, v);
+                    }
                 });
-                break;
+            }
+            break;
             case MINIMIZING_BUTTON: {
                 view = new MiniVideoButton(getContext());
                 if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
@@ -327,6 +370,12 @@ public class TopMenuBar extends FrameLayout {
                         }
                     }
                 }
+                view.setOnClickListener(v -> {
+                    ZegoMenuBarButtonClickListener clickListener = ZegoUIKitPrebuiltCallService.events.callEvents.getButtonClickListener();
+                    if (clickListener != null) {
+                        clickListener.onClick(ZegoMenuBarButtonName.MINIMIZING_BUTTON, v);
+                    }
+                });
             }
             break;
         }

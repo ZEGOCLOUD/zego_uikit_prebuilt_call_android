@@ -11,20 +11,20 @@ import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.FragmentActivity;
 import com.permissionx.guolindev.PermissionX;
 import com.permissionx.guolindev.callback.RequestCallback;
-import com.zegocloud.uikit.components.audiovideo.ZegoToggleMicrophoneButton;
+import com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraButton;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.event.ZegoMenuBarButtonClickListener;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public class PermissionMicrophoneButton extends ZegoToggleMicrophoneButton {
+public class PermissionSwitchCameraButton extends ZegoSwitchCameraButton {
 
     private GestureDetectorCompat gestureDetectorCompat;
 
-    public PermissionMicrophoneButton(@NonNull Context context) {
+    public PermissionSwitchCameraButton(@NonNull Context context) {
         super(context);
         gestureDetectorCompat = new GestureDetectorCompat(context, new SimpleOnGestureListener() {
             @Override
@@ -40,8 +40,8 @@ public class PermissionMicrophoneButton extends ZegoToggleMicrophoneButton {
                             callOnClick();
                             ZegoMenuBarButtonClickListener clickListener = ZegoUIKitPrebuiltCallService.events.callEvents.getButtonClickListener();
                             if (clickListener != null) {
-                                clickListener.onClick(ZegoMenuBarButtonName.TOGGLE_MICROPHONE_BUTTON,
-                                    PermissionMicrophoneButton.this);
+                                clickListener.onClick(ZegoMenuBarButtonName.SWITCH_CAMERA_BUTTON,
+                                    PermissionSwitchCameraButton.this);
                             }
                         }
                     });
@@ -56,8 +56,9 @@ public class PermissionMicrophoneButton extends ZegoToggleMicrophoneButton {
         return gestureDetectorCompat.onTouchEvent(event);
     }
 
+
     private void requestPermissionIfNeeded(RequestCallback requestCallback) {
-        List<String> permissions = Arrays.asList(permission.RECORD_AUDIO);
+        List<String> permissions = Collections.singletonList(permission.CAMERA);
 
         boolean allGranted = true;
         for (String permission : permissions) {
@@ -69,13 +70,12 @@ public class PermissionMicrophoneButton extends ZegoToggleMicrophoneButton {
             requestCallback.onResult(true, permissions, new ArrayList<>());
             return;
         }
-
-        PermissionX.init((FragmentActivity) getContext()).permissions(permission.RECORD_AUDIO)
+        PermissionX.init((FragmentActivity) getContext()).permissions(permissions)
             .onExplainRequestReason((scope, deniedList) -> {
-                String message = getContext().getString(R.string.call_permission_explain_mic);
+                String message = getContext().getString(R.string.call_permission_explain_camera);
                 scope.showRequestReasonDialog(deniedList, message, getContext().getString(R.string.call_ok));
             }).onForwardToSettings((scope, deniedList) -> {
-                String message = getContext().getString(R.string.call_settings_mic);
+                String message = getContext().getString(R.string.call_settings_camera);
                 scope.showForwardToSettingsDialog(deniedList, message, getContext().getString(R.string.call_settings),
                     getContext().getString(R.string.call_cancel));
             }).request(new RequestCallback() {

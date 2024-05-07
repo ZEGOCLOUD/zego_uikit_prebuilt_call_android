@@ -10,6 +10,7 @@ public class CallEvents {
     private BackPressEvent backPressEvent;
     private ZegoOnlySelfInRoomListener onlySelfInRoomListener;
     private CallEndListener callEndListener;
+    private ZegoMenuBarButtonClickListener buttonClickListener;
 
     /**
      * The default back pressed event is finish call immediately,override this event to change the default event.
@@ -54,5 +55,14 @@ public class CallEvents {
         if (eventHandler != null) {
             ZegoUIKit.addEventHandler(eventHandler);
         }
+    }
+
+    public ZegoMenuBarButtonClickListener getButtonClickListener() {
+        return buttonClickListener;
+    }
+
+    public void setButtonClickListener(
+        ZegoMenuBarButtonClickListener buttonClickListener) {
+        this.buttonClickListener = buttonClickListener;
     }
 }
