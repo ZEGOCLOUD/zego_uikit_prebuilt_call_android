@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.zegocloud.uikit.ZegoUIKit;
+import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
 import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
@@ -169,6 +170,14 @@ public class CallInviteActivity extends AppCompatActivity {
         }
         ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
         ZegoUIKitPrebuiltCallConfig config = getPrebuiltCallConfig(invitationData);
+        ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = CallInvitationServiceImpl.getInstance()
+            .getCallInvitationConfig();
+        if (callInvitationConfig != null && callInvitationConfig.translationText != null
+            && callInvitationConfig.translationText.getInvitationBaseText() instanceof InvitationTextCHS) {
+            config.zegoCallText = new ZegoCallText(ZegoUIKitLanguage.CHS);
+        } else {
+            config.zegoCallText = new ZegoCallText(ZegoUIKitLanguage.ENGLISH);
+        }
 
         ZegoUIKitPrebuiltCallFragment fragment = ZegoUIKitPrebuiltCallFragment.newInstance(this, invitationData.callID,
             config);

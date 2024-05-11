@@ -41,14 +41,14 @@ public class ZegoTranslationText {
     public String sendCallButtonError;
 
 
-    private InvatationBaseText invatationBaseText = new InvatationTextEnglish();
+    private InvitationBaseText invatationBaseText = new InvitationTextEnglish();
 
     public ZegoTranslationText() {
         this(ZegoUIKitLanguage.ENGLISH);
     }
     public ZegoTranslationText(ZegoUIKitLanguage language) {
         if (language == ZegoUIKitLanguage.CHS) {
-            invatationBaseText = new InvatationTextCHS();
+            invatationBaseText = new InvitationTextCHS();
         }
         incomingVideoCallDialogTitle = invatationBaseText.incomingVideoCallDialogTitle;
         incomingVideoCallDialogMessage = invatationBaseText.incomingVideoCallDialogMessage;
@@ -91,8 +91,8 @@ public class ZegoTranslationText {
             // innerText is null, no need to copy from
             return;
         }
-        if (invatationBaseText instanceof InvatationTextEnglish) {
-            InvatationTextEnglish english = new InvatationTextEnglish();
+        if (invatationBaseText instanceof InvitationTextEnglish) {
+            InvitationTextEnglish english = new InvitationTextEnglish();
             if (english.incomingCallPageAcceptButton.equals(incomingCallPageAcceptButton)) { // not changed
                 incomingCallPageAcceptButton = innerText.incomingCallPageAcceptButton;
             }
@@ -177,6 +177,9 @@ public class ZegoTranslationText {
                 outgoingGroupVoiceCallPageMessage = innerText.outgoingGroupVoiceCallPageMessage;
             }
         }
+    }
 
+    public InvitationBaseText getInvitationBaseText() {
+        return invatationBaseText;
     }
 }

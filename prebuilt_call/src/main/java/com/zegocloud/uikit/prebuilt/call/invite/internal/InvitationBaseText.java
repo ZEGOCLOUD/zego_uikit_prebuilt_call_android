@@ -1,6 +1,6 @@
 package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
-public abstract class InvatationBaseText {
+public abstract class InvitationBaseText {
 
     public String incomingVideoCallDialogTitle = "%s";
     public String incomingVideoCallDialogMessage = "Incoming video call...";

@@ -1,8 +1,8 @@
 package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
-public class InvatationTextCHS extends InvatationBaseText {
+public class InvitationTextCHS extends InvitationBaseText {
 
-    public InvatationTextCHS() {
+    public InvitationTextCHS() {
         incomingVideoCallDialogTitle = "%s";
         incomingVideoCallDialogMessage = "视频来电...";
         incomingVoiceCallDialogTitle = "%s";
