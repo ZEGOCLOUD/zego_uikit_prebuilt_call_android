@@ -157,8 +157,8 @@ public class TopMenuBar extends FrameLayout {
                 view = new PermissionCameraButton(getContext());
                 ((ZegoToggleCameraButton) view).setIcon(R.drawable.call_icon_top_camera_normal,
                     R.drawable.call_icon_top_camera_off);
-                if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
-                    ZegoMenuBarButtonConfig buttonConfig = callConfig.bottomMenuBarConfig.buttonConfig;
+                if (callConfig != null && callConfig.topMenuBarConfig != null) {
+                    ZegoMenuBarButtonConfig buttonConfig = callConfig.topMenuBarConfig.buttonConfig;
                     if (buttonConfig != null) {
                         if (buttonConfig.toggleCameraOnImage != null) {
                             ((PermissionCameraButton) view).setOpenDrawable(buttonConfig.toggleCameraOnImage);
@@ -174,8 +174,8 @@ public class TopMenuBar extends FrameLayout {
                 view = new PermissionMicrophoneButton(getContext());
                 ((ZegoToggleMicrophoneButton) view).setIcon(R.drawable.call_icon_top_mic_normal,
                     R.drawable.call_icon_top_mic_off);
-                if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
-                    ZegoMenuBarButtonConfig buttonConfig = callConfig.bottomMenuBarConfig.buttonConfig;
+                if (callConfig != null && callConfig.topMenuBarConfig != null) {
+                    ZegoMenuBarButtonConfig buttonConfig = callConfig.topMenuBarConfig.buttonConfig;
                     if (buttonConfig != null) {
                         if (buttonConfig.toggleMicrophoneOnImage != null) {
                             ((PermissionMicrophoneButton) view).setOpenDrawable(buttonConfig.toggleMicrophoneOnImage);
@@ -192,8 +192,8 @@ public class TopMenuBar extends FrameLayout {
                 view = new ZegoSwitchCameraButton(getContext());
                 ((ZegoSwitchCameraButton) view).setImageResource(R.drawable.call_icon_top_camera_switch,
                     R.drawable.call_icon_top_camera_switch);
-                if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
-                    ZegoMenuBarButtonConfig buttonConfig = callConfig.bottomMenuBarConfig.buttonConfig;
+                if (callConfig != null && callConfig.topMenuBarConfig != null) {
+                    ZegoMenuBarButtonConfig buttonConfig = callConfig.topMenuBarConfig.buttonConfig;
                     if (buttonConfig != null) {
                         if (buttonConfig.switchCameraFrontImage != null) {
                             ((ZegoSwitchCameraButton) view).setOpenDrawable(buttonConfig.switchCameraFrontImage);
@@ -209,8 +209,8 @@ public class TopMenuBar extends FrameLayout {
             case HANG_UP_BUTTON: {
                 view = new ZegoLeaveCallButton(getContext());
                 ((ZegoLeaveCallButton) view).setIcon(R.drawable.call_icon_top_leave);
-                if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
-                    ZegoMenuBarButtonConfig buttonConfig = callConfig.bottomMenuBarConfig.buttonConfig;
+                if (callConfig != null && callConfig.topMenuBarConfig != null) {
+                    ZegoMenuBarButtonConfig buttonConfig = callConfig.topMenuBarConfig.buttonConfig;
                     if (buttonConfig != null) {
                         if (buttonConfig.hangUpButtonImage != null) {
                             ((ZegoLeaveCallButton) view).setImageDrawable(buttonConfig.hangUpButtonImage);
@@ -230,8 +230,8 @@ public class TopMenuBar extends FrameLayout {
                 view = new ZegoSwitchAudioOutputButton(getContext());
                 ((ZegoSwitchAudioOutputButton) view).setIcon(R.drawable.call_icon_top_speaker_normal,
                     R.drawable.call_icon_top_speaker_close, R.drawable.call_icon_top_bluetooth);
-                if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
-                    ZegoMenuBarButtonConfig buttonConfig = callConfig.bottomMenuBarConfig.buttonConfig;
+                if (callConfig != null && callConfig.topMenuBarConfig != null) {
+                    ZegoMenuBarButtonConfig buttonConfig = callConfig.topMenuBarConfig.buttonConfig;
                     if (buttonConfig != null) {
                         if (buttonConfig.audioOutputSpeakerImage != null) {
                             ((ZegoSwitchAudioOutputButton) view).setSpeakerImageIcon(
@@ -259,8 +259,8 @@ public class TopMenuBar extends FrameLayout {
             case SHOW_MEMBER_LIST_BUTTON: {
                 view = new ImageView(getContext());
                 ((ImageView) view).setImageResource(R.drawable.call_icon_top_member_normal);
-                if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
-                    ZegoMenuBarButtonConfig buttonConfig = callConfig.bottomMenuBarConfig.buttonConfig;
+                if (callConfig != null && callConfig.topMenuBarConfig != null) {
+                    ZegoMenuBarButtonConfig buttonConfig = callConfig.topMenuBarConfig.buttonConfig;
                     if (buttonConfig != null) {
                         if (buttonConfig.showMemberListButtonImage != null) {
                             ((ImageView) view).setImageDrawable(buttonConfig.showMemberListButtonImage);
@@ -283,8 +283,8 @@ public class TopMenuBar extends FrameLayout {
             case SCREEN_SHARING_TOGGLE_BUTTON: {
                 view = new ZegoScreenSharingToggleButton(getContext());
                 ((ZegoScreenSharingToggleButton) view).topBarStyle();
-                if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
-                    ZegoMenuBarButtonConfig buttonConfig = callConfig.bottomMenuBarConfig.buttonConfig;
+                if (callConfig != null && callConfig.topMenuBarConfig != null) {
+                    ZegoMenuBarButtonConfig buttonConfig = callConfig.topMenuBarConfig.buttonConfig;
                     if (buttonConfig != null) {
                         if (buttonConfig.screenSharingToggleButtonOnImage != null) {
                             ((ZegoScreenSharingToggleButton) view).setOpenDrawable(
@@ -309,8 +309,8 @@ public class TopMenuBar extends FrameLayout {
             break;
             case BEAUTY_BUTTON: {
                 view = new BeautyButton(getContext());
-                if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
-                    ZegoMenuBarButtonConfig buttonConfig = callConfig.bottomMenuBarConfig.buttonConfig;
+                if (callConfig != null && callConfig.topMenuBarConfig != null) {
+                    ZegoMenuBarButtonConfig buttonConfig = callConfig.topMenuBarConfig.buttonConfig;
                     if (buttonConfig != null) {
                         if (buttonConfig.beautyButtonImage != null) {
                             ((BeautyButton) view).setImageDrawable(buttonConfig.beautyButtonImage,
@@ -340,8 +340,8 @@ public class TopMenuBar extends FrameLayout {
             case CHAT_BUTTON: {
                 view = new ImageView(getContext());
                 ((ImageView) view).setImageResource(R.drawable.call_icon_chat_normal);
-                if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
-                    ZegoMenuBarButtonConfig buttonConfig = callConfig.bottomMenuBarConfig.buttonConfig;
+                if (callConfig != null && callConfig.topMenuBarConfig != null) {
+                    ZegoMenuBarButtonConfig buttonConfig = callConfig.topMenuBarConfig.buttonConfig;
                     if (buttonConfig != null) {
                         if (buttonConfig.chatButtonImage != null) {
                             ((ImageView) view).setImageDrawable(buttonConfig.chatButtonImage);
@@ -361,8 +361,8 @@ public class TopMenuBar extends FrameLayout {
             break;
             case MINIMIZING_BUTTON: {
                 view = new MiniVideoButton(getContext());
-                if (callConfig != null && callConfig.bottomMenuBarConfig != null) {
-                    ZegoMenuBarButtonConfig buttonConfig = callConfig.bottomMenuBarConfig.buttonConfig;
+                if (callConfig != null && callConfig.topMenuBarConfig != null) {
+                    ZegoMenuBarButtonConfig buttonConfig = callConfig.topMenuBarConfig.buttonConfig;
                     if (buttonConfig != null) {
                         if (buttonConfig.minimizingButtonImage != null) {
                             ((MiniVideoButton) view).setImageDrawable(buttonConfig.minimizingButtonImage,
