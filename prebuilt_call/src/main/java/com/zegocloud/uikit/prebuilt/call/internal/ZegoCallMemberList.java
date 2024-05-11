@@ -19,6 +19,9 @@ import com.zegocloud.uikit.components.memberlist.ZegoMemberListItemViewProvider;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMemberListConfig;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallLayoutMemberlistBinding;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallText;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoTranslationText;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -87,6 +90,12 @@ public class ZegoCallMemberList extends BottomSheetDialog {
         getBehavior().setPeekHeight(height);
         CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(-1, height);
         binding.memberlistLayout.setLayoutParams(params);
+
+        ZegoCallText zegoCallText = CallInvitationServiceImpl.getInstance()
+            .getCallConfig().zegoCallText;
+        if(zegoCallText != null){
+            binding.memberlistTitle.setText(zegoCallText.memberListTitle);
+        }
     }
 
     @Override

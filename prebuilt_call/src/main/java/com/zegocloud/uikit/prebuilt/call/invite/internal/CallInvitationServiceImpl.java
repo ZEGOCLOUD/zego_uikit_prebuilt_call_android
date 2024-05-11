@@ -23,6 +23,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
+import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
+import com.zegocloud.uikit.plugin.adapter.plugins.beauty.ZegoBeautyPluginInnerTextCHS;
+import com.zegocloud.uikit.plugin.adapter.plugins.beauty.ZegoBeautyPluginInnerTextEnglish;
 import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginNotificationConfig;
 import com.zegocloud.uikit.plugin.adapter.utils.GenericUtils;
 import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
@@ -553,6 +556,9 @@ public class CallInvitationServiceImpl {
     }
 
     public boolean init(Application application, long appID, String appSign, String token) {
+        Timber.d(
+            "Call init() called with: application = [" + application + "], appID = [" + appID + "], appSign.isEmpty() = [" + TextUtils.isEmpty(appSign)
+                + "], token.isEmpty() = [" + TextUtils.isEmpty(token) + "]");
         if (alreadyInit) {
             // we assume that user not changed his appID and appSign
             ErrorEventsListener errorEvents = ZegoUIKitPrebuiltCallService.events.getErrorEventsListener();
@@ -616,6 +622,12 @@ public class CallInvitationServiceImpl {
         } else {
             this.invitationConfig = invitationConfig;
         }
+
+        if (invitationConfig.translationText != null) {
+            invitationConfig.translationText.copyFromInnerTextIfNotCustomized(invitationConfig.innerText);
+        } else {
+            invitationConfig.translationText = new ZegoTranslationText();
+        }
     }
 
     public ZegoUIKitPrebuiltCallInvitationConfig getCallInvitationConfig() {
@@ -661,6 +673,14 @@ public class CallInvitationServiceImpl {
     }
 
     public void initBeautyPlugin() {
+        if (callConfig.zegoCallText != null) {
+            ZegoUIKitLanguage language = callConfig.zegoCallText.getLanguage();
+            if (language == ZegoUIKitLanguage.CHS) {
+                callConfig.beautyConfig.innerText = new ZegoBeautyPluginInnerTextCHS();
+            } else {
+                callConfig.beautyConfig.innerText = new ZegoBeautyPluginInnerTextEnglish();
+            }
+        }
         ZegoUIKit.getBeautyPlugin().setZegoBeautyPluginConfig(callConfig.beautyConfig);
         ZegoUIKit.getBeautyPlugin().init(application, appID, appSign);
     }

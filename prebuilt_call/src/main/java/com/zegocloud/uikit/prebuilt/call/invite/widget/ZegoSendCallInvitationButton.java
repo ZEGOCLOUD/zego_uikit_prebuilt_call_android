@@ -16,6 +16,7 @@ import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceIm
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ClickListener;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallUser;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoTranslationText;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,19 +78,15 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
 
     @Override
     protected void invokedWhenClick() {
+        ZegoTranslationText translationText = CallInvitationServiceImpl.getInstance()
+            .getCallInvitationConfig().translationText;
         ZegoInvitationType invitationType = ZegoInvitationType.getZegoInvitationType(type);
-        CallInvitationServiceImpl.getInstance().sendInvitation(invitees, invitationType, customData, timeout,null,
-            getSendInvitationConfig(), new PluginCallbackListener() {
-                @Override
-                public void callback(Map<String, Object> result) {
-                    ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
-                    if (uiKitUser == null) {
-                        String message = getContext().getString(R.string.login_error_tips);
-                        showError(-4, message);
-                        if (sendInvitationListener != null) {
-                            sendInvitationListener.onClick(-1, message, new ArrayList<>());
-                        }
-                    } else {
+        CallInvitationServiceImpl.getInstance()
+            .sendInvitation(invitees, invitationType, customData, timeout, null, getSendInvitationConfig(),
+                new PluginCallbackListener() {
+                    @Override
+                    public void callback(Map<String, Object> result) {
+                        ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
                         int code = (int) result.get("code");
                         String message = (String) result.get("message");
                         List<ZegoUIKitUser> errorInvitees = (List<ZegoUIKitUser>) result.get("errorInvitees");
@@ -98,8 +95,11 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
                                 CallInviteActivity.startOutgoingPage(getContext());
                             }
                             if (!errorInvitees.isEmpty()) {
-                                StringBuilder sb = new StringBuilder(
-                                    getContext().getString(R.string.call_invite_error_offline));
+                                String error = "";
+                                if (translationText != null) {
+                                    error = translationText.sendCallButtonErrorOffLine;
+                                }
+                                StringBuilder sb = new StringBuilder(error);
                                 int count = 0;
                                 for (ZegoUIKitUser errorInvitee : errorInvitees) {
                                     sb.append(errorInvitee.userID);
@@ -113,7 +113,11 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
                                 showError(-5, sb.toString());
                             }
                         } else {
-                            showError(code, getContext().getString(R.string.call_invite_error, code, message));
+                            String error = "";
+                            if (translationText != null) {
+                                error = translationText.sendCallButtonError;
+                            }
+                            showError(code, String.format(error, code, message));
                         }
                         if (sendInvitationListener != null) {
                             List<ZegoCallUser> callbackErrorInvitees = new ArrayList<>();
@@ -127,8 +131,7 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
                             sendInvitationListener.onClick(code, message, callbackErrorInvitees);
                         }
                     }
-                }
-            });
+                });
     }
 
     public void setOnClickListener(ClickListener listener) {

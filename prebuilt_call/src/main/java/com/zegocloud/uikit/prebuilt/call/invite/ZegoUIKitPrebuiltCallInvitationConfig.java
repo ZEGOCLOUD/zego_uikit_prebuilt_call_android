@@ -1,8 +1,12 @@
 package com.zegocloud.uikit.prebuilt.call.invite;
 
 import android.graphics.drawable.Drawable;
+import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoNotificationConfig;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoInnerText;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoTranslationText;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoUIKitPrebuiltCallConfigProvider;
 
 public class ZegoUIKitPrebuiltCallInvitationConfig {
@@ -15,11 +19,25 @@ public class ZegoUIKitPrebuiltCallInvitationConfig {
 
     //Indicates if the reject button is displayed. Default is true
     public boolean showDeclineButton = true;
-    /**
-     * This property needs to be set when you are building an Android app and when the notifyWhenAppRunningInBackgroundOrQuit is true.
-     * notificationConfig.channelID must be the same as the FCM Channel ID in [ZEGOCLOUD Admin Console|_blank]https://console.zegocloud.com),
-     * and the notificationConfig.channelName can be an arbitrary value.The notificationConfig.sound must be the same as the FCM sound in Admin Console either.
-     */
+
     public ZegoNotificationConfig notificationConfig;
+
     public ZegoInnerText innerText = new ZegoInnerText();
+    public ZegoTranslationText translationText = new ZegoTranslationText();
+
+    public static ZegoUIKitPrebuiltCallConfig generateDefaultConfig(ZegoCallInvitationData invitationData) {
+        ZegoUIKitPrebuiltCallConfig config = null;
+        boolean isVideoCall = invitationData.type == ZegoInvitationType.VIDEO_CALL.getValue();
+        boolean isGroupCall = invitationData.invitees.size() > 1;
+        if (isVideoCall && isGroupCall) {
+            config = ZegoUIKitPrebuiltCallConfig.groupVideoCall();
+        } else if (!isVideoCall && isGroupCall) {
+            config = ZegoUIKitPrebuiltCallConfig.groupVoiceCall();
+        } else if (!isVideoCall) {
+            config = ZegoUIKitPrebuiltCallConfig.oneOnOneVoiceCall();
+        } else {
+            config = ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall();
+        }
+        return config;
+    }
 }

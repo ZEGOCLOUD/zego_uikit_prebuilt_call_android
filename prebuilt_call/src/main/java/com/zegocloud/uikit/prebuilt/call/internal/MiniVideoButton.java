@@ -69,14 +69,21 @@ public class MiniVideoButton extends ZEGOImageButton {
                     .onExplainRequestReason(new ExplainReasonCallback() {
                         @Override
                         public void onExplainReason(@NonNull ExplainScope scope, @NonNull List<String> deniedList) {
-                            String message = "We need your consent for the following permissions in order to display the video window properly";
+                            String message = "";
+                            String agree = "";
+                            String disagree = "";
                             ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance()
                                 .getCallConfig();
                             if (callConfig != null && callConfig.miniVideoConfig != null && !TextUtils.isEmpty(
                                 callConfig.miniVideoConfig.permissionText)) {
                                 message = callConfig.miniVideoConfig.permissionText;
                             }
-                            scope.showRequestReasonDialog(deniedList, message, "Allow", "Deny");
+                            if (callConfig != null && callConfig.zegoCallText != null) {
+                                message = callConfig.zegoCallText.permissionFloatWindow;
+                                agree = callConfig.zegoCallText.agree;
+                                disagree = callConfig.zegoCallText.disagree;
+                            }
+                            scope.showRequestReasonDialog(deniedList, message, agree, disagree);
                         }
                     }).request(new RequestCallback() {
                         @Override

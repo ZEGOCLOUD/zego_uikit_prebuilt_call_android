@@ -11,7 +11,6 @@
     android:orientation="vertical">
 
     <RelativeLayout
-      android:id="@+id/memberlist_title"
       android:layout_width="match_parent"
       android:layout_height="49dp">
 
@@ -24,12 +23,12 @@
         android:src="@drawable/call_icon_down" />
 
       <TextView
+        android:id="@+id/memberlist_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginStart="5dp"
         android:layout_toEndOf="@id/memberlist_down"
-        android:text="@string/call_memberlist_title"
         android:textColor="@android:color/white"
         android:textSize="18sp" />
     </RelativeLayout>

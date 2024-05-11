@@ -1,12 +1,6 @@
 package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
-import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
-
-/**
- * @deprecated use {@link ZegoUIKitPrebuiltCallInvitationConfig#translationText} instead
- */
-@Deprecated
-public class ZegoInnerText {
+public abstract class InvatationBaseText {
 
     public String incomingVideoCallDialogTitle = "%s";
     public String incomingVideoCallDialogMessage = "Incoming video call...";
@@ -41,4 +35,6 @@ public class ZegoInnerText {
     public String incomingCallPageDeclineButton = "Decline";
     public String incomingCallPageAcceptButton = "Accept";
 
+    public String sendCallButtonError = "Failed to send a call invitation,code:%1$d,message: %2$s";
+    public String sendCallButtonErrorOffLine = "User doesn't exist or is offline: ";
 }

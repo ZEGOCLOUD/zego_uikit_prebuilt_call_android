@@ -46,6 +46,7 @@ import com.zegocloud.uikit.prebuilt.call.internal.MiniVideoWindow;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoAudioVideoForegroundView;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoScreenShareForegroundView;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallText;
 import com.zegocloud.uikit.service.defines.ZegoMeRemovedFromRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
@@ -68,6 +69,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     private BroadcastReceiver configurationChangeReceiver;
     private MiniVideoWindow miniVideoWindow;
     private MiniVideoView contentView;
+    private ZegoOnlySelfInRoomListener onlySelfInRoomListener;
 
     /**
      * start by call-invite，is already init first,only need callID to join room.
@@ -146,33 +148,42 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         String userID = arguments.getString("userID");
         String userName = arguments.getString("userName");
         String appToken = arguments.getString("appToken");
+        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
         if (appID != 0) {
             if (!TextUtils.isEmpty(appToken)) {
                 CallInvitationServiceImpl.getInstance().init(application, appID, null, appToken);
             } else {
                 CallInvitationServiceImpl.getInstance().init(application, appID, appSign, null);
             }
-
+            if (callConfig.zegoCallText != null) {
+                ZegoUIKit.setLanguage(callConfig.zegoCallText.getLanguage());
+            }
             CallInvitationServiceImpl.getInstance().loginUser(userID, userName);
+        } else {
+            if (callConfig.zegoCallText != null) {
+                ZegoUIKit.setLanguage(callConfig.zegoCallText.getLanguage());
+            }
         }
-
-        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
 
         if (callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)) {
             CallInvitationServiceImpl.getInstance().initBeautyPlugin();
         }
+
+        ZegoCallText zegoCallText = CallInvitationServiceImpl.getInstance().getCallConfig().zegoCallText;
         if (callConfig.hangUpConfirmDialogInfo != null) {
             if (TextUtils.isEmpty(callConfig.hangUpConfirmDialogInfo.title)) {
-                callConfig.hangUpConfirmDialogInfo.title = getString(R.string.call_leave_title);
+                if (zegoCallText != null) {
+                    callConfig.hangUpConfirmDialogInfo.title = zegoCallText.leaveTitle;
+                }
             }
             if (TextUtils.isEmpty(callConfig.hangUpConfirmDialogInfo.message)) {
-                callConfig.hangUpConfirmDialogInfo.message = getString(R.string.call_leave_message);
+                callConfig.hangUpConfirmDialogInfo.message = zegoCallText.leaveMessage;
             }
             if (TextUtils.isEmpty(callConfig.hangUpConfirmDialogInfo.cancelButtonName)) {
-                callConfig.hangUpConfirmDialogInfo.cancelButtonName = getString(R.string.call_leave_cancel);
+                callConfig.hangUpConfirmDialogInfo.cancelButtonName = zegoCallText.cancel;
             }
             if (TextUtils.isEmpty(callConfig.hangUpConfirmDialogInfo.confirmButtonName)) {
-                callConfig.hangUpConfirmDialogInfo.confirmButtonName = getString(R.string.call_leave_confirm);
+                callConfig.hangUpConfirmDialogInfo.confirmButtonName = zegoCallText.confirm;
             }
         }
 
@@ -372,7 +383,9 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
         ZegoUIKit.addOnOnlySelfInRoomListener(() -> {
             ZegoOnlySelfInRoomListener selfInRoomListener = ZegoUIKitPrebuiltCallService.events.callEvents.getOnlySelfInRoomListener();
-            if (selfInRoomListener != null) {
+            if (onlySelfInRoomListener != null) {
+                onlySelfInRoomListener.onOnlySelfInRoom();
+            } else if (selfInRoomListener != null) {
                 selfInRoomListener.onOnlySelfInRoom();
             } else {
                 CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
@@ -516,29 +529,70 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         }
         PermissionX.init(requireActivity()).permissions(permissions).onExplainRequestReason((scope, deniedList) -> {
             String message = "";
+            String camera = "";
+            String mic = "";
+            String settings = "";
+            String cancel = "";
+            String ok = "";
+            String micAndCamera = "";
+            String settingsCamera = "";
+            String settingsMic = "";
+            String settingsMicAndCamera = "";
+            ZegoCallText zegoCallText = CallInvitationServiceImpl.getInstance().getCallConfig().zegoCallText;
+            if (zegoCallText != null) {
+                camera = zegoCallText.permissionExplainCamera;
+                mic = zegoCallText.permissionExplainMic;
+                micAndCamera = zegoCallText.permissionExplainMicAndCamera;
+                settings = zegoCallText.settings;
+                cancel = zegoCallText.cancel;
+                settingsCamera = zegoCallText.settingCamera;
+                settingsMic = zegoCallText.settingMic;
+                settingsMicAndCamera = zegoCallText.settingMicAndCamera;
+                ok = zegoCallText.ok;
+            }
             if (deniedList.size() == 1) {
                 if (deniedList.contains(permission.CAMERA)) {
-                    message = getContext().getString(R.string.call_permission_explain_camera);
+                    message = camera;
                 } else if (deniedList.contains(permission.RECORD_AUDIO)) {
-                    message = getContext().getString(R.string.call_permission_explain_mic);
+                    message = mic;
                 }
             } else {
-                message = getContext().getString(R.string.call_permission_explain_camera_mic);
+                message = micAndCamera;
             }
-            scope.showRequestReasonDialog(deniedList, message, getContext().getString(R.string.call_ok));
+            scope.showRequestReasonDialog(deniedList, message, ok);
         }).onForwardToSettings((scope, deniedList) -> {
             String message = "";
+            String camera = "";
+            String mic = "";
+            String settings = "";
+            String cancel = "";
+            String ok = "";
+            String micAndCamera = "";
+            String settingsCamera = "";
+            String settingsMic = "";
+            String settingsMicAndCamera = "";
+            ZegoCallText zegoCallText = CallInvitationServiceImpl.getInstance().getCallConfig().zegoCallText;
+            if (zegoCallText != null) {
+                camera = zegoCallText.permissionExplainCamera;
+                mic = zegoCallText.permissionExplainMic;
+                micAndCamera = zegoCallText.permissionExplainMicAndCamera;
+                settings = zegoCallText.settings;
+                cancel = zegoCallText.cancel;
+                settingsCamera = zegoCallText.settingCamera;
+                settingsMic = zegoCallText.settingMic;
+                settingsMicAndCamera = zegoCallText.settingMicAndCamera;
+                ok = zegoCallText.ok;
+            }
             if (deniedList.size() == 1) {
                 if (deniedList.contains(permission.CAMERA)) {
-                    message = getContext().getString(R.string.call_settings_camera);
+                    message = settingsCamera;
                 } else if (deniedList.contains(permission.RECORD_AUDIO)) {
-                    message = getContext().getString(R.string.call_settings_mic);
+                    message = settingsMic;
                 }
             } else {
-                message = getContext().getString(R.string.call_settings_camera_mic);
+                message = settingsMicAndCamera;
             }
-            scope.showForwardToSettingsDialog(deniedList, message, getContext().getString(R.string.call_settings),
-                getContext().getString(R.string.call_cancel));
+            scope.showForwardToSettingsDialog(deniedList, message, settings, cancel);
         }).request(new RequestCallback() {
             @Override
             public void onResult(boolean allGranted, @NonNull List<String> grantedList,
@@ -665,7 +719,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
      */
     @Deprecated
     public void setOnOnlySelfInRoomListener(ZegoOnlySelfInRoomListener listener) {
-        ZegoUIKitPrebuiltCallService.events.callEvents.setOnlySelfInRoomListener(listener);
+        this.onlySelfInRoomListener = listener;
     }
 
     public interface LeaveCallListener {

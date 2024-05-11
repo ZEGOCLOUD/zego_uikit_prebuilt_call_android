@@ -13,8 +13,6 @@ import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallDialogInvitationBinding;
-import com.zegocloud.uikit.prebuilt.call.event.InvitationEvents;
-import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 
 public class CallInvitationDialog {
 
@@ -60,19 +58,24 @@ public class CallInvitationDialog {
             hide();
             CallInviteActivity.startCallPage(context);
         });
+        ZegoTranslationText translationText = CallInvitationServiceImpl.getInstance().getCallInvitationConfig().translationText;
         if (invitationData.type == ZegoInvitationType.VOICE_CALL.getValue()) {
             binding.dialogCallAccept.setBackgroundResource(R.drawable.call_selector_dialog_voice_accept);
-            if (invitationData.invitees.size() > 1) {
-                binding.dialogCallType.setText(R.string.call_incoming_group_voice_call);
-            } else {
-                binding.dialogCallType.setText(R.string.call_incoming_voice_call);
+            if (translationText != null) {
+                if (invitationData.invitees.size() > 1) {
+                    binding.dialogCallType.setText(translationText.incomingGroupVoiceCallDialogMessage);
+                } else {
+                    binding.dialogCallType.setText(translationText.incomingVoiceCallDialogMessage);
+                }
             }
         } else {
             binding.dialogCallAccept.setBackgroundResource(R.drawable.call_selector_dialog_video_accept);
-            if (invitationData.invitees.size() > 1) {
-                binding.dialogCallType.setText(R.string.call_incoming_group_video_call);
-            } else {
-                binding.dialogCallType.setText(R.string.call_incoming_video_call);
+            if (translationText != null) {
+                if (invitationData.invitees.size() > 1) {
+                    binding.dialogCallType.setText(translationText.incomingGroupVideoCallDialogMessage);
+                } else {
+                    binding.dialogCallType.setText(translationText.incomingVideoCallDialogMessage);
+                }
             }
         }
         binding.dialogCallDecline.setInviterID(invitationData.inviter.userID);

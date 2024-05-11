@@ -174,7 +174,6 @@ public class CallInviteActivity extends AppCompatActivity {
             config);
 
         if (config.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)) {
-            ZegoUIKit.getBeautyPlugin().setZegoBeautyPluginConfig(config.beautyConfig);
             CallInvitationServiceImpl.getInstance().initBeautyPlugin();
         }
 

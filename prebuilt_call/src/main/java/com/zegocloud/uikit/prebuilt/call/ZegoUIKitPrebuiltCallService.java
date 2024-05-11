@@ -18,8 +18,9 @@ public class ZegoUIKitPrebuiltCallService {
 
     /**
      * ZEGO SDK will init and login.Only after init and login,SDK can send/receive call to/from others. Please make sure
-     * SDK init success and login success.This method should be called as soon as user login this own business.
+     * SDK init success and login success.This method should be called as soon as user login your own business.
      *
+     * if you don't need call-invite feature,please don't use this method.
      * @param application
      * @param appID
      * @param appSign
@@ -34,6 +35,18 @@ public class ZegoUIKitPrebuiltCallService {
         CallInvitationServiceImpl.getInstance().setCallInvitationConfig(config);
     }
 
+    /**
+     * ZEGO SDK will init and login.Only after init and login,SDK can send/receive call to/from others. Please make sure
+     * SDK init success and login success.This method should be called as soon as user login this own business.
+     *
+     * if you don't need call-invite feature,please don't use this method.
+     * @param application
+     * @param appID
+     * @param token
+     * @param userID
+     * @param userName
+     * @param config
+     */
     public static void initWithToken(Application application, long appID, String token, String userID, String userName,
         ZegoUIKitPrebuiltCallInvitationConfig config) {
         CallInvitationServiceImpl.getInstance().init(application, appID, null, token);
@@ -42,7 +55,8 @@ public class ZegoUIKitPrebuiltCallService {
     }
 
     /**
-     * Should call this method as soon as the user logout from  app
+     * Should call this method as soon as the user logout from app
+     * if you don't need call-invite feature,please don't use this method.
      */
     public static void unInit() {
         CallInvitationServiceImpl.getInstance().unInit();

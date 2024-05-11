@@ -25,7 +25,7 @@ import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallLayoutWaitingBinding;
-import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
 import java.util.List;
@@ -129,20 +129,26 @@ public class CallWaitingFragment extends Fragment {
             }
         }
 
+        ZegoTranslationText translationText = CallInvitationServiceImpl.getInstance()
+            .getCallInvitationConfig().translationText;
         boolean isGroup = invitees != null && invitees.size() > 1;
         if (type == ZegoInvitationType.VOICE_CALL.getValue()) {
             binding.callWaitingAccept.setBackgroundResource(R.drawable.call_selector_dialog_voice_accept);
             if ("incoming".equals(page)) {
-                String callStateTextVoice = isGroup ? getString(R.string.call_incoming_group_voice_call)
-                    : getString(R.string.call_incoming_voice_call);
-                binding.callStateText.setText(callStateTextVoice);
+                if (translationText != null) {
+                    String callStateTextVoice = isGroup ? translationText.incomingGroupVoiceCallPageMessage
+                        : translationText.incomingVoiceCallPageMessage;
+                    binding.callStateText.setText(callStateTextVoice);
+                }
             }
         } else {
             binding.callWaitingAccept.setBackgroundResource(R.drawable.call_selector_dialog_video_accept);
             if ("incoming".equals(page)) {
-                String callStateTextVideo = isGroup ? getString(R.string.call_incoming_group_video_call)
-                    : getString(R.string.call_incoming_video_call);
-                binding.callStateText.setText(callStateTextVideo);
+                if (translationText != null) {
+                    String callStateTextVideo = isGroup ? translationText.incomingGroupVideoCallDialogMessage
+                        : translationText.incomingVideoCallPageMessage;
+                    binding.callStateText.setText(callStateTextVideo);
+                }
             }
         }
         binding.callWaitingAccept.setInviterID(inviter.userID);
@@ -209,29 +215,70 @@ public class CallWaitingFragment extends Fragment {
 
         PermissionX.init(requireActivity()).permissions(permissions).onExplainRequestReason((scope, deniedList) -> {
             String message = "";
+            String camera = "";
+            String mic = "";
+            String settings = "";
+            String cancel = "";
+            String ok = "";
+            String micAndCamera = "";
+            String settingsCamera = "";
+            String settingsMic = "";
+            String settingsMicAndCamera = "";
+            ZegoCallText zegoCallText = CallInvitationServiceImpl.getInstance().getCallConfig().zegoCallText;
+            if (zegoCallText != null) {
+                camera = zegoCallText.permissionExplainCamera;
+                mic = zegoCallText.permissionExplainMic;
+                micAndCamera = zegoCallText.permissionExplainMicAndCamera;
+                settings = zegoCallText.settings;
+                cancel = zegoCallText.cancel;
+                settingsCamera = zegoCallText.settingCamera;
+                settingsMic = zegoCallText.settingMic;
+                settingsMicAndCamera = zegoCallText.settingMicAndCamera;
+                ok = zegoCallText.ok;
+            }
             if (deniedList.size() == 1) {
                 if (deniedList.contains(permission.CAMERA)) {
-                    message = getContext().getString(R.string.call_permission_explain_camera);
+                    message = camera;
                 } else if (deniedList.contains(permission.RECORD_AUDIO)) {
-                    message = getContext().getString(R.string.call_permission_explain_mic);
+                    message = mic;
                 }
             } else {
-                message = getContext().getString(R.string.call_permission_explain_camera_mic);
+                message = settingsMicAndCamera;
             }
-            scope.showRequestReasonDialog(deniedList, message, getString(R.string.call_ok));
+            scope.showRequestReasonDialog(deniedList, message, ok);
         }).onForwardToSettings((scope, deniedList) -> {
             String message = "";
+            String camera = "";
+            String mic = "";
+            String settings = "";
+            String cancel = "";
+            String ok = "";
+            String micAndCamera = "";
+            String settingsCamera = "";
+            String settingsMic = "";
+            String settingsMicAndCamera = "";
+            ZegoCallText zegoCallText = CallInvitationServiceImpl.getInstance().getCallConfig().zegoCallText;
+            if (zegoCallText != null) {
+                camera = zegoCallText.permissionExplainCamera;
+                mic = zegoCallText.permissionExplainMic;
+                micAndCamera = zegoCallText.permissionExplainMicAndCamera;
+                settings = zegoCallText.settings;
+                cancel = zegoCallText.cancel;
+                settingsCamera = zegoCallText.settingCamera;
+                settingsMic = zegoCallText.settingMic;
+                settingsMicAndCamera = zegoCallText.settingMicAndCamera;
+                ok = zegoCallText.ok;
+            }
             if (deniedList.size() == 1) {
                 if (deniedList.contains(permission.CAMERA)) {
-                    message = getContext().getString(R.string.call_settings_camera);
+                    message = settingsCamera;
                 } else if (deniedList.contains(permission.RECORD_AUDIO)) {
-                    message = getContext().getString(R.string.call_settings_mic);
+                    message = settingsMic;
                 }
             } else {
-                message = getContext().getString(R.string.call_settings_camera_mic);
+                message = settingsMicAndCamera;
             }
-            scope.showForwardToSettingsDialog(deniedList, message, getString(R.string.call_settings),
-                getString(R.string.call_cancel));
+            scope.showForwardToSettingsDialog(deniedList, message, settings, cancel);
         }).request(new RequestCallback() {
             @Override
             public void onResult(boolean allGranted, @NonNull List<String> grantedList,
@@ -278,11 +325,12 @@ public class CallWaitingFragment extends Fragment {
     }
 
     private void setInnerText(String page, int type, ZegoUIKitUser showUser, List<ZegoUIKitUser> invitees) {
-        if (CallInvitationServiceImpl.getInstance().getCallInvitationConfig() == null) {
+        ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = CallInvitationServiceImpl.getInstance()
+            .getCallInvitationConfig();
+        if (callInvitationConfig == null) {
             return;
         }
-        ZegoInnerText innerText = CallInvitationServiceImpl.getInstance().getCallInvitationConfig().innerText;
-
+        ZegoTranslationText innerText = callInvitationConfig.translationText;
         if (innerText == null) {
             return;
         }
@@ -305,7 +353,8 @@ public class CallWaitingFragment extends Fragment {
         }
     }
 
-    private void setVoiceInnerText(boolean isGroup, String page, ZegoUIKitUser showUser, ZegoInnerText innerText) {
+    private void setVoiceInnerText(boolean isGroup, String page, ZegoUIKitUser showUser,
+        ZegoTranslationText innerText) {
         if (isGroup) {
             if ("incoming".equals(page)) {
                 if (!TextUtils.isEmpty(innerText.incomingGroupVoiceCallPageTitle)) {
@@ -362,7 +411,8 @@ public class CallWaitingFragment extends Fragment {
 
     }
 
-    private void setVideoInnerText(boolean isGroup, String page, ZegoUIKitUser showUser, ZegoInnerText innerText) {
+    private void setVideoInnerText(boolean isGroup, String page, ZegoUIKitUser showUser,
+        ZegoTranslationText innerText) {
         if (isGroup) {
             if ("incoming".equals(page)) {
                 if (!TextUtils.isEmpty(innerText.incomingGroupVideoCallPageTitle)) {

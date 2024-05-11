@@ -14,9 +14,11 @@ import com.permissionx.guolindev.PermissionX;
 import com.permissionx.guolindev.callback.RequestCallback;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleCameraButton;
 import com.zegocloud.uikit.prebuilt.call.R;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.event.ZegoMenuBarButtonClickListener;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -79,14 +81,27 @@ public class PermissionCameraButton extends ZegoToggleCameraButton {
             requestCallback.onResult(true, permissions, new ArrayList<>());
             return;
         }
+
+        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
         PermissionX.init((FragmentActivity) getContext()).permissions(permissions)
             .onExplainRequestReason((scope, deniedList) -> {
-                String message = getContext().getString(R.string.call_permission_explain_camera);
-                scope.showRequestReasonDialog(deniedList, message, getContext().getString(R.string.call_ok));
+                String message = "";
+                String ok = "";
+                if (callConfig.zegoCallText != null) {
+                    message = callConfig.zegoCallText.permissionExplainCamera;
+                    ok = callConfig.zegoCallText.ok;
+                }
+                scope.showRequestReasonDialog(deniedList, message, ok);
             }).onForwardToSettings((scope, deniedList) -> {
-                String message = getContext().getString(R.string.call_settings_camera);
-                scope.showForwardToSettingsDialog(deniedList, message, getContext().getString(R.string.call_settings),
-                    getContext().getString(R.string.call_cancel));
+                String message = "";
+                String settings = "";
+                String cancel = "";
+                if (callConfig.zegoCallText != null) {
+                    message = callConfig.zegoCallText.permissionExplainCamera;
+                    settings = callConfig.zegoCallText.settings;
+                    cancel = callConfig.zegoCallText.cancel;
+                }
+                scope.showForwardToSettingsDialog(deniedList, message, settings, cancel);
             }).request(new RequestCallback() {
                 @Override
                 public void onResult(boolean allGranted, @NonNull List<String> grantedList,

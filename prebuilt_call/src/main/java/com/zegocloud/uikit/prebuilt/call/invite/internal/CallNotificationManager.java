@@ -60,8 +60,8 @@ public class CallNotificationManager {
         String notificationMessage = "";
         ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = CallInvitationServiceImpl.getInstance()
             .getCallInvitationConfig();
-        if (callInvitationConfig != null && callInvitationConfig.innerText != null) {
-            ZegoInnerText innerText = CallInvitationServiceImpl.getInstance().getCallInvitationConfig().innerText;
+        if (callInvitationConfig != null && callInvitationConfig.translationText != null) {
+            ZegoTranslationText innerText = callInvitationConfig.translationText;
             if (isVideoCall) {
                 notificationMessage =
                     isGroup ? innerText.incomingGroupVideoCallDialogMessage : innerText.incomingVideoCallDialogMessage;
@@ -77,14 +77,15 @@ public class CallNotificationManager {
         String notificationTitle = "";
         ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = CallInvitationServiceImpl.getInstance()
             .getCallInvitationConfig();
-        if (callInvitationConfig != null && callInvitationConfig.innerText != null) {
-            ZegoInnerText innerText = callInvitationConfig.innerText;
+        if (callInvitationConfig != null && callInvitationConfig.translationText != null) {
+            ZegoTranslationText innerText = callInvitationConfig.translationText;
             if (isVideoCall) {
                 notificationTitle = isGroup ? String.format(innerText.incomingGroupVideoCallDialogTitle, userName)
                     : String.format(innerText.incomingVideoCallDialogTitle, userName);
             } else {
+                String incomingVoiceCallDialogTitle = innerText.incomingVoiceCallDialogTitle;
                 notificationTitle = isGroup ? String.format(innerText.incomingGroupVoiceCallDialogTitle, userName)
-                    : String.format(innerText.incomingVoiceCallDialogTitle, userName);
+                    : String.format(incomingVoiceCallDialogTitle, userName);
             }
         }
 
@@ -196,6 +197,9 @@ public class CallNotificationManager {
         PendingIntent declineIntent = getDeclineIntent(context);
 
         boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
+        boolean offlineNotification = zimPushMessage != null;
+        Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
+        boolean backgroundNotification = zimPushMessage == null && topActivity != null;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 
@@ -203,32 +207,40 @@ public class CallNotificationManager {
                     R.drawable.call_icon_chat_normal) //// A small icon that will be displayed in the status bar
                 .setContentTitle(title)   // Notification text, usually the caller’s name
                 .setContentText(body).setContentIntent(clickIntent).setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setCategory(NotificationCompat.CATEGORY_CALL).setOngoing(true)
-                .setAutoCancel(true);
-            Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
+                .setCategory(NotificationCompat.CATEGORY_CALL).setOngoing(true).setAutoCancel(true);
 
-            if (zimPushMessage == null && topActivity != null && canShowFullOnLockScreen) {
+            // offline call can only start foregroundService and show notification,cannot show full screen on
+            // lock screen.
+            if (backgroundNotification && canShowFullOnLockScreen) {
                 PendingIntent lockScreenIntent = getLockScreenIntent(context);
                 builder.setFullScreenIntent(lockScreenIntent, true);
+            }
+
+            if (offlineNotification || canShowFullOnLockScreen) {
 
                 //callStyle need foreground service or fullscreen intent
                 android.app.Person caller = new android.app.Person.Builder().setName(title).setImportant(true).build();
                 Notification.CallStyle callStyle = Notification.CallStyle.forIncomingCall(caller, declineIntent,
                     acceptIntent);
                 builder.setStyle(callStyle);
-            }else {
+            } else {
+
+                String accept = context.getString(R.string.call_page_action_accept);
+
+                String decline = context.getString(R.string.call_page_action_decline);
+
                 Notification.Action.Builder acceptAction = new Notification.Action.Builder(
                     // The icon that will be displayed on the button (or not, depends on the Android version)
                     Icon.createWithResource(context, R.drawable.call_selector_dialog_voice_accept),
                     // The text on the button
-                    context.getString(R.string.call_page_action_accept), acceptIntent);
+                    accept, acceptIntent);
 
                 Notification.Action.Builder declineAction = new Notification.Action.Builder(
                     // The icon that will be displayed on the button (or not, depends on the Android version)
                     Icon.createWithResource(context,
                         com.zegocloud.uikit.R.drawable.zego_uikit_icon_dialog_voice_decline),
                     // The text on the button
-                    context.getString(R.string.call_page_action_decline), declineIntent);
+                    decline, declineIntent);
 
                 builder.addAction(acceptAction.build());
                 builder.addAction(declineAction.build());
@@ -241,23 +253,27 @@ public class CallNotificationManager {
                 .setContentText(body).setContentIntent(clickIntent).setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC).setCategory(NotificationCompat.CATEGORY_CALL)
                 .setOngoing(true).setAutoCancel(true);
-            Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
-            if (zimPushMessage == null && topActivity != null && canShowFullOnLockScreen) {
+            if (backgroundNotification && canShowFullOnLockScreen) {
                 PendingIntent lockScreenIntent = getLockScreenIntent(context);
                 builder.setFullScreenIntent(lockScreenIntent, true);
             }
+
+            String accept = context.getString(R.string.call_page_action_accept);
+
+            String decline = context.getString(R.string.call_page_action_decline);
+
             NotificationCompat.Action.Builder acceptAction = new Action.Builder(
                 // The icon that will be displayed on the button (or not, depends on the Android version)
                 IconCompat.createWithResource(context, R.drawable.call_selector_dialog_voice_accept),
                 // The text on the button
-                context.getString(R.string.call_page_action_accept), acceptIntent);
+                accept, acceptIntent);
 
             NotificationCompat.Action.Builder declineAction = new Action.Builder(
                 // The icon that will be displayed on the button (or not, depends on the Android version)
                 IconCompat.createWithResource(context,
                     com.zegocloud.uikit.R.drawable.zego_uikit_icon_dialog_voice_decline),
                 // The text on the button
-                context.getString(R.string.call_page_action_decline), declineIntent);
+                decline, declineIntent);
 
             builder.addAction(acceptAction.build());
             builder.addAction(declineAction.build());

@@ -17,6 +17,8 @@ import androidx.annotation.NonNull;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoInRoomChatConfig;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallLayoutInroomChatBinding;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallText;
 
 public class ZegoInRoomChatDialog extends Dialog {
 
@@ -71,6 +73,11 @@ public class ZegoInRoomChatDialog extends Dialog {
             binding.inroomChatView.setInRoomChatItemViewProvider(inRoomChatConfig.inRoomChatItemViewProvider);
             binding.inroomChatTitle.setText(inRoomChatConfig.title);
             binding.inroomChatInput.setPlaceHolder(inRoomChatConfig.inputHint);
+            ZegoCallText zegoCallText = CallInvitationServiceImpl.getInstance().getCallConfig().zegoCallText;
+            if (zegoCallText != null) {
+                binding.inroomChatTitle.setText(zegoCallText.inRoomChatTitle);
+                binding.inroomChatInput.setPlaceHolder(zegoCallText.inRoomChatInputHint);
+            }
         }
 
         globalLayoutListener = new OnGlobalLayoutListener() {

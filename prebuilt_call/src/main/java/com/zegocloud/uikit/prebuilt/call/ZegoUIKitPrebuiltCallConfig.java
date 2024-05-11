@@ -18,9 +18,11 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltAudioVideoViewConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltVideoConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig;
+import com.zegocloud.uikit.prebuilt.call.event.BackPressEvent;
 import com.zegocloud.uikit.prebuilt.call.event.CallEndListener;
 import com.zegocloud.uikit.prebuilt.call.event.CallEvents;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoMiniVideoConfig;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallText;
 import com.zegocloud.uikit.service.defines.ZegoMeRemovedFromRoomListener;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +37,15 @@ public class ZegoUIKitPrebuiltCallConfig {
     public ZegoLayout layout = new ZegoLayout();
     public ZegoBottomMenuBarConfig bottomMenuBarConfig = new ZegoBottomMenuBarConfig();
     public ZegoTopMenuBarConfig topMenuBarConfig = new ZegoTopMenuBarConfig();
+
+    /**
+     * if hangUpConfirmDialogInfo is not null,a confirm dialog will show when leave button is clicked or back button is
+     * pressed. Please use {@link ZegoCallText }  to custom dialog texts. if you want to custom back button
+     * events,Please use {@link CallEvents#setBackPressEvent(BackPressEvent)}
+     */
+    @Deprecated
     public ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo;
+
     public ZegoMemberListConfig memberListConfig = new ZegoMemberListConfig();
     public ZegoPrebuiltVideoConfig screenSharingVideoConfig = new ZegoPrebuiltVideoConfig(
         ZegoPresetResolution.PRESET_540P);
@@ -46,6 +56,7 @@ public class ZegoUIKitPrebuiltCallConfig {
     public ZegoBeautyPluginConfig beautyConfig = new ZegoBeautyPluginConfig();
     public ZegoInRoomChatConfig inRoomChatConfig = new ZegoInRoomChatConfig();
     public ZegoMiniVideoConfig miniVideoConfig = new ZegoMiniVideoConfig();
+    public ZegoCallText zegoCallText = new ZegoCallText();
 
     /**
      * use ZegoUIKitPrebuiltCallService.events.callEvents.setCallEndListener() instead;

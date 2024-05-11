@@ -10,8 +10,9 @@ public class ZegoTopMenuBarConfig implements Serializable {
     public List<ZegoMenuBarButtonName> buttons = new ArrayList<>();
     public boolean hideAutomatically = true;
     public boolean hideByClick = true;
-    public ZegoMenuBarStyle style = ZegoMenuBarStyle.DARK;
     public boolean isVisible = false;
+
+    public ZegoMenuBarStyle style = ZegoMenuBarStyle.DARK;
 
     public ZegoMenuBarButtonConfig buttonConfig = new ZegoMenuBarButtonConfig();
 }
