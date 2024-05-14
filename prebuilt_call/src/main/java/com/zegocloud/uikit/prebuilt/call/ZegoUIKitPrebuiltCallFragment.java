@@ -165,24 +165,23 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             }
         }
 
-        if (callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)) {
+        if (callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON) ||
+            callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)) {
             CallInvitationServiceImpl.getInstance().initBeautyPlugin();
         }
 
         ZegoCallText zegoCallText = CallInvitationServiceImpl.getInstance().getCallConfig().zegoCallText;
         if (callConfig.hangUpConfirmDialogInfo != null) {
-            if (TextUtils.isEmpty(callConfig.hangUpConfirmDialogInfo.title)) {
-                if (zegoCallText != null) {
-                    callConfig.hangUpConfirmDialogInfo.title = zegoCallText.leaveTitle;
-                }
+            if (zegoCallText != null) {
+                callConfig.hangUpConfirmDialogInfo.title = zegoCallText.leaveTitle;
             }
-            if (TextUtils.isEmpty(callConfig.hangUpConfirmDialogInfo.message)) {
+            if (zegoCallText != null) {
                 callConfig.hangUpConfirmDialogInfo.message = zegoCallText.leaveMessage;
             }
-            if (TextUtils.isEmpty(callConfig.hangUpConfirmDialogInfo.cancelButtonName)) {
+            if (zegoCallText != null) {
                 callConfig.hangUpConfirmDialogInfo.cancelButtonName = zegoCallText.cancel;
             }
-            if (TextUtils.isEmpty(callConfig.hangUpConfirmDialogInfo.confirmButtonName)) {
+            if (zegoCallText != null) {
                 callConfig.hangUpConfirmDialogInfo.confirmButtonName = zegoCallText.confirm;
             }
         }

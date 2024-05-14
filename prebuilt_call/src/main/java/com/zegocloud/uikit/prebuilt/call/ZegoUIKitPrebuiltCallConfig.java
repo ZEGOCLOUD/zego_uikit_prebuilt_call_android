@@ -39,9 +39,12 @@ public class ZegoUIKitPrebuiltCallConfig {
     public ZegoTopMenuBarConfig topMenuBarConfig = new ZegoTopMenuBarConfig();
 
     /**
-     * if hangUpConfirmDialogInfo is not null,a confirm dialog will show when leave button is clicked or back button is
-     * pressed. Please use {@link ZegoCallText }  to custom dialog texts. if you want to custom back button
-     * events,Please use {@link CallEvents#setBackPressEvent(BackPressEvent)}
+     * if you want to custom back button events,you can use {@link CallEvents#setBackPressEvent(BackPressEvent)}
+     * </br>
+     * Or if hangUpConfirmDialogInfo is not null,a confirm dialog will show when leave button is clicked or Android back button is
+     * pressed. Please use {@link ZegoCallText }  to custom dialog texts.
+     * </br>
+     * if hangUpConfirmDialogInfo is null,click leave button or Android back button will end call directly.
      */
     @Deprecated
     public ZegoHangUpConfirmDialogInfo hangUpConfirmDialogInfo;

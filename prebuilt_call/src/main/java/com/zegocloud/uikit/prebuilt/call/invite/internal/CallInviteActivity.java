@@ -182,10 +182,6 @@ public class CallInviteActivity extends AppCompatActivity {
         ZegoUIKitPrebuiltCallFragment fragment = ZegoUIKitPrebuiltCallFragment.newInstance(this, invitationData.callID,
             config);
 
-        if (config.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)) {
-            CallInvitationServiceImpl.getInstance().initBeautyPlugin();
-        }
-
         if (invitationData.invitees.size() > 1) {
             fragment.setOnOnlySelfInRoomListener(new ZegoOnlySelfInRoomListener() {
                 @Override

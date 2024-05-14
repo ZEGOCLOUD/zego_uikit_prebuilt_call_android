@@ -40,7 +40,6 @@ import java.util.Map;
 
 public class TopMenuBar extends FrameLayout {
 
-    private final int maxViewCount = 3;
     private final List<View> showList = new ArrayList<>();
     private LinearLayout contentView;
     private TextView titleView;
@@ -128,8 +127,8 @@ public class TopMenuBar extends FrameLayout {
                 distinct.add(button);
             }
         }
-        if (distinct.size() > maxViewCount) {
-            distinct = distinct.subList(0, maxViewCount);
+        if (distinct.size() > menuBarConfig.maxCount) {
+            distinct = distinct.subList(0, menuBarConfig.maxCount);
         }
         List<View> menuBarViews = getMenuBarViews(distinct);
         showList.addAll(menuBarViews);
@@ -390,7 +389,7 @@ public class TopMenuBar extends FrameLayout {
     }
 
     public void addButtons(List<View> viewList) {
-        int length = maxViewCount - showList.size();
+        int length = menuBarConfig.maxCount - showList.size();
         if (length > 0) {
             if (viewList.size() > length) {
                 viewList = viewList.subList(0, length);

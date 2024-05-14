@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
+import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutMode;
 import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
 import com.zegocloud.uikit.plugin.adapter.plugins.beauty.ZegoBeautyPluginInnerTextCHS;
 import com.zegocloud.uikit.plugin.adapter.plugins.beauty.ZegoBeautyPluginInnerTextEnglish;
@@ -47,6 +48,7 @@ import com.zegocloud.uikit.service.defines.ZegoUIKitPluginCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitSignalingPluginInvitationListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import com.zegocloud.uikit.service.express.IExpressEngineEventHandler;
+import im.zego.internal.screencapture.ZegoScreenCaptureManager.ZegoScreenCaptureAssistantActivity;
 import im.zego.zegoexpress.constants.ZegoRoomStateChangedReason;
 import im.zego.zegoexpress.entity.ZegoUser;
 import im.zego.zim.ZIM;
@@ -1316,7 +1318,7 @@ public class CallInvitationServiceImpl {
 
             ActivityManager am = (ActivityManager) topActivity.getSystemService(Context.ACTIVITY_SERVICE);
             if (am != null) {
-                if (!(topActivity instanceof CallInviteActivity)) {
+                if (!(topActivity instanceof CallInviteActivity) && !(topActivity instanceof ZegoScreenCaptureAssistantActivity)) {
                     if (inRoom) {
                         // call entered the room, then switched to the background, but there is no minimize .
                         // Now, when returning to the app, it is necessary to bring the CallInviteActivity to the foreground
@@ -1327,9 +1329,9 @@ public class CallInvitationServiceImpl {
                             .getZegoUIKitPrebuiltCallFragment();
                         boolean hasMiniButton =
                             callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
-                                || callConfig.topMenuBarConfig.buttons.contains(
-                                ZegoMenuBarButtonName.MINIMIZING_BUTTON);
-                        if (!hasMiniButton && callFragment != null) {
+                                || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON);
+
+                        if (!hasMiniButton && callFragment != null ) {
                             List<ActivityManager.AppTask> tasks = am.getAppTasks();
                             if (tasks != null && tasks.size() > 0) {
                                 for (AppTask task : tasks) {
