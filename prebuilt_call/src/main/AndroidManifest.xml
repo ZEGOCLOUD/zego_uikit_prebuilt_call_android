@@ -9,6 +9,9 @@
   <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
   <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+
   <application>
     <activity
       android:name="com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity"
@@ -18,8 +21,9 @@
       android:showOnLockScreen="true"
       android:taskAffinity=":zego" />
 
-    <service android:name=".invite.OffLineCallNotificationService"
-      android:foregroundServiceType="phoneCall">
+    <service
+      android:name=".invite.OffLineCallNotificationService"
+      android:foregroundServiceType="dataSync">
 
     </service>
     <receiver

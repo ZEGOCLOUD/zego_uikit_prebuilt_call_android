@@ -5,6 +5,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -16,7 +19,7 @@ import java.util.List;
 import timber.log.Timber;
 
 /**
- * foreground service, only used to keep process foreground to receive messages
+ * foreground service, when receive fcm data,use this service to show a Notification .
  */
 public class OffLineCallNotificationService extends Service {
 
@@ -63,7 +66,12 @@ public class OffLineCallNotificationService extends Service {
         } else {
             Notification callNotification = CallInvitationServiceImpl.getInstance().getCallNotification(this);
             if (callNotification != null) {
-                startForeground(CallNotificationManager.callNotificationID, callNotification);
+                if (VERSION.SDK_INT >= VERSION_CODES.Q) {
+                    startForeground(CallNotificationManager.callNotificationID, callNotification,
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+                } else {
+                    startForeground(CallNotificationManager.callNotificationID, callNotification);
+                }
             }
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
