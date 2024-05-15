@@ -23,7 +23,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
-import com.zegocloud.uikit.components.audiovideocontainer.ZegoLayoutMode;
 import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
 import com.zegocloud.uikit.plugin.adapter.plugins.beauty.ZegoBeautyPluginInnerTextCHS;
 import com.zegocloud.uikit.plugin.adapter.plugins.beauty.ZegoBeautyPluginInnerTextEnglish;
@@ -558,9 +557,6 @@ public class CallInvitationServiceImpl {
     }
 
     public boolean init(Application application, long appID, String appSign, String token) {
-        Timber.d(
-            "Call init() called with: application = [" + application + "], appID = [" + appID + "], appSign.isEmpty() = [" + TextUtils.isEmpty(appSign)
-                + "], token.isEmpty() = [" + TextUtils.isEmpty(token) + "]");
         if (alreadyInit) {
             // we assume that user not changed his appID and appSign
             ErrorEventsListener errorEvents = ZegoUIKitPrebuiltCallService.events.getErrorEventsListener();
@@ -572,6 +568,11 @@ public class CallInvitationServiceImpl {
         }
         boolean result = ZegoUIKit.init(application, appID, appSign, ZegoScenario.GENERAL);
         if (result) {
+
+            Timber.d(
+                "Call init() called with: application = [" + application + "], appID = [" + appID + "], appSign.isEmpty() = [" + TextUtils.isEmpty(appSign)
+                    + "], token.isEmpty() = [" + TextUtils.isEmpty(token) + "]");
+
             alreadyInit = true;
             this.application = application;
             this.appID = appID;
