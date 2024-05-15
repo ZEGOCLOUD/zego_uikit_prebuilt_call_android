@@ -568,7 +568,6 @@ public class CallInvitationServiceImpl {
         }
         boolean result = ZegoUIKit.init(application, appID, appSign, ZegoScenario.GENERAL);
         if (result) {
-
             Timber.d(
                 "Call init() called with: application = [" + application + "], appID = [" + appID + "], appSign.isEmpty() = [" + TextUtils.isEmpty(appSign)
                     + "], token.isEmpty() = [" + TextUtils.isEmpty(token) + "]");
