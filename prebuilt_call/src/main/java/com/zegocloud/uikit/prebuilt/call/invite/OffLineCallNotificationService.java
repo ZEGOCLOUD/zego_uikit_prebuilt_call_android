@@ -3,8 +3,6 @@ package com.zegocloud.uikit.prebuilt.call.invite;
 import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
@@ -15,11 +13,10 @@ import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceIm
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallNotificationManager;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZIMPushMessage;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallInvitationData;
-import java.util.List;
 import timber.log.Timber;
 
 /**
- * foreground service, when receive fcm data,use this service to show a Notification .
+ * foreground service, when receive fcm data,use this service to show a call-style Notification.
  */
 public class OffLineCallNotificationService extends Service {
 
@@ -45,8 +42,9 @@ public class OffLineCallNotificationService extends Service {
                     CallInvitationServiceImpl.getInstance().rejectInvitation(null);
                 }
             } else {
-                CallInvitationServiceImpl.getInstance()
-                    .setNotificationClickAction(intent.getAction(), zimPushMessage.invitationID);
+                //after init will receive onInvitationReceived,and ACTION_DECLINE_CALL will cause rejectInvitation
+                // and unInitToReceiveOffline to ready for offline invite again.
+                CallInvitationServiceImpl.getInstance().setNotificationClickAction(intent.getAction(), zimPushMessage.invitationID);
                 CallInvitationServiceImpl.getInstance().autoInitAndLoginUser(getApplication());
                 CallInvitationServiceImpl.getInstance().parsePayload();
             }
@@ -54,15 +52,13 @@ public class OffLineCallNotificationService extends Service {
         } else if (CallNotificationManager.ACTION_CLICK.equals(intent.getAction())) {
             // click will start service ,then start app,inject action here
             // while click accept button will start app directly
-            CallInvitationServiceImpl.getInstance()
-                .setNotificationClickAction(intent.getAction(), zimPushMessage.invitationID);
-            startApp();
-            CallInvitationServiceImpl.getInstance().dismissCallNotification(getApplicationContext());
+//            CallInvitationServiceImpl.getInstance().setNotificationClickAction(intent.getAction(), zimPushMessage.invitationID);
+//            startApp();
+//            CallInvitationServiceImpl.getInstance().dismissCallNotification(getApplicationContext());
         } else if (CallNotificationManager.ACTION_ACCEPT_CALL.equals(intent.getAction())) {
-            CallInvitationServiceImpl.getInstance()
-                .setNotificationClickAction(intent.getAction(), zimPushMessage.invitationID);
-            startApp();
-            CallInvitationServiceImpl.getInstance().dismissCallNotification(getApplicationContext());
+//            CallInvitationServiceImpl.getInstance().setNotificationClickAction(intent.getAction(), zimPushMessage.invitationID);
+//            startApp();
+//            CallInvitationServiceImpl.getInstance().dismissCallNotification(getApplicationContext());
         } else {
             Notification callNotification = CallInvitationServiceImpl.getInstance().getCallNotification(this);
             if (callNotification != null) {
@@ -83,30 +79,6 @@ public class OffLineCallNotificationService extends Service {
         }
 
         return super.onStartCommand(intent, flags, startId);
-    }
-
-    public void startApp() {
-        Intent intent = null;
-        try {
-            intent = new Intent(this, Class.forName(getLauncherActivity()));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public String getLauncherActivity() {
-        Intent intent = new Intent(Intent.ACTION_MAIN, null);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        intent.setPackage(getApplication().getPackageName());
-        PackageManager pm = getApplication().getPackageManager();
-        List<ResolveInfo> info = pm.queryIntentActivities(intent, 0);
-        if (info == null || info.size() == 0) {
-            return "";
-        }
-        return info.get(0).activityInfo.name;
     }
 
     @Override

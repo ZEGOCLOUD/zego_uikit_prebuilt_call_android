@@ -396,31 +396,6 @@ public class CallInvitationServiceImpl {
         setZIMPushMessage(null);
     }
 
-
-    public void startApp(Context context) {
-        Intent intent = null;
-        try {
-            intent = new Intent(context, Class.forName(getLauncherActivity()));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            context.startActivity(intent);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public String getLauncherActivity() {
-        Intent intent = new Intent(Intent.ACTION_MAIN, null);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        intent.setPackage(getApplication().getPackageName());
-        PackageManager pm = getApplication().getPackageManager();
-        List<ResolveInfo> info = pm.queryIntentActivities(intent, 0);
-        if (info == null || info.size() == 0) {
-            return "";
-        }
-        return info.get(0).activityInfo.name;
-    }
-
     private JSONObject getJsonObjectFromString(String s) {
         JSONObject jsonObject = null;
         try {
@@ -568,9 +543,9 @@ public class CallInvitationServiceImpl {
         }
         boolean result = ZegoUIKit.init(application, appID, appSign, ZegoScenario.GENERAL);
         if (result) {
-            Timber.d(
-                "Call init() called with: application = [" + application + "], appID = [" + appID + "], appSign.isEmpty() = [" + TextUtils.isEmpty(appSign)
-                    + "], token.isEmpty() = [" + TextUtils.isEmpty(token) + "]");
+            Timber.d("Call init() called with: application = [" + application + "], appID = [" + appID
+                + "], appSign.isEmpty() = [" + TextUtils.isEmpty(appSign) + "], token.isEmpty() = ["
+                + TextUtils.isEmpty(token) + "]");
 
             alreadyInit = true;
             this.application = application;
@@ -591,10 +566,7 @@ public class CallInvitationServiceImpl {
 
             ZegoUIKit.addEventHandler(expressEventHandler, false);
             ZegoUIKit.getSignalingPlugin().addInvitationListener(invitationListener);
-            if (appActivityManager == null) {
-                appActivityManager = new AppActivityManager();
-                this.application.registerActivityLifecycleCallbacks(appActivityManager);
-            }
+            registerLifeCycleCallback(application);
             ZegoSignalingPlugin.getInstance().registerZIMEventHandler(zimEventHandler);
         }
         if (!result) {
@@ -605,6 +577,14 @@ public class CallInvitationServiceImpl {
             }
         }
         return result;
+    }
+
+    public void registerLifeCycleCallback(Application application) {
+        this.application = application;
+        if (appActivityManager == null) {
+            appActivityManager = new AppActivityManager(application);
+            application.registerActivityLifecycleCallbacks(appActivityManager);
+        }
     }
 
     public void setCallResourceID(String resourceID) {
@@ -1165,10 +1145,6 @@ public class CallInvitationServiceImpl {
         RingtoneManager.stopRingTone();
     }
 
-    public Application getApplication() {
-        return application;
-    }
-
     public void setZegoUIKitPrebuiltCallFragment(ZegoUIKitPrebuiltCallFragment zegoUIKitPrebuiltCallFragment) {
         this.zegoUIKitPrebuiltCallFragment = zegoUIKitPrebuiltCallFragment;
     }
@@ -1258,10 +1234,36 @@ public class CallInvitationServiceImpl {
     public class AppActivityManager implements ActivityLifecycleCallbacks {
 
         private Activity topActivity;
+        private String launcherActivity;
+
+        public String getLauncherActivity(Application application) {
+            Intent intent = new Intent(Intent.ACTION_MAIN, null);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            intent.setPackage(application.getPackageName());
+            PackageManager pm = application.getPackageManager();
+            List<ResolveInfo> info = pm.queryIntentActivities(intent, 0);
+            if (info == null || info.size() == 0) {
+                return "";
+            }
+            return info.get(0).activityInfo.name;
+        }
+
+        public AppActivityManager(Application application) {
+            launcherActivity = getLauncherActivity(application);
+        }
 
         @Override
         public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
-
+            String activityName = activity.getClass().getCanonicalName();
+            if (pushMessage != null && Objects.equals(activityName, launcherActivity)) {
+                String action = activity.getIntent().getAction();
+                Timber.d("onActivityCreated() called with: activity = [" + activity + "], action = ["
+                    + action + "]");
+                if (!TextUtils.isEmpty(action)) {
+                    setNotificationClickAction(action, pushMessage.invitationID);
+                }
+                CallInvitationServiceImpl.getInstance().dismissCallNotification(application);
+            }
         }
 
         @Override
@@ -1310,15 +1312,16 @@ public class CallInvitationServiceImpl {
             boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
             if (canShowFullOnLockScreen) {
                 if (!(topActivity instanceof CallInviteActivity)) {
-                    dismissCallNotification();
+                    dismissCallNotification(topActivity);
                 }
             } else {
-                dismissCallNotification();
+                dismissCallNotification(topActivity);
             }
 
             ActivityManager am = (ActivityManager) topActivity.getSystemService(Context.ACTIVITY_SERVICE);
             if (am != null) {
-                if (!(topActivity instanceof CallInviteActivity) && !(topActivity instanceof ZegoScreenCaptureAssistantActivity)) {
+                if (!(topActivity instanceof CallInviteActivity)
+                    && !(topActivity instanceof ZegoScreenCaptureAssistantActivity)) {
                     if (inRoom) {
                         // call entered the room, then switched to the background, but there is no minimize .
                         // Now, when returning to the app, it is necessary to bring the CallInviteActivity to the foreground
@@ -1329,9 +1332,10 @@ public class CallInvitationServiceImpl {
                             .getZegoUIKitPrebuiltCallFragment();
                         boolean hasMiniButton =
                             callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
-                                || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON);
+                                || callConfig.topMenuBarConfig.buttons.contains(
+                                ZegoMenuBarButtonName.MINIMIZING_BUTTON);
 
-                        if (!hasMiniButton && callFragment != null ) {
+                        if (!hasMiniButton && callFragment != null) {
                             List<ActivityManager.AppTask> tasks = am.getAppTasks();
                             if (tasks != null && tasks.size() > 0) {
                                 for (AppTask task : tasks) {

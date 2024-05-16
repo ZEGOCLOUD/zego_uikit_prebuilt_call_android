@@ -1,6 +1,7 @@
 package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
 import android.app.Activity;
+import android.app.Application;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationChannel;
@@ -192,14 +193,20 @@ public class CallNotificationManager {
             }
         }
 
+        Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
+        boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
+        boolean offlineNotification = zimPushMessage != null;
+        boolean backgroundNotification = zimPushMessage == null && topActivity != null;
+
+        if (zimPushMessage != null || topActivity == null) {
+            // offline service
+            Application application = (Application) context.getApplicationContext();
+            CallInvitationServiceImpl.getInstance().registerLifeCycleCallback(application);
+        }
+
         PendingIntent clickIntent = getClickIntent(context);
         PendingIntent acceptIntent = getAcceptIntent(context);
         PendingIntent declineIntent = getDeclineIntent(context);
-
-        boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
-        boolean offlineNotification = zimPushMessage != null;
-        Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
-        boolean backgroundNotification = zimPushMessage == null && topActivity != null;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 
@@ -217,7 +224,6 @@ public class CallNotificationManager {
             }
 
             if (offlineNotification || canShowFullOnLockScreen) {
-
                 //callStyle need foreground service or fullscreen intent
                 android.app.Person caller = new android.app.Person.Builder().setName(title).setImportant(true).build();
                 Notification.CallStyle callStyle = Notification.CallStyle.forIncomingCall(caller, declineIntent,
@@ -302,21 +308,38 @@ public class CallNotificationManager {
             }
             return openIntent;
         } else {
-            // remember action and start app, auto accept and start callInviteActivity
-            Intent intent = new Intent(context, OffLineCallNotificationService.class);
-            intent.setAction(ACTION_ACCEPT_CALL);
-
+            Intent intent = null;
+            try {
+                intent = new Intent(context, Class.forName(getLauncherActivity(context)));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.setAction(ACTION_ACCEPT_CALL);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
             PendingIntent pendingIntent;
             if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
-                pendingIntent = PendingIntent.getService(context, 0, intent,
+                pendingIntent = PendingIntent.getActivity(context, 0, intent,
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
             } else {
-                pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
             return pendingIntent;
+
+            // Android 12 trampoline limit
+            //            // remember action and start app, auto accept and start callInviteActivity
+            //            Intent intent = new Intent(context, OffLineCallNotificationService.class);
+            //            intent.setAction(ACTION_ACCEPT_CALL);
+            //            PendingIntent pendingIntent;
+            //            if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+            //                pendingIntent = PendingIntent.getService(context, 0, intent,
+            //                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+            //            } else {
+            //                pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            //            }
+            //            return pendingIntent;
         }
     }
-
 
     private PendingIntent getDeclineIntent(Context context) {
         Intent intent = new Intent(context, OffLineCallNotificationService.class);
@@ -351,17 +374,34 @@ public class CallNotificationManager {
             }
             return openIntent;
         } else {
-            Intent intent = new Intent(context, OffLineCallNotificationService.class);
-            intent.setAction(ACTION_CLICK);
-
-            PendingIntent openIntent;
+            Intent intent = null;
+            try {
+                intent = new Intent(context, Class.forName(getLauncherActivity(context)));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.setAction(ACTION_CLICK);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            PendingIntent pendingIntent;
             if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
-                openIntent = PendingIntent.getService(context, 0, intent,
+                pendingIntent = PendingIntent.getActivity(context, 0, intent,
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
             } else {
-                openIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
-            return openIntent;
+
+            // Android 12 trampoline limit
+            //            Intent intent = new Intent(context, OffLineCallNotificationService.class);
+            //            intent.setAction(ACTION_CLICK);
+            //            PendingIntent openIntent;
+            //            if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+            //                pendingIntent = PendingIntent.getService(context, 0, intent,
+            //                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+            //            } else {
+            //                pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            //            }
+            return pendingIntent;
         }
 
     }
