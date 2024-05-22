@@ -767,7 +767,9 @@ public class CallInvitationServiceImpl {
     }
 
     public void dismissCallNotification() {
-        callNotificationManager.dismissCallNotification(application);
+        if (application != null) {
+            callNotificationManager.dismissCallNotification(application);
+        }
     }
 
     public void dismissCallNotification(Context context) {

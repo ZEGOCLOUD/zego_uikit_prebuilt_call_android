@@ -1,5 +1,6 @@
 package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
+import android.Manifest.permission;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Notification;
@@ -16,6 +17,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationCompat.Action;
@@ -41,20 +44,51 @@ public class CallNotificationManager {
     public static final String callNotificationChannelID = "call_notification_id";
     private static final String callNotificationChannelName = "call_notification_name";
     private static final String callNotificationChannelDesc = "call_notification_desc";
+    private static final int TIMEOUT_AFTER = 30000;
 
     private boolean isNotificationShowed;
+    private final Runnable dismissNotificationRunnable = new Runnable() {
+        @Override
+        public void run() {
+            CallInvitationServiceImpl.getInstance().dismissCallNotification();
+            CallInvitationServiceImpl.getInstance().clearPushMessage();
+        }
+    };
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     public void showCallNotification(Context context) {
         Timber.d("showCallNotification() called with: context = [" + context + "]");
+        boolean canShowNotification = checkIfAppCanShowNotification(context);
         ContextCompat.startForegroundService(context, new Intent(context, OffLineCallNotificationService.class));
-        isNotificationShowed = true;
+        if (canShowNotification) {
+            handler.postDelayed(dismissNotificationRunnable, TIMEOUT_AFTER);
+            isNotificationShowed = true;
+        }
+    }
+
+    private boolean checkIfAppCanShowNotification(Context context) {
+        boolean hasNotificationPermission = true;
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
+            hasNotificationPermission = ContextCompat.checkSelfPermission(context, permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED;
+        }
+        boolean notificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled();
+        if (!hasNotificationPermission || !notificationsEnabled) {
+            Timber.d("checkNotificationEnabled() called with: hasNotificationPermission = %b,notificationsEnabled = %b",
+                hasNotificationPermission, notificationsEnabled);
+        }
+        return hasNotificationPermission && notificationsEnabled;
     }
 
     public void showCallBackgroundNotification(Context context) {
         Timber.d("showCallBackgroundNotification() called with: context = [" + context + "]");
+        boolean canShowNotification = checkIfAppCanShowNotification(context);
         Notification callNotification = CallInvitationServiceImpl.getInstance().getCallNotification(context);
         NotificationManagerCompat.from(context).notify(callNotificationID, callNotification);
-        isNotificationShowed = true;
+        if (canShowNotification) {
+            handler.postDelayed(dismissNotificationRunnable, TIMEOUT_AFTER);
+            isNotificationShowed = true;
+        }
     }
 
     public String getBackgroundNotificationMessage(boolean isVideoCall, boolean isGroup) {
@@ -144,11 +178,15 @@ public class CallNotificationManager {
     }
 
     public void dismissCallNotification(Context context) {
-        Intent intent = new Intent(context, OffLineCallNotificationService.class);
-        isNotificationShowed = false;
-        context.stopService(intent);
+        if (isNotificationShowed) {
+            isNotificationShowed = false;
+            Intent intent = new Intent(context, OffLineCallNotificationService.class);
+            context.stopService(intent);
 
-        NotificationManagerCompat.from(context).cancel(callNotificationID);
+            NotificationManagerCompat.from(context).cancel(callNotificationID);
+
+            handler.removeCallbacks(dismissNotificationRunnable);
+        }
     }
 
     public boolean isCallNotificationShowed() {
@@ -251,6 +289,7 @@ public class CallNotificationManager {
                 builder.addAction(acceptAction.build());
                 builder.addAction(declineAction.build());
             }
+            builder.setTimeoutAfter(TIMEOUT_AFTER + 1000);
             return builder.build();
         } else {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelID).setSmallIcon(
@@ -283,6 +322,7 @@ public class CallNotificationManager {
 
             builder.addAction(acceptAction.build());
             builder.addAction(declineAction.build());
+            builder.setTimeoutAfter(TIMEOUT_AFTER + 1000);
             return builder.build();
         }
     }
