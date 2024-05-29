@@ -68,8 +68,8 @@ public class CallNotificationManager {
 
     private boolean checkIfAppCanShowNotification(Context context) {
         boolean hasNotificationPermission = true;
-        if (Build.VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
-            hasNotificationPermission = ContextCompat.checkSelfPermission(context, permission.POST_NOTIFICATIONS)
+        if (Build.VERSION.SDK_INT >= 33) {
+            hasNotificationPermission = ContextCompat.checkSelfPermission(context, "android.permission.POST_NOTIFICATIONS")
                 == PackageManager.PERMISSION_GRANTED;
         }
         boolean notificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled();

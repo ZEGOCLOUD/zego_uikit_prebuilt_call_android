@@ -20,9 +20,11 @@ import com.permissionx.guolindev.PermissionX;
 import com.permissionx.guolindev.callback.RequestCallback;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.components.audiovideo.ZegoAvatarViewProvider;
+import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
 import com.zegocloud.uikit.plugin.adapter.utils.GenericUtils;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallLayoutWaitingBinding;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
@@ -213,6 +215,12 @@ public class CallWaitingFragment extends Fragment {
             return;
         }
 
+        ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = CallInvitationServiceImpl.getInstance()
+            .getCallInvitationConfig();
+        if (callInvitationConfig == null || callInvitationConfig.translationText == null) {
+            return;
+        }
+
         PermissionX.init(requireActivity()).permissions(permissions).onExplainRequestReason((scope, deniedList) -> {
             String message = "";
             String camera = "";
@@ -224,18 +232,21 @@ public class CallWaitingFragment extends Fragment {
             String settingsCamera = "";
             String settingsMic = "";
             String settingsMicAndCamera = "";
-            ZegoCallText zegoCallText = CallInvitationServiceImpl.getInstance().getCallConfig().zegoCallText;
-            if (zegoCallText != null) {
-                camera = zegoCallText.permissionExplainCamera;
-                mic = zegoCallText.permissionExplainMic;
-                micAndCamera = zegoCallText.permissionExplainMicAndCamera;
-                settings = zegoCallText.settings;
-                cancel = zegoCallText.cancel;
-                settingsCamera = zegoCallText.settingCamera;
-                settingsMic = zegoCallText.settingMic;
-                settingsMicAndCamera = zegoCallText.settingMicAndCamera;
-                ok = zegoCallText.ok;
+            ZegoCallText zegoCallText;
+            if (callInvitationConfig.translationText.getInvitationBaseText() instanceof InvitationTextEnglish) {
+                zegoCallText = new ZegoCallText(ZegoUIKitLanguage.ENGLISH);
+            } else {
+                zegoCallText = new ZegoCallText(ZegoUIKitLanguage.CHS);
             }
+            camera = zegoCallText.permissionExplainCamera;
+            mic = zegoCallText.permissionExplainMic;
+            micAndCamera = zegoCallText.permissionExplainMicAndCamera;
+            settings = zegoCallText.settings;
+            cancel = zegoCallText.cancel;
+            settingsCamera = zegoCallText.settingCamera;
+            settingsMic = zegoCallText.settingMic;
+            settingsMicAndCamera = zegoCallText.settingMicAndCamera;
+            ok = zegoCallText.ok;
             if (deniedList.size() == 1) {
                 if (deniedList.contains(permission.CAMERA)) {
                     message = camera;
@@ -257,18 +268,21 @@ public class CallWaitingFragment extends Fragment {
             String settingsCamera = "";
             String settingsMic = "";
             String settingsMicAndCamera = "";
-            ZegoCallText zegoCallText = CallInvitationServiceImpl.getInstance().getCallConfig().zegoCallText;
-            if (zegoCallText != null) {
-                camera = zegoCallText.permissionExplainCamera;
-                mic = zegoCallText.permissionExplainMic;
-                micAndCamera = zegoCallText.permissionExplainMicAndCamera;
-                settings = zegoCallText.settings;
-                cancel = zegoCallText.cancel;
-                settingsCamera = zegoCallText.settingCamera;
-                settingsMic = zegoCallText.settingMic;
-                settingsMicAndCamera = zegoCallText.settingMicAndCamera;
-                ok = zegoCallText.ok;
+            ZegoCallText zegoCallText;
+            if (callInvitationConfig.translationText.getInvitationBaseText() instanceof InvitationTextEnglish) {
+                zegoCallText = new ZegoCallText(ZegoUIKitLanguage.ENGLISH);
+            } else {
+                zegoCallText = new ZegoCallText(ZegoUIKitLanguage.CHS);
             }
+            camera = zegoCallText.permissionExplainCamera;
+            mic = zegoCallText.permissionExplainMic;
+            micAndCamera = zegoCallText.permissionExplainMicAndCamera;
+            settings = zegoCallText.settings;
+            cancel = zegoCallText.cancel;
+            settingsCamera = zegoCallText.settingCamera;
+            settingsMic = zegoCallText.settingMic;
+            settingsMicAndCamera = zegoCallText.settingMicAndCamera;
+            ok = zegoCallText.ok;
             if (deniedList.size() == 1) {
                 if (deniedList.contains(permission.CAMERA)) {
                     message = settingsCamera;
