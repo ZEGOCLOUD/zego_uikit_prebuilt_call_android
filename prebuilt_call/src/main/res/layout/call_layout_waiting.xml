@@ -4,7 +4,7 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
-  <com.zegocloud.uikit.components.audiovideo.ZegoAudioVideoView
+  <TextureView
     android:id="@+id/audio_video_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent" />

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.text.TextUtils;
+import android.util.Log;
 import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallInvitationData;
@@ -96,6 +97,7 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
 
     @Override
     protected void onRegistered(Context context, ZPNsRegisterMessage message) {
+        Timber.d("onRegistered() called with: context = [" + context + "], message = [" + message + "]");
     }
 
     static public ZIMPushMessage getZIMPushMessage(ZPNsMessage message) {

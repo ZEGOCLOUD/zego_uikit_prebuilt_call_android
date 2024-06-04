@@ -29,6 +29,8 @@ import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallLayoutWaitingBinding;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
+import im.zego.zegoexpress.constants.ZegoViewMode;
+import im.zego.zegoexpress.entity.ZegoCanvas;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +40,7 @@ public class CallWaitingFragment extends Fragment {
     private OnBackPressedCallback onBackPressedCallback;
     private Drawable backgroundDrawable;
     private ZegoAvatarViewProvider zegoAvatarViewProvider;
+    private ZegoCanvas zegoCanvas;
 
     public CallWaitingFragment() {
     }
@@ -86,6 +89,9 @@ public class CallWaitingFragment extends Fragment {
         ZegoUIKitUser inviter = invitationData.inviter;
         List<ZegoUIKitUser> invitees = invitationData.invitees;
 
+        zegoCanvas = new ZegoCanvas(binding.audioVideoView);
+        zegoCanvas.viewMode = ZegoViewMode.ASPECT_FILL;
+
         ZegoUIKitUser showUser = null;
         if ("incoming".equals(page)) {
             showUser = inviter;
@@ -109,9 +115,10 @@ public class CallWaitingFragment extends Fragment {
                 binding.audioVideoView.setVisibility(View.GONE);
                 binding.cameraSwitch.setVisibility(View.GONE);
             } else {
+                ZegoUIKit.startPreview(zegoCanvas);
                 binding.cameraSwitch.setVisibility(View.VISIBLE);
                 binding.audioVideoView.setVisibility(View.VISIBLE);
-                binding.audioVideoView.setUserID(userID);
+//                binding.audioVideoView.setUserID(userID);
             }
             binding.callWaitingCancel.setVisibility(View.VISIBLE);
             binding.callWaitingRefuse.setVisibility(View.GONE);

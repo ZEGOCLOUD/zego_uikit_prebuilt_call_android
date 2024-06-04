@@ -527,7 +527,10 @@ public class CallInvitationServiceImpl {
             init(application, preAppID, preAppSign, token);
             loginUser(preUserID, preUserName);
 
-            ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
+            if (!isOtherPushEnable()) {
+                enableFCMPush();
+            }
+            registerPush();
         }
     }
 
@@ -642,10 +645,14 @@ public class CallInvitationServiceImpl {
         ZegoUIKit.getSignalingPlugin().login(userID, userName, new ZegoUIKitPluginCallback() {
             @Override
             public void onResult(int errorCode, String message) {
-                if (errorCode != 0) {
-                    alreadyLogin = false;
+                Timber.d("login() called with: errorCode = [" + errorCode + "], message = [" + message + "]");
+                if (errorCode == 0) {
+                    if (!isOtherPushEnable()) {
+                        enableFCMPush();
+                    }
+                    registerPush();
                 } else {
-                    ZegoUIKit.getSignalingPlugin().enableNotifyWhenAppRunningInBackgroundOrQuit(true);
+                    alreadyLogin = false;
                 }
             }
         });
@@ -892,6 +899,60 @@ public class CallInvitationServiceImpl {
         updateListener = null;
         clearPushMessage();
         ZegoUIKit.leaveRoom();
+    }
+
+    public void enableFCMPush() {
+//        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+//            if (!task.isSuccessful()) {
+//                return;
+//            }
+//            String token = task.getResult();
+//            if (!TextUtils.isEmpty(token)) {
+//              //  ZegoUIKit.getSignalingPlugin().enableFCMPush();
+//            }
+//        });
+        ZegoUIKit.getSignalingPlugin().enableFCMPush();
+    }
+
+    public void disableFCMPush() {
+        ZegoUIKit.getSignalingPlugin().disableFCMPush();
+    }
+
+    public void enableHWPush(String hwAppID) {
+        Timber.d("enableHWPush() called with: hwAppID = [" + hwAppID + "]");
+        ZegoUIKit.getSignalingPlugin().enableHWPush(hwAppID);
+    }
+
+    public void enableMiPush(String miAppID, String miAppKey) {
+        ZegoUIKit.getSignalingPlugin().enableMiPush(miAppID, miAppKey);
+    }
+
+
+    public void enableVivoPush(String vivoAppID, String vivoAppKey) {
+        ZegoUIKit.getSignalingPlugin().enableVivoPush(vivoAppID, vivoAppKey);
+    }
+
+    public void enableOppoPush(String oppoAppID, String oppoAppKey, String oppoAppSecret) {
+        ZegoUIKit.getSignalingPlugin().enableOppoPush(oppoAppID, oppoAppKey, oppoAppSecret);
+    }
+
+    public boolean isOtherPushEnable() {
+        return ZegoUIKit.getSignalingPlugin().isOtherPushEnable();
+    }
+
+    public boolean isFCMPushEnable() {
+        return ZegoUIKit.getSignalingPlugin().isFCMPushEnable();
+    }
+
+    public void registerPush() {
+        if (isFCMPushEnable() || isOtherPushEnable()) {
+            Timber.d("registerPush() called");
+            ZegoUIKit.getSignalingPlugin().registerPush();
+        }
+    }
+
+    public void unregisterPush() {
+        ZegoUIKit.getSignalingPlugin().unregisterPush();
     }
 
     public void sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees,
@@ -1259,8 +1320,7 @@ public class CallInvitationServiceImpl {
             String activityName = activity.getClass().getCanonicalName();
             if (pushMessage != null && Objects.equals(activityName, launcherActivity)) {
                 String action = activity.getIntent().getAction();
-                Timber.d("onActivityCreated() called with: activity = [" + activity + "], action = ["
-                    + action + "]");
+                Timber.d("onActivityCreated() called with: activity = [" + activity + "], action = [" + action + "]");
                 if (!TextUtils.isEmpty(action)) {
                     setNotificationClickAction(action, pushMessage.invitationID);
                 }
