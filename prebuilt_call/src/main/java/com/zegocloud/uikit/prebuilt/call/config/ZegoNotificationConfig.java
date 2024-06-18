@@ -10,6 +10,7 @@ public class ZegoNotificationConfig {
 
     public String channelID;
     public String channelName;
+    public String channelDesc;
     public String sound;
 
 }

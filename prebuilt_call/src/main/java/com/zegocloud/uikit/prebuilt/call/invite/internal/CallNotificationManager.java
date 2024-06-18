@@ -1,6 +1,5 @@
 package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
-import android.Manifest.permission;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Notification;
@@ -69,8 +68,9 @@ public class CallNotificationManager {
     private boolean checkIfAppCanShowNotification(Context context) {
         boolean hasNotificationPermission = true;
         if (Build.VERSION.SDK_INT >= 33) {
-            hasNotificationPermission = ContextCompat.checkSelfPermission(context, "android.permission.POST_NOTIFICATIONS")
-                == PackageManager.PERMISSION_GRANTED;
+            hasNotificationPermission =
+                ContextCompat.checkSelfPermission(context, "android.permission.POST_NOTIFICATIONS")
+                    == PackageManager.PERMISSION_GRANTED;
         }
         boolean notificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled();
         if (!hasNotificationPermission || !notificationsEnabled) {
@@ -145,7 +145,7 @@ public class CallNotificationManager {
         } else {
             channelID = invitationConfig.notificationConfig.channelID;
             channelName = invitationConfig.notificationConfig.channelName;
-            channelDesc = channelName;
+            channelDesc = invitationConfig.notificationConfig.channelDesc;
             String soundName = invitationConfig.notificationConfig.sound;
             if (!TextUtils.isEmpty(soundName)) {
                 ringtone = RingtoneManager.getUriFromRaw(context, getSoundName(soundName));
@@ -232,8 +232,8 @@ public class CallNotificationManager {
         }
 
         Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
-        boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
-        boolean offlineNotification = zimPushMessage != null;
+        //        boolean canShowFullOnLockScreen = CallInvitationServiceImpl.getInstance().canShowFullOnLockScreen();
+        boolean willStartForegroundService = zimPushMessage != null;
         boolean backgroundNotification = zimPushMessage == null && topActivity != null;
 
         if (zimPushMessage != null || topActivity == null) {
@@ -256,12 +256,12 @@ public class CallNotificationManager {
 
             // offline call can only start foregroundService and show notification,cannot show full screen on
             // lock screen.
-            if (backgroundNotification && canShowFullOnLockScreen) {
-                PendingIntent lockScreenIntent = getLockScreenIntent(context);
-                builder.setFullScreenIntent(lockScreenIntent, true);
-            }
+            //            if (backgroundNotification && canShowFullOnLockScreen) {
+            //                PendingIntent lockScreenIntent = getLockScreenIntent(context);
+            //                builder.setFullScreenIntent(lockScreenIntent, true);
+            //            }
 
-            if (offlineNotification || canShowFullOnLockScreen) {
+            if (willStartForegroundService) {
                 //callStyle need foreground service or fullscreen intent
                 android.app.Person caller = new android.app.Person.Builder().setName(title).setImportant(true).build();
                 Notification.CallStyle callStyle = Notification.CallStyle.forIncomingCall(caller, declineIntent,
@@ -298,10 +298,10 @@ public class CallNotificationManager {
                 .setContentText(body).setContentIntent(clickIntent).setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC).setCategory(NotificationCompat.CATEGORY_CALL)
                 .setOngoing(true).setAutoCancel(true);
-            if (backgroundNotification && canShowFullOnLockScreen) {
-                PendingIntent lockScreenIntent = getLockScreenIntent(context);
-                builder.setFullScreenIntent(lockScreenIntent, true);
-            }
+//            if (backgroundNotification && canShowFullOnLockScreen) {
+//                PendingIntent lockScreenIntent = getLockScreenIntent(context);
+//                builder.setFullScreenIntent(lockScreenIntent, true);
+//            }
 
             String accept = context.getString(R.string.call_page_action_accept);
 
