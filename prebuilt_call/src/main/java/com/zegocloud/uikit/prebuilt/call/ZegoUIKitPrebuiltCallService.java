@@ -4,7 +4,6 @@ import android.Manifest.permission;
 import android.app.Activity;
 import android.app.Application;
 import android.provider.Settings;
-import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginNotificationConfig;
 import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
@@ -15,6 +14,7 @@ import com.zegocloud.uikit.prebuilt.call.event.Events;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.service.defines.ZegoAudioOutputDevice;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.List;
 
@@ -146,8 +146,7 @@ public class ZegoUIKitPrebuiltCallService {
         ZegoInvitationType type, String customData, ZegoSignalingPluginNotificationConfig notificationConfig,
         PluginCallbackListener callbackListener) {
         CallInvitationServiceImpl.getInstance()
-            .sendInvitationWithUIChange(activity, invitees, type, "", 60, null, notificationConfig,
-                callbackListener);
+            .sendInvitationWithUIChange(activity, invitees, type, "", 60, null, notificationConfig, callbackListener);
     }
 
     /**
@@ -203,5 +202,33 @@ public class ZegoUIKitPrebuiltCallService {
 
     public static void enableOppoPush(String oppoAppID, String oppoAppKey, String oppoAppSecret) {
         CallInvitationServiceImpl.getInstance().enableOppoPush(oppoAppID, oppoAppKey, oppoAppSecret);
+    }
+
+    /**
+     * Details Description: Whether to use the speaker to play audio. When choosing not to use the built-in speaker for
+     * sound output, the SDK will select the audio output device with the highest priority according to the system
+     * scheduling to play the sound. Common audio routing includes: earpiece, headphones, Bluetooth devices, etc.
+     * <br>
+     * Related Interface: Get the current audio routing {@link ZegoUIKitPrebuiltCallService#getAudioRouteType}.
+     * <br>
+     * Usage Restrictions: Only supports switching between the earpiece and the speaker. If it is a Bluetooth headset or
+     * wired headphones, it does not support routing to the speaker through this interface.
+     *
+     * @param outputToSpeaker Whether to use the speaker to play audio
+     */
+    public static void setAudioOutputToSpeaker(boolean outputToSpeaker) {
+        CallInvitationServiceImpl.getInstance().setAudioOutputToSpeaker(outputToSpeaker);
+    }
+
+    /**
+     * Details Description: Audio routing refers to the audio output device used by the App when playing audio. Common
+     * audio routing options include: speaker, earpiece, headphones, Bluetooth devices, etc.
+     * <br>
+     * Related Interface: Set the audio routing to the speaker {@link ZegoUIKitPrebuiltCallService#setAudioOutputToSpeaker(boolean)}.
+     *
+     * @return current audio routing
+     */
+    public static ZegoAudioOutputDevice getAudioRouteType() {
+        return CallInvitationServiceImpl.getInstance().getAudioRouteType();
     }
 }

@@ -1,6 +1,7 @@
 package com.zegocloud.uikit.prebuilt.call.event;
 
 import com.zegocloud.uikit.ZegoUIKit;
+import com.zegocloud.uikit.service.defines.ZegoAudioOutputDeviceChangedListener;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import com.zegocloud.uikit.service.express.IExpressEngineEventHandler;
 
@@ -30,7 +31,6 @@ public class CallEvents {
     }
 
     /**
-     *
      * The default action is finish call immediately,override this event to change the default event.
      *
      * @param onlySelfInRoomListener
@@ -61,8 +61,15 @@ public class CallEvents {
         return buttonClickListener;
     }
 
-    public void setButtonClickListener(
-        ZegoMenuBarButtonClickListener buttonClickListener) {
+    public void setButtonClickListener(ZegoMenuBarButtonClickListener buttonClickListener) {
         this.buttonClickListener = buttonClickListener;
+    }
+
+    public void addAudioOutputDeviceChangedListener(ZegoAudioOutputDeviceChangedListener listener) {
+        ZegoUIKit.addAudioOutputDeviceChangedListener(listener);
+    }
+
+    public void removeAudioOutputDeviceChangedListener(ZegoAudioOutputDeviceChangedListener listener) {
+        ZegoUIKit.removeAudioOutputDeviceChangedListener(listener);
     }
 }

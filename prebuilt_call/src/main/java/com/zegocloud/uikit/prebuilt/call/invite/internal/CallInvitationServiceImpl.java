@@ -41,6 +41,7 @@ import com.zegocloud.uikit.prebuilt.call.event.ErrorEventsListener;
 import com.zegocloud.uikit.prebuilt.call.event.SignalPluginConnectListener;
 import com.zegocloud.uikit.prebuilt.call.event.ZegoCallEndReason;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
+import com.zegocloud.uikit.service.defines.ZegoAudioOutputDevice;
 import com.zegocloud.uikit.service.defines.ZegoScenario;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitPluginCallback;
@@ -48,6 +49,7 @@ import com.zegocloud.uikit.service.defines.ZegoUIKitSignalingPluginInvitationLis
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import com.zegocloud.uikit.service.express.IExpressEngineEventHandler;
 import im.zego.internal.screencapture.ZegoScreenCaptureManager.ZegoScreenCaptureAssistantActivity;
+import im.zego.zegoexpress.constants.ZegoAudioRoute;
 import im.zego.zegoexpress.constants.ZegoRoomStateChangedReason;
 import im.zego.zegoexpress.entity.ZegoUser;
 import im.zego.zim.ZIM;
@@ -799,6 +801,17 @@ public class CallInvitationServiceImpl {
         return callNotificationManager.createCallNotification(context);
     }
 
+
+    public void setAudioOutputToSpeaker(boolean outputToSpeaker) {
+        ZegoUIKit.setAudioOutputToSpeaker(outputToSpeaker);
+    }
+
+    public ZegoAudioOutputDevice getAudioRouteType() {
+        ZegoAudioRoute audioRouteType = ZegoUIKit.getAudioRouteType();
+        return ZegoAudioOutputDevice.getAudioOutputDevice(audioRouteType.value());
+    }
+
+
     public boolean isInRoom() {
         return inRoom;
     }
@@ -902,15 +915,15 @@ public class CallInvitationServiceImpl {
     }
 
     public void enableFCMPush() {
-//        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-//            if (!task.isSuccessful()) {
-//                return;
-//            }
-//            String token = task.getResult();
-//            if (!TextUtils.isEmpty(token)) {
-//              //  ZegoUIKit.getSignalingPlugin().enableFCMPush();
-//            }
-//        });
+        //        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+        //            if (!task.isSuccessful()) {
+        //                return;
+        //            }
+        //            String token = task.getResult();
+        //            if (!TextUtils.isEmpty(token)) {
+        //              //  ZegoUIKit.getSignalingPlugin().enableFCMPush();
+        //            }
+        //        });
         ZegoUIKit.getSignalingPlugin().enableFCMPush();
     }
 
