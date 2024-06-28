@@ -136,15 +136,10 @@ public class CallInvitationServiceImpl {
         public void onRoomStateChanged(String roomID, ZegoRoomStateChangedReason reason, int errorCode,
             JSONObject extendedData) {
             super.onRoomStateChanged(roomID, reason, errorCode, extendedData);
-            CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
             if (reason == ZegoRoomStateChangedReason.KICK_OUT) {
-                if (zegoUIKitPrebuiltCallFragment != null) {
-                    zegoUIKitPrebuiltCallFragment.endCall();
-                }
-                CallInvitationServiceImpl.getInstance().leaveRoom();
-                if (callEndListener != null) {
-                    callEndListener.onCallEnd(ZegoCallEndReason.KICK_OUT, "");
-                }
+                leaveRoomInternal();
+                finishAttachedActivity();
+                invokeKickOutCallback();
             }
         }
 
@@ -159,14 +154,9 @@ public class CallInvitationServiceImpl {
                     for (int i = 0; i < userIDArray.length(); i++) {
                         String userID = userIDArray.getString(i);
                         if (localUser != null && Objects.equals(userID, localUser.userID)) {
-                            if (zegoUIKitPrebuiltCallFragment != null) {
-                                zegoUIKitPrebuiltCallFragment.endCall();
-                            }
-                            CallInvitationServiceImpl.getInstance().leaveRoom();
-                            CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
-                            if (callEndListener != null) {
-                                callEndListener.onCallEnd(ZegoCallEndReason.KICK_OUT, fromUser.userID);
-                            }
+                            leaveRoomInternal();
+                            finishAttachedActivity();
+                            invokeKickOutCallback();
                         }
                     }
                 }
@@ -268,11 +258,10 @@ public class CallInvitationServiceImpl {
                         clearPushMessage();
                     } else if (CallNotificationManager.ACTION_DECLINE_CALL.equals(notificationAction)) {
                         // offline push
-                        ZegoUIKit.getSignalingPlugin()
-                            .refuseInvitation(inviter.userID, "", new PluginCallbackListener() {
+                        ZegoUIKit.getSignalingPlugin().refuseInvitation(inviter.userID, "", new PluginCallbackListener() {
                                 @Override
                                 public void callback(Map<String, Object> result) {
-                                    unInitToReceiveOffline();
+                                    unInit();
                                 }
                             });
                         clearPushMessage();
@@ -473,16 +462,34 @@ public class CallInvitationServiceImpl {
         return ZegoUIKit.isCameraOn(ZegoUIKit.getLocalUser().userID);
     }
 
-    public void endCallAndInvokeCallback() {
+    public void endCall() {
         if (zegoUIKitPrebuiltCallFragment != null) {
-            CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
-            if (callEndListener != null) {
-                callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);
-            }
+            invokeLocalHangUpCallback();
+        }
+        leaveRoomInternal();
+        finishAttachedActivity();
+    }
+
+
+    private static void invokeLocalHangUpCallback() {
+        CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
+        if (callEndListener != null) {
+            callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);
+        }
+    }
+
+    private static void invokeKickOutCallback() {
+        CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
+        if (callEndListener != null) {
+            callEndListener.onCallEnd(ZegoCallEndReason.KICK_OUT, "");
+        }
+    }
+
+    private void finishAttachedActivity() {
+        if (zegoUIKitPrebuiltCallFragment != null) {
             zegoUIKitPrebuiltCallFragment.endCall();
             zegoUIKitPrebuiltCallFragment = null;
         }
-        CallInvitationServiceImpl.getInstance().leaveRoom();
     }
 
     public boolean isCameraOn(String userID) {
@@ -676,46 +683,39 @@ public class CallInvitationServiceImpl {
         ZegoUIKit.getBeautyPlugin().init(application, appID, appSign);
     }
 
-    public void unInitToReceiveOffline() {
-        Timber.d("unInitToReceiveOffline() called");
-        ZegoUIKit.getSignalingPlugin().removeInvitationListener(invitationListener);
-        ZegoUIKit.getSignalingPlugin().destroy();
+    public void logoutUser() {
+        removePrebuiltLoginUserData();
+        ZegoUIKit.logout();
+        if (invitationConfig != null) {
+            ZegoUIKit.getSignalingPlugin().logout();
+        }
+    }
 
+    private void removePrebuiltLoginUserData() {
+        alreadyLogin = false;
         setCallState(NONE);
         clearInvitationData();
         clearPushMessage();
         if (callStateListeners != null) {
             callStateListeners.clear();
         }
-        zegoUIKitPrebuiltCallFragment = null;
+    }
+
+    public void unInit(){
+        removePrebuiltLoginUserData();
+
+        ZegoUIKit.removeEventHandler(expressEventHandler);
+        ZegoSignalingPlugin.getInstance().unregisterZIMEventHandler(zimEventHandler);
+        ZegoUIKit.getSignalingPlugin().removeInvitationListener(invitationListener);
+        ZegoUIKit.getSignalingPlugin().destroy();
 
         alreadyInit = false;
-        alreadyLogin = false;
-        inRoom = false;
         appID = 0;
         appSign = null;
         invitationConfig = null;
         callConfig = null;
         elapsedTime = 0;
         startTimeLocal = 0;
-    }
-
-
-    public void unInit() {
-        Timber.d("unInit() called");
-        leaveRoom();
-        ZegoUIKitPrebuiltCallFragment callFragment = ZegoUIKitPrebuiltCallService.getPrebuiltCallFragment();
-        if (callFragment != null) {
-            callFragment.endCall();
-        }
-        ZegoUIKit.removeEventHandler(expressEventHandler);
-        ZegoSignalingPlugin.getInstance().unregisterZIMEventHandler(zimEventHandler);
-        if (invitationConfig != null) {
-            ZegoUIKit.logout();
-            ZegoUIKit.getSignalingPlugin().logout();
-        }
-        unInitToReceiveOffline();
-
     }
 
     public boolean canShowFullOnLockScreen() {
@@ -884,7 +884,7 @@ public class CallInvitationServiceImpl {
         });
     }
 
-    public void leaveRoom() {
+    public void leaveRoomInternal() {
         Timber.d("leaveRoom() called alreadyInit: roomID = [" + alreadyInit + "], callState = [" + callState + "]");
         if (alreadyInit) {
             if (callState == OUTGOING) {
@@ -932,7 +932,6 @@ public class CallInvitationServiceImpl {
     }
 
     public void enableHWPush(String hwAppID) {
-        Timber.d("enableHWPush() called with: hwAppID = [" + hwAppID + "]");
         ZegoUIKit.getSignalingPlugin().enableHWPush(hwAppID);
     }
 

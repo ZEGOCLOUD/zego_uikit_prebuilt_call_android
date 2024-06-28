@@ -40,7 +40,7 @@ public class ZegoLeaveCallButton extends ZegoLeaveButton {
                 if (callFragment != null) {
                     callFragment.endCall();
                 }
-                CallInvitationServiceImpl.getInstance().leaveRoom();
+                CallInvitationServiceImpl.getInstance().leaveRoomInternal();
                 CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
                 if (callEndListener != null) {
                     callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);
@@ -64,7 +64,7 @@ public class ZegoLeaveCallButton extends ZegoLeaveButton {
                     if (callFragment != null) {
                         callFragment.endCall();
                     }
-                    CallInvitationServiceImpl.getInstance().leaveRoom();
+                    CallInvitationServiceImpl.getInstance().leaveRoomInternal();
                     CallEndListener callEndListener = ZegoUIKitPrebuiltCallService.events.callEvents.getCallEndListener();
                     if (callEndListener != null) {
                         callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);

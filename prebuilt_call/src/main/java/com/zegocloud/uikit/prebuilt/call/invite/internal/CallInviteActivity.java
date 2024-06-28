@@ -17,7 +17,6 @@ import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
-import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import java.util.Map;
@@ -105,7 +104,7 @@ public class CallInviteActivity extends AppCompatActivity {
         ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
         Timber.d("onCreate() called with: callInvitationData = [" + callInvitationData + "]");
         if (callInvitationData == null) {
-            CallInvitationServiceImpl.getInstance().leaveRoom();
+            CallInvitationServiceImpl.getInstance().leaveRoomInternal();
             finish();
             return;
         }

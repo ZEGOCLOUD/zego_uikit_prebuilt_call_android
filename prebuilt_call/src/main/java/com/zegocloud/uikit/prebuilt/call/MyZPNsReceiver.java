@@ -77,6 +77,7 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
 
     @Override
     protected void onNotificationClicked(Context context, ZPNsMessage message) {
+        Timber.d("onNotificationClicked() called with: context = [" + context + "], message = [" + message + "]");
     }
 
     private String findReceiver(Context context, String action, String packageName) {
@@ -93,6 +94,7 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
 
     @Override
     protected void onNotificationArrived(Context context, ZPNsMessage message) {
+        Timber.d("onNotificationArrived() called with: context = [" + context + "], message = [" + message + "]");
     }
 
     @Override

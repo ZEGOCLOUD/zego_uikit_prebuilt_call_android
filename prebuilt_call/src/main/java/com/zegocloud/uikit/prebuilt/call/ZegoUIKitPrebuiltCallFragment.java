@@ -227,7 +227,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                         }
                         setEnabled(false);
                         endCall();
-                        CallInvitationServiceImpl.getInstance().leaveRoom();
+                        CallInvitationServiceImpl.getInstance().leaveRoomInternal();
                     }
                 }
 
@@ -269,7 +269,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 configurationChangeReceiver = null;
             }
             dismissMiniVideoWindow();
-            CallInvitationServiceImpl.getInstance().leaveRoom();
+            CallInvitationServiceImpl.getInstance().leaveRoomInternal();
         }
 
     }
@@ -281,7 +281,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             requireActivity().unregisterReceiver(configurationChangeReceiver);
             configurationChangeReceiver = null;
             dismissMiniVideoWindow();
-            CallInvitationServiceImpl.getInstance().leaveRoom();
+            CallInvitationServiceImpl.getInstance().leaveRoomInternal();
         }
     }
 
@@ -392,7 +392,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                     callEndListener.onCallEnd(ZegoCallEndReason.REMOTE_HANGUP, "");
                 }
                 endCall();
-                CallInvitationServiceImpl.getInstance().leaveRoom();
+                CallInvitationServiceImpl.getInstance().leaveRoomInternal();
             }
         });
 
@@ -402,7 +402,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 if (callConfig.removedFromRoomListener == null) {
                     endCall();
                     //callEndListener has been invoked in callInvitationServiceImpl.onIMRecvCustomCommand();
-                    CallInvitationServiceImpl.getInstance().leaveRoom();
+                    CallInvitationServiceImpl.getInstance().leaveRoomInternal();
                 }
             }
         });
@@ -679,7 +679,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                     callEndListener.onCallEnd(ZegoCallEndReason.LOCAL_HANGUP, null);
                 }
                 endCall();
-                CallInvitationServiceImpl.getInstance().leaveRoom();
+                CallInvitationServiceImpl.getInstance().leaveRoomInternal();
             }
         });
         builder.setNegativeButton(negativeText, new DialogInterface.OnClickListener() {

@@ -71,14 +71,23 @@ public class ZegoUIKitPrebuiltCallService {
      * use this method.
      */
     public static void unInit() {
+        CallInvitationServiceImpl.getInstance().endCall();
+        CallInvitationServiceImpl.getInstance().logoutUser();
         CallInvitationServiceImpl.getInstance().unInit();
+    }
+
+    /**
+     * used with zim_kit,not for usual use.
+     */
+    public static void logoutUser() {
+        CallInvitationServiceImpl.getInstance().logoutUser();
     }
 
     /**
      * End and leave current call.Current activity will be finished.
      */
     public static void endCall() {
-        CallInvitationServiceImpl.getInstance().endCallAndInvokeCallback();
+        CallInvitationServiceImpl.getInstance().endCall();
     }
 
     /**
