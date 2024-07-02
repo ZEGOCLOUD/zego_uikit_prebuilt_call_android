@@ -58,7 +58,8 @@ public class CallNotificationManager {
     public void showCallNotification(Context context) {
         Timber.d("showCallNotification() called with: context = [" + context + "]");
         boolean canShowNotification = checkIfAppCanShowNotification(context);
-        ContextCompat.startForegroundService(context, new Intent(context, OffLineCallNotificationService.class));
+//        ContextCompat.startForegroundService(context, new Intent(context, OffLineCallNotificationService.class));
+        context.startService(new Intent(context, OffLineCallNotificationService.class));
         if (canShowNotification) {
             handler.postDelayed(dismissNotificationRunnable, TIMEOUT_AFTER);
             isNotificationShowed = true;
@@ -261,13 +262,13 @@ public class CallNotificationManager {
             //                builder.setFullScreenIntent(lockScreenIntent, true);
             //            }
 
-            if (willStartForegroundService) {
-                //callStyle need foreground service or fullscreen intent
-                android.app.Person caller = new android.app.Person.Builder().setName(title).setImportant(true).build();
-                Notification.CallStyle callStyle = Notification.CallStyle.forIncomingCall(caller, declineIntent,
-                    acceptIntent);
-                builder.setStyle(callStyle);
-            } else {
+//            if (willStartForegroundService) {
+//                //callStyle need foreground service or fullscreen intent
+//                android.app.Person caller = new android.app.Person.Builder().setName(title).setImportant(true).build();
+//                Notification.CallStyle callStyle = Notification.CallStyle.forIncomingCall(caller, declineIntent,
+//                    acceptIntent);
+//                builder.setStyle(callStyle);
+//            } else {
 
                 String accept = context.getString(R.string.call_page_action_accept);
 
@@ -288,7 +289,7 @@ public class CallNotificationManager {
 
                 builder.addAction(acceptAction.build());
                 builder.addAction(declineAction.build());
-            }
+//            }
             builder.setTimeoutAfter(TIMEOUT_AFTER + 1000);
             return builder.build();
         } else {

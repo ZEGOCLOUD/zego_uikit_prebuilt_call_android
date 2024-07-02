@@ -9,7 +9,7 @@
   <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
 <!--  <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />-->
 
-  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+<!--  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />-->
 
 
   <application>
@@ -22,9 +22,7 @@
       android:taskAffinity=":zego" />
 
     <service
-      android:name=".invite.OffLineCallNotificationService"
-      android:foregroundServiceType="dataSync">
-
+      android:name=".invite.OffLineCallNotificationService">
     </service>
     <receiver
       android:name=".MyZPNsReceiver"

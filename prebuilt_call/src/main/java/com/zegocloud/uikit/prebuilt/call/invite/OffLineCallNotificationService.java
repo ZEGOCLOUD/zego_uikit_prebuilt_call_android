@@ -3,10 +3,8 @@ package com.zegocloud.uikit.prebuilt.call.invite;
 import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
-import android.content.pm.ServiceInfo;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
+import androidx.core.app.NotificationManagerCompat;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallNotificationManager;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZIMPushMessage;
@@ -61,21 +59,22 @@ public class OffLineCallNotificationService extends Service {
         } else {
             Notification callNotification = CallInvitationServiceImpl.getInstance().getCallNotification(this);
             if (callNotification != null) {
-                if (VERSION.SDK_INT >= VERSION_CODES.Q) {
-                    startForeground(CallNotificationManager.callNotificationID, callNotification,
-                        ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
-                } else {
-                    startForeground(CallNotificationManager.callNotificationID, callNotification);
-                }
+//                if (VERSION.SDK_INT >= VERSION_CODES.Q) {
+//                    startForeground(CallNotificationManager.callNotificationID, callNotification,
+//                        ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+//                } else {
+//                    startForeground(CallNotificationManager.callNotificationID, callNotification);
+//                }
+                NotificationManagerCompat.from(this).notify(CallNotificationManager.callNotificationID, callNotification);
             }
         }
 
         return super.onStartCommand(intent, flags, startId);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        stopForeground(true);
-    }
+//    @Override
+    //    public void onDestroy() {
+    //        super.onDestroy();
+    //        stopForeground(true);
+    //    }
 }
