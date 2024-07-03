@@ -333,19 +333,14 @@ public class CallNotificationManager {
         ZIMPushMessage zimPushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
         Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
         if (zimPushMessage == null && topActivity != null) {
-            Intent intent = new Intent(context, CallInviteActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putString("page", "call");
-            intent.putExtra("bundle", bundle);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.setAction(ACTION_ACCEPT_CALL);
+            Intent callPageIntent = CallInviteActivity.getStartCallPageIntent(context, ACTION_ACCEPT_CALL);
 
             PendingIntent openIntent;
             if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
-                openIntent = PendingIntent.getActivity(context, 0, intent,
+                openIntent = PendingIntent.getActivity(context, 0, callPageIntent,
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
             } else {
-                openIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                openIntent = PendingIntent.getActivity(context, 0, callPageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
             return openIntent;
         } else {
@@ -400,18 +395,13 @@ public class CallNotificationManager {
         ZIMPushMessage zimPushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
         Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
         if (zimPushMessage == null && topActivity != null) {
-            Intent intent = new Intent(context, CallInviteActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putString("page", "incoming");
-            intent.putExtra("bundle", bundle);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.setAction(ACTION_CLICK);
+            Intent incomingPageIntent = CallInviteActivity.getIncomingPageIntent(context, ACTION_CLICK);
             PendingIntent openIntent;
             if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
-                openIntent = PendingIntent.getActivity(context, 0, intent,
+                openIntent = PendingIntent.getActivity(context, 0, incomingPageIntent,
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
             } else {
-                openIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                openIntent = PendingIntent.getActivity(context, 0, incomingPageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
             return openIntent;
         } else {

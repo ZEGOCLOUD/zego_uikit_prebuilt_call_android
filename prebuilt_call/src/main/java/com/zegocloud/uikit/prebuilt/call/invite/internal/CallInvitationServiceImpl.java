@@ -15,9 +15,12 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -258,7 +261,8 @@ public class CallInvitationServiceImpl {
                         clearPushMessage();
                     } else if (CallNotificationManager.ACTION_DECLINE_CALL.equals(notificationAction)) {
                         // offline push
-                        ZegoUIKit.getSignalingPlugin().refuseInvitation(inviter.userID, "", new PluginCallbackListener() {
+                        ZegoUIKit.getSignalingPlugin()
+                            .refuseInvitation(inviter.userID, "", new PluginCallbackListener() {
                                 @Override
                                 public void callback(Map<String, Object> result) {
                                     unInit();
@@ -701,7 +705,7 @@ public class CallInvitationServiceImpl {
         }
     }
 
-    public void unInit(){
+    public void unInit() {
         removePrebuiltLoginUserData();
 
         ZegoUIKit.removeEventHandler(expressEventHandler);
@@ -1354,13 +1358,9 @@ public class CallInvitationServiceImpl {
                 // if app's topActivity is not CallInviteActivity.then start it
                 // with incoming page
                 if (!(topActivity instanceof CallInviteActivity)) {
-                    Intent intent = new Intent(activity, CallInviteActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("page", "incoming");
-                    intent.putExtra("bundle", bundle);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.setAction(CallNotificationManager.ACTION_CLICK);
-                    activity.startActivity(intent);
+                    Intent incomingPageIntent = CallInviteActivity.getIncomingPageIntent(activity,
+                        CallNotificationManager.ACTION_CLICK);
+                    activity.startActivity(incomingPageIntent);
 
                     handler.postDelayed(new Runnable() {
                         @Override
@@ -1396,56 +1396,52 @@ public class CallInvitationServiceImpl {
             if (am != null) {
                 if (!(topActivity instanceof CallInviteActivity)
                     && !(topActivity instanceof ZegoScreenCaptureAssistantActivity)) {
-                    if (inRoom) {
-                        // call entered the room, then switched to the background, but there is no minimize .
-                        // Now, when returning to the app, it is necessary to bring the CallInviteActivity to the foreground
-                        // (because the CallInviteActivity was hidden in the recent apps, it won't show up if not brought to the foreground).
-                        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance()
-                            .getCallConfig();
-                        ZegoUIKitPrebuiltCallFragment callFragment = CallInvitationServiceImpl.getInstance()
-                            .getZegoUIKitPrebuiltCallFragment();
-                        boolean hasMiniButton =
-                            callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
-                                || callConfig.topMenuBarConfig.buttons.contains(
-                                ZegoMenuBarButtonName.MINIMIZING_BUTTON);
-
-                        if (!hasMiniButton && callFragment != null) {
-                            List<ActivityManager.AppTask> tasks = am.getAppTasks();
-                            if (tasks != null && tasks.size() > 0) {
-                                for (AppTask task : tasks) {
-                                    RecentTaskInfo taskInfo = task.getTaskInfo();
-                                    if (taskInfo.baseIntent.getComponent().toShortString()
-                                        .contains(CallInviteActivity.class.getName())) {
-                                        task.moveToFront();
+                    boolean isCallInvite = invitationConfig != null;
+                    // call-invite,in room,hasMiniButton,but no permission, and app goes background.
+                    // Now, when returning to the app, it is necessary to bring the CallInviteActivity to the foreground
+                    // (because the CallInviteActivity was hidden in the recent apps, it won't show up if not brought to the foreground).
+                    if (isCallInvite) {
+                        if (inRoom) {
+                            boolean hasMiniButton =
+                                callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
+                                    || callConfig.topMenuBarConfig.buttons.contains(
+                                    ZegoMenuBarButtonName.MINIMIZING_BUTTON);
+                            boolean noSystemOverlayPermission =
+                                VERSION.SDK_INT >= VERSION_CODES.M && !Settings.canDrawOverlays(topActivity);
+                            if (hasMiniButton && noSystemOverlayPermission) {
+                                if (zegoUIKitPrebuiltCallFragment != null) {
+                                    bringCallInviteActivityToFront(am);
+                                }
+                            }
+                        } else {
+                            if (callInvitationData != null) {
+                                // not in room ,but in waiting page，need to bring CallInviteActivity to front
+                                boolean isCallInviteActivityStarted = false;
+                                List<RunningTaskInfo> runningTasks = am.getRunningTasks(Integer.MAX_VALUE);
+                                for (RunningTaskInfo runningTask : runningTasks) {
+                                    if (Objects.equals(runningTask.topActivity.getClassName(),
+                                        CallInviteActivity.class.getName())) {
+                                        isCallInviteActivityStarted = true;
                                         break;
                                     }
                                 }
-                            }
-                        }
-                    } else if (callInvitationData != null) {
-                        boolean isCallInviteActivityStarted = false;
-                        List<RunningTaskInfo> runningTasks = am.getRunningTasks(Integer.MAX_VALUE);
-                        for (RunningTaskInfo runningTask : runningTasks) {
-                            if (Objects.equals(runningTask.topActivity.getClassName(),
-                                CallInviteActivity.class.getName())) {
-                                isCallInviteActivityStarted = true;
-                                break;
-                            }
-                        }
-                        if (isCallInviteActivityStarted) {
-                            List<ActivityManager.AppTask> tasks = am.getAppTasks();
-                            if (tasks != null && tasks.size() > 0) {
-                                for (AppTask task : tasks) {
-                                    RecentTaskInfo taskInfo = task.getTaskInfo();
-                                    if (taskInfo.baseIntent.getComponent().toShortString()
-                                        .contains(CallInviteActivity.class.getName())) {
-                                        task.moveToFront();
-                                        break;
+                                if (isCallInviteActivityStarted) {
+                                    List<ActivityManager.AppTask> tasks = am.getAppTasks();
+                                    if (tasks != null && tasks.size() > 0) {
+                                        for (AppTask task : tasks) {
+                                            RecentTaskInfo taskInfo = task.getTaskInfo();
+                                            if (taskInfo.baseIntent.getComponent().toShortString()
+                                                .contains(CallInviteActivity.class.getName())) {
+                                                task.moveToFront();
+                                                break;
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+
                 }
             }
         }
@@ -1470,6 +1466,19 @@ public class CallInvitationServiceImpl {
 
         public Activity getTopActivity() {
             return topActivity;
+        }
+    }
+
+    private static void bringCallInviteActivityToFront(ActivityManager am) {
+        List<AppTask> tasks = am.getAppTasks();
+        if (tasks != null && tasks.size() > 0) {
+            for (AppTask task : tasks) {
+                RecentTaskInfo taskInfo = task.getTaskInfo();
+                if (taskInfo.baseIntent.getComponent().toShortString().contains(CallInviteActivity.class.getName())) {
+                    task.moveToFront();
+                    break;
+                }
+            }
         }
     }
 }

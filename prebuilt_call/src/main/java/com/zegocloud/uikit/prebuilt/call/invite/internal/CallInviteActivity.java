@@ -3,20 +3,23 @@ package com.zegocloud.uikit.prebuilt.call.invite.internal;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.Window;
 import android.view.WindowManager;
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
 import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
-import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import java.util.Map;
@@ -33,37 +36,68 @@ public class CallInviteActivity extends AppCompatActivity {
         Intent intent = new Intent(context, CallInviteActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("page", "outgoing");
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        addFlags(intent, context);
         intent.putExtra("bundle", bundle);
         context.startActivity(intent);
     }
 
+    private static void addFlags(Intent intent, Context context) {
+        ZegoUIKitPrebuiltCallConfig callConfig = getCustomCallConfig();
+        if (callConfig != null) {
+            boolean hasMiniButton =
+                callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
+                    || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON);
+            boolean hasSystemOverlayPermission =
+                VERSION.SDK_INT <= VERSION_CODES.M || Settings.canDrawOverlays(context);
+            if (hasMiniButton && hasSystemOverlayPermission) {
+                // call invite and has miniButton，and hasSystemOverlayPermission, excludeFromRecent + singleTask
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            } else {
+                // call invite but no miniButton，normal launchMode.
+            }
+        }
+    }
+
     public static void startIncomingPage(Context context) {
-        //        String pushPayload = CallInvitationServiceImpl.getInstance().getPushPayload();
-        //        if (pushPayload != null) {
-        //            CallInvitationServiceImpl.getInstance().parsePayload();
-        //        }
         Intent intent = new Intent(context, CallInviteActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("page", "incoming");
         intent.putExtra("bundle", bundle);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        addFlags(intent, context);
         context.startActivity(intent);
     }
 
 
     public static void startCallPage(Context context) {
-        //        String pushPayload = CallInvitationServiceImpl.getInstance().getPushPayload();
-        //        if (pushPayload != null) {
-        //            CallInvitationServiceImpl.getInstance().parsePayload();
-        //        }
-
         Intent intent = new Intent(context, CallInviteActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("page", "call");
         intent.putExtra("bundle", bundle);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        addFlags(intent, context);
         context.startActivity(intent);
+    }
+
+
+    public static Intent getStartCallPageIntent(Context context, String action) {
+        Intent intent = new Intent(context, CallInviteActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("page", "call");
+        intent.putExtra("bundle", bundle);
+        addFlags(intent, context);
+        intent.setAction(action);
+        return intent;
+    }
+
+
+    public static Intent getIncomingPageIntent(Context context, String action) {
+        Intent intent = new Intent(context, CallInviteActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("page", "incoming");
+        intent.putExtra("bundle", bundle);
+        addFlags(intent, context);
+        intent.setAction(action);
+        return intent;
     }
 
     @Override
@@ -168,18 +202,21 @@ public class CallInviteActivity extends AppCompatActivity {
             return;
         }
         ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
-        ZegoUIKitPrebuiltCallConfig config = getPrebuiltCallConfig(invitationData);
+        ZegoUIKitPrebuiltCallConfig callConfig = getCustomCallConfig();
+        if (callConfig == null) {
+            callConfig = ZegoUIKitPrebuiltCallInvitationConfig.generateDefaultConfig(invitationData);
+        }
         ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = CallInvitationServiceImpl.getInstance()
             .getCallInvitationConfig();
         if (callInvitationConfig != null && callInvitationConfig.translationText != null
             && callInvitationConfig.translationText.getInvitationBaseText() instanceof InvitationTextCHS) {
-            config.zegoCallText = new ZegoCallText(ZegoUIKitLanguage.CHS);
+            callConfig.zegoCallText = new ZegoCallText(ZegoUIKitLanguage.CHS);
         } else {
-            config.zegoCallText = new ZegoCallText(ZegoUIKitLanguage.ENGLISH);
+            callConfig.zegoCallText = new ZegoCallText(ZegoUIKitLanguage.ENGLISH);
         }
 
         ZegoUIKitPrebuiltCallFragment fragment = ZegoUIKitPrebuiltCallFragment.newInstance(this, invitationData.callID,
-            config);
+            callConfig);
 
         if (invitationData.invitees.size() > 1) {
             fragment.setOnOnlySelfInRoomListener(new ZegoOnlySelfInRoomListener() {
@@ -192,25 +229,12 @@ public class CallInviteActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction().replace(R.id.call_fragment_container, fragment).commitNow();
     }
 
-    @NonNull
-    private ZegoUIKitPrebuiltCallConfig getPrebuiltCallConfig(ZegoCallInvitationData invitationData) {
+    private static @Nullable ZegoUIKitPrebuiltCallConfig getCustomCallConfig() {
+        ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
         ZegoUIKitPrebuiltCallConfig config = null;
-        CallInvitationServiceImpl service = CallInvitationServiceImpl.getInstance();
-        if (service.getProvider() != null) {
-            config = service.getProvider().requireConfig(invitationData);
-        }
-        if (config == null) {
-            boolean isVideoCall = invitationData.type == ZegoInvitationType.VIDEO_CALL.getValue();
-            boolean isGroupCall = invitationData.invitees.size() > 1;
-            if (isVideoCall && isGroupCall) {
-                config = ZegoUIKitPrebuiltCallConfig.groupVideoCall();
-            } else if (!isVideoCall && isGroupCall) {
-                config = ZegoUIKitPrebuiltCallConfig.groupVoiceCall();
-            } else if (!isVideoCall) {
-                config = ZegoUIKitPrebuiltCallConfig.oneOnOneVoiceCall();
-            } else {
-                config = ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall();
-            }
+        ZegoUIKitPrebuiltCallConfigProvider provider = CallInvitationServiceImpl.getInstance().getProvider();
+        if (provider != null) {
+            config = provider.requireConfig(invitationData);
         }
         return config;
     }
