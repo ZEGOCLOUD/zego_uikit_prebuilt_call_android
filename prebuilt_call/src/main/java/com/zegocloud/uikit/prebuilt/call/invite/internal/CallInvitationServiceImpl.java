@@ -675,16 +675,18 @@ public class CallInvitationServiceImpl {
     }
 
     public void initBeautyPlugin() {
-        if (callConfig.zegoCallText != null) {
-            ZegoUIKitLanguage language = callConfig.zegoCallText.getLanguage();
-            if (language == ZegoUIKitLanguage.CHS) {
-                callConfig.beautyConfig.innerText = new ZegoBeautyPluginInnerTextCHS();
-            } else {
-                callConfig.beautyConfig.innerText = new ZegoBeautyPluginInnerTextEnglish();
+        if (callConfig != null) {
+            if (callConfig.zegoCallText != null) {
+                ZegoUIKitLanguage language = callConfig.zegoCallText.getLanguage();
+                if (language == ZegoUIKitLanguage.CHS) {
+                    callConfig.beautyConfig.innerText = new ZegoBeautyPluginInnerTextCHS();
+                } else {
+                    callConfig.beautyConfig.innerText = new ZegoBeautyPluginInnerTextEnglish();
+                }
             }
+            ZegoUIKit.getBeautyPlugin().setZegoBeautyPluginConfig(callConfig.beautyConfig);
+            ZegoUIKit.getBeautyPlugin().init(application, appID, appSign);
         }
-        ZegoUIKit.getBeautyPlugin().setZegoBeautyPluginConfig(callConfig.beautyConfig);
-        ZegoUIKit.getBeautyPlugin().init(application, appID, appSign);
     }
 
     public void logoutUser() {
@@ -1310,6 +1312,10 @@ public class CallInvitationServiceImpl {
         }
     }
 
+    public void resetAllBeautiesToDefault() {
+        ZegoUIKit.getBeautyPlugin().resetBeautyValueToDefault(null);
+    }
+
     public class AppActivityManager implements ActivityLifecycleCallbacks {
 
         private Activity topActivity;
@@ -1426,17 +1432,7 @@ public class CallInvitationServiceImpl {
                                     }
                                 }
                                 if (isCallInviteActivityStarted) {
-                                    List<ActivityManager.AppTask> tasks = am.getAppTasks();
-                                    if (tasks != null && tasks.size() > 0) {
-                                        for (AppTask task : tasks) {
-                                            RecentTaskInfo taskInfo = task.getTaskInfo();
-                                            if (taskInfo.baseIntent.getComponent().toShortString()
-                                                .contains(CallInviteActivity.class.getName())) {
-                                                task.moveToFront();
-                                                break;
-                                            }
-                                        }
-                                    }
+                                    bringCallInviteActivityToFront(am);
                                 }
                             }
                         }

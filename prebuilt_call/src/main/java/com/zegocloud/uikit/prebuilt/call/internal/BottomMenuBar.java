@@ -375,6 +375,12 @@ public class BottomMenuBar extends LinearLayout {
         notifyListChanged();
     }
 
+    public void dismissMoreDialog() {
+        if (moreDialog != null && moreDialog.isShowing()) {
+            moreDialog.dismiss();
+        }
+    }
+
     private void showMoreDialog() {
         if (moreDialog == null) {
             moreDialog = new MoreDialog(getContext());

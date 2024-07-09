@@ -277,6 +277,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        binding.bottomMenuBar.dismissMoreDialog();
         if (configurationChangeReceiver != null) {
             requireActivity().unregisterReceiver(configurationChangeReceiver);
             configurationChangeReceiver = null;

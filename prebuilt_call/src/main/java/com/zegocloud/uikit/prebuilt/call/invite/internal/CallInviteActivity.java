@@ -192,6 +192,7 @@ public class CallInviteActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Timber.d("onDestroy() called");
+
         CallInvitationServiceImpl.getInstance().dismissCallNotification(this);
         CallInvitationServiceImpl.getInstance().removeCallStateListener(callStateListener);
     }

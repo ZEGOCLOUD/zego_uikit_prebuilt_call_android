@@ -233,11 +233,16 @@ public class ZegoUIKitPrebuiltCallService {
      * Details Description: Audio routing refers to the audio output device used by the App when playing audio. Common
      * audio routing options include: speaker, earpiece, headphones, Bluetooth devices, etc.
      * <br>
-     * Related Interface: Set the audio routing to the speaker {@link ZegoUIKitPrebuiltCallService#setAudioOutputToSpeaker(boolean)}.
+     * Related Interface: Set the audio routing to the speaker
+     * {@link ZegoUIKitPrebuiltCallService#setAudioOutputToSpeaker(boolean)}.
      *
      * @return current audio routing
      */
     public static ZegoAudioOutputDevice getAudioRouteType() {
         return CallInvitationServiceImpl.getInstance().getAudioRouteType();
+    }
+
+    public static void resetAllBeautiesToDefault() {
+        CallInvitationServiceImpl.getInstance().resetAllBeautiesToDefault();
     }
 }

@@ -195,6 +195,7 @@ public class CallWaitingFragment extends Fragment {
                 permissions.add(permission.RECORD_AUDIO);
             } else {
                 permissions.add(permission.CAMERA);
+                permissions.add(permission.RECORD_AUDIO);
             }
             requestPermissionIfNeeded(permissions, (allGranted, grantedList, deniedList) -> {
                 if (grantedList.contains(permission.CAMERA)) {
