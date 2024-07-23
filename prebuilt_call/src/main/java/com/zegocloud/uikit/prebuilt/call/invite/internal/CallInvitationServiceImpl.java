@@ -581,7 +581,6 @@ public class CallInvitationServiceImpl {
             }
 
             ZegoUIKit.addEventHandler(expressEventHandler, false);
-            ZegoUIKit.getSignalingPlugin().addInvitationListener(invitationListener);
             registerLifeCycleCallback(application);
             ZegoSignalingPlugin.getInstance().registerZIMEventHandler(zimEventHandler);
         }
@@ -655,6 +654,7 @@ public class CallInvitationServiceImpl {
         }
         alreadyLogin = true;
         ZegoUIKit.login(userID, userName);
+        ZegoUIKit.getSignalingPlugin().addInvitationListener(invitationListener);
         ZegoUIKit.getSignalingPlugin().login(userID, userName, new ZegoUIKitPluginCallback() {
             @Override
             public void onResult(int errorCode, String message) {

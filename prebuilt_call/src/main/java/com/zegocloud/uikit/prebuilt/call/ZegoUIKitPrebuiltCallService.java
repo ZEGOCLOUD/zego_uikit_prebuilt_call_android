@@ -242,6 +242,9 @@ public class ZegoUIKitPrebuiltCallService {
         return CallInvitationServiceImpl.getInstance().getAudioRouteType();
     }
 
+    /**
+     * reset all beauty values to default.
+     */
     public static void resetAllBeautiesToDefault() {
         CallInvitationServiceImpl.getInstance().resetAllBeautiesToDefault();
     }
