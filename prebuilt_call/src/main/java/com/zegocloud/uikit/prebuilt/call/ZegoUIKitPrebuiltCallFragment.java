@@ -51,6 +51,7 @@ import com.zegocloud.uikit.service.defines.ZegoMeRemovedFromRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
+import im.zego.zegoexpress.ZegoExpressEngine;
 import im.zego.zegoexpress.constants.ZegoOrientation;
 import im.zego.zegoexpress.constants.ZegoVideoConfigPreset;
 import im.zego.zegoexpress.entity.ZegoVideoConfig;
@@ -165,8 +166,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             }
         }
 
-        if (callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON) ||
-            callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)) {
+        if (callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)
+            || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)) {
             CallInvitationServiceImpl.getInstance().initBeautyPlugin();
         }
 
@@ -193,20 +194,27 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             @Override
             public void onReceive(Context context, Intent intent) {
                 ZegoOrientation orientation = ZegoOrientation.ORIENTATION_0;
-
+                ZegoVideoConfig videoConfig = ZegoExpressEngine.getEngine().getVideoConfig();
+                int sEdge = Math.min(videoConfig.encodeWidth, videoConfig.encodeHeight);
+                int lEdge = Math.max(videoConfig.encodeWidth, videoConfig.encodeHeight);
                 if (Surface.ROTATION_0 == requireActivity().getWindowManager().getDefaultDisplay().getRotation()) {
                     orientation = ZegoOrientation.ORIENTATION_0;
+                    videoConfig.setEncodeResolution(sEdge, lEdge);
                 } else if (Surface.ROTATION_180 == requireActivity().getWindowManager().getDefaultDisplay()
                     .getRotation()) {
                     orientation = ZegoOrientation.ORIENTATION_180;
+                    videoConfig.setEncodeResolution(sEdge, lEdge);
                 } else if (Surface.ROTATION_270 == requireActivity().getWindowManager().getDefaultDisplay()
                     .getRotation()) {
                     orientation = ZegoOrientation.ORIENTATION_270;
+                    videoConfig.setEncodeResolution(lEdge, sEdge);
                 } else if (Surface.ROTATION_90 == requireActivity().getWindowManager().getDefaultDisplay()
                     .getRotation()) {
                     orientation = ZegoOrientation.ORIENTATION_90;
+                    videoConfig.setEncodeResolution(lEdge, sEdge);
                 }
                 ZegoUIKit.setAppOrientation(orientation);
+                ZegoUIKit.setVideoConfig(videoConfig);
             }
         };
         requireActivity().registerReceiver(configurationChangeReceiver, configurationChangeFilter);
