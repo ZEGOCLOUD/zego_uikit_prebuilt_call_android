@@ -611,14 +611,11 @@ public class CallInvitationServiceImpl {
     }
 
     public void setCallInvitationConfig(ZegoUIKitPrebuiltCallInvitationConfig invitationConfig) {
-        if (this.invitationConfig == null) {
-            this.invitationConfig = invitationConfig;
-            initRingtoneManager(application, invitationConfig);
-            // offline channel need ringtone
-            callNotificationManager.createCallNotificationChannel(application);
-        } else {
-            this.invitationConfig = invitationConfig;
-        }
+        this.invitationConfig = invitationConfig;
+
+        initRingtoneManager(application, invitationConfig);
+
+        callNotificationManager.createCallNotificationChannel(invitationConfig, application);
 
         if (invitationConfig.translationText != null) {
             invitationConfig.translationText.copyFromInnerTextIfNotCustomized(invitationConfig.innerText);
@@ -964,7 +961,6 @@ public class CallInvitationServiceImpl {
 
     public void registerPush() {
         if (isFCMPushEnable() || isOtherPushEnable()) {
-            Timber.d("registerPush() called");
             ZegoUIKit.getSignalingPlugin().registerPush();
         }
     }

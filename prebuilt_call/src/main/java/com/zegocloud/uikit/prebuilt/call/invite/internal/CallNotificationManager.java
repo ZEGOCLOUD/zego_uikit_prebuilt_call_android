@@ -132,9 +132,7 @@ public class CallNotificationManager {
         return notificationTitle;
     }
 
-    public void createCallNotificationChannel(Context context) {
-        ZegoUIKitPrebuiltCallInvitationConfig invitationConfig = CallInvitationServiceImpl.getInstance()
-            .getCallInvitationConfig();
+    public void createCallNotificationChannel(ZegoUIKitPrebuiltCallInvitationConfig invitationConfig,Context context) {
         String channelID;
         String channelName;
         String channelDesc;
