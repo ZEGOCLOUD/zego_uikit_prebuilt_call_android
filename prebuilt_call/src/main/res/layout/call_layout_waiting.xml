@@ -63,9 +63,24 @@
     android:layout_marginTop="24dp"
     android:textColor="#B2FFFFFF"
     android:textSize="16sp"
+    android:gravity="center"
+    android:lineSpacingMultiplier="1.2"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/call_user_name" />
+
+  <TextView
+      android:id="@+id/call_state_text2"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="6dp"
+      android:textColor="#B2FFFFFF"
+      android:textSize="14sp"
+      android:gravity="center"
+      android:lineSpacingMultiplier="1.2"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/call_state_text" />
 
   <com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoCancelCallInvitationButton
     android:id="@+id/call_waiting_cancel"

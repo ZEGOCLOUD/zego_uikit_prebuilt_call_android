@@ -82,7 +82,7 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
             .getCallInvitationConfig().translationText;
         ZegoInvitationType invitationType = ZegoInvitationType.getZegoInvitationType(type);
         CallInvitationServiceImpl.getInstance()
-            .sendInvitation(invitees, invitationType, customData, timeout, null, getSendInvitationConfig(),
+            .sendInvitation(invitees, invitationType, customData, timeout, this.callID, getSendInvitationConfig(),
                 new PluginCallbackListener() {
                     @Override
                     public void callback(Map<String, Object> result) {

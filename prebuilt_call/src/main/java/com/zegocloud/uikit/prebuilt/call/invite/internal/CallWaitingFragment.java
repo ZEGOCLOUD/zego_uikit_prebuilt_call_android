@@ -428,6 +428,9 @@ public class CallWaitingFragment extends Fragment {
                 if (!TextUtils.isEmpty(innerText.outgoingVoiceCallPageMessage)) {
                     binding.callStateText.setText(innerText.outgoingVoiceCallPageMessage);
                 }
+                if (!TextUtils.isEmpty(innerText.outgoingVoiceCallPageSmallMessage)) {
+                    binding.callStateText2.setText(innerText.outgoingVoiceCallPageSmallMessage);
+                }
             }
         }
 

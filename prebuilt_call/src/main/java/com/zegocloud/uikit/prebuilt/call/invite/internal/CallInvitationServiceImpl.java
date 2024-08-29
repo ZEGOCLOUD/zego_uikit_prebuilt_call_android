@@ -557,7 +557,7 @@ public class CallInvitationServiceImpl {
             }
             return true;
         }
-        boolean result = ZegoUIKit.init(application, appID, appSign, ZegoScenario.GENERAL);
+        boolean result = ZegoUIKit.init(application, appID, appSign, ZegoScenario.STANDARD_VIDEO_CALL);
         if (result) {
             Timber.d("Call init() called with: application = [" + application + "], appID = [" + appID
                 + "], appSign.isEmpty() = [" + TextUtils.isEmpty(appSign) + "], token.isEmpty() = ["

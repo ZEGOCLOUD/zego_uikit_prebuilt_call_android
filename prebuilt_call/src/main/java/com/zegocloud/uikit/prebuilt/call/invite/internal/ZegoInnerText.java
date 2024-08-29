@@ -32,6 +32,7 @@ public class ZegoInnerText {
     public String outgoingVideoCallPageMessage = "Calling...";
     public String outgoingVoiceCallPageTitle = "%s";
     public String outgoingVoiceCallPageMessage = "Calling...";
+    public String outgoingVoiceCallPageSmallMessage = null;
 
     public String outgoingGroupVideoCallPageTitle = "%s";
     public String outgoingGroupVideoCallPageMessage = "Calling...";

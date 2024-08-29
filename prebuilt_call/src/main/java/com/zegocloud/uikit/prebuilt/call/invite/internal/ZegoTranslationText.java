@@ -1,5 +1,7 @@
 package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
+import android.text.TextUtils;
+
 import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
 
 public class ZegoTranslationText {
@@ -28,6 +30,7 @@ public class ZegoTranslationText {
     public String outgoingVideoCallPageMessage;
     public String outgoingVoiceCallPageTitle;
     public String outgoingVoiceCallPageMessage;
+    public String outgoingVoiceCallPageSmallMessage;
 
     public String outgoingGroupVideoCallPageTitle;
     public String outgoingGroupVideoCallPageMessage;
@@ -70,6 +73,7 @@ public class ZegoTranslationText {
         outgoingVideoCallPageMessage = invatationBaseText.outgoingVideoCallPageMessage;
         outgoingVoiceCallPageTitle = invatationBaseText.outgoingVoiceCallPageTitle;
         outgoingVoiceCallPageMessage = invatationBaseText.outgoingVoiceCallPageMessage;
+        outgoingVoiceCallPageSmallMessage = invatationBaseText.outgoingVoiceCallPageSmallMessage;
         outgoingGroupVideoCallPageTitle = invatationBaseText.outgoingGroupVideoCallPageTitle;
         outgoingGroupVideoCallPageMessage = invatationBaseText.outgoingGroupVideoCallPageMessage;
         outgoingGroupVoiceCallPageTitle = invatationBaseText.outgoingGroupVoiceCallPageTitle;
@@ -162,6 +166,9 @@ public class ZegoTranslationText {
             }
             if (english.outgoingVoiceCallPageMessage.equals(outgoingVoiceCallPageMessage)) {
                 outgoingVoiceCallPageMessage = innerText.outgoingVoiceCallPageMessage;
+            }
+            if (TextUtils.equals(english.outgoingVoiceCallPageSmallMessage, outgoingVoiceCallPageSmallMessage)) {
+                outgoingVoiceCallPageSmallMessage = innerText.outgoingVoiceCallPageSmallMessage;
             }
 
             if (english.outgoingGroupVideoCallPageTitle.equals(outgoingGroupVideoCallPageTitle)) {

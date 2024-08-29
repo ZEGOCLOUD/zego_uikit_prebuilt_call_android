@@ -26,6 +26,7 @@ public abstract class InvitationBaseText {
     public String outgoingVideoCallPageMessage = "Calling...";
     public String outgoingVoiceCallPageTitle = "%s";
     public String outgoingVoiceCallPageMessage = "Calling...";
+    public String outgoingVoiceCallPageSmallMessage = "";
 
     public String outgoingGroupVideoCallPageTitle = "%s";
     public String outgoingGroupVideoCallPageMessage = "Calling...";
