@@ -1,5 +1,6 @@
 package com.zegocloud.uikit.prebuilt.call.config;
 
+import android.view.View;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,8 @@ public class ZegoTopMenuBarConfig implements Serializable {
     public boolean isVisible = false;
 
     public int maxCount = 5;
+
+    public List<View> extendedButtons;
 
     public ZegoMenuBarStyle style = ZegoMenuBarStyle.DARK;
 

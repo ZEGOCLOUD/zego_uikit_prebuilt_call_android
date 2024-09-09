@@ -6,12 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.text.TextUtils;
-import android.util.Log;
-import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallInvitationData;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.ZIMPushMessage;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
+import com.zegocloud.uikit.prebuilt.call.core.push.ZIMPushMessage;
 import im.zego.zpns.ZPNsMessageReceiver;
 import im.zego.zpns.entity.ZPNsMessage;
 import im.zego.zpns.entity.ZPNsRegisterMessage;
@@ -45,7 +43,6 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
                     context.sendBroadcast(intent);
                 }
             } else {
-                MMKV.initialize(context);
                 // if app have background activity,we assume that app has already login in.In this
                 // case,offline message is ignored.
                 // else we assume that app is not started,offline message is effective
@@ -59,8 +56,7 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
                             }
                         }
                     } else {
-                        ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance()
-                            .getCallInvitationData();
+                        ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
                         if (callInvitationData != null) {
                             if (pushMessage.invitationID.equals(callInvitationData.invitationID)) {
                                 return;

@@ -2,7 +2,6 @@ package com.zegocloud.uikit.prebuilt.call.plugin_impl;
 
 import android.app.Activity;
 import android.app.Application;
-import android.util.Log;
 import com.zegocloud.uikit.plugin.adapter.plugins.ZegoPluginType;
 import com.zegocloud.uikit.plugin.adapter.plugins.call.PluginCallType;
 import com.zegocloud.uikit.plugin.adapter.plugins.call.PluginCallUser;
@@ -15,7 +14,7 @@ import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
 import java.util.List;

@@ -11,8 +11,7 @@ import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginN
 import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.plugin.invitation.components.ZegoStartInvitationButton;
-import com.zegocloud.uikit.prebuilt.call.R;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ClickListener;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallUser;
@@ -81,8 +80,7 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
         ZegoTranslationText translationText = CallInvitationServiceImpl.getInstance()
             .getCallInvitationConfig().translationText;
         ZegoInvitationType invitationType = ZegoInvitationType.getZegoInvitationType(type);
-        CallInvitationServiceImpl.getInstance()
-            .sendInvitation(invitees, invitationType, customData, timeout, this.callID, getSendInvitationConfig(),
+        CallInvitationServiceImpl.getInstance().sendInvitation(invitees, invitationType, customData, timeout, this.callID, getSendInvitationConfig(),
                 new PluginCallbackListener() {
                     @Override
                     public void callback(Map<String, Object> result) {

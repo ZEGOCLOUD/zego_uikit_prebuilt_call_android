@@ -17,7 +17,7 @@ import androidx.annotation.NonNull;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoInRoomChatConfig;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallLayoutInroomChatBinding;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallText;
 
 public class ZegoInRoomChatDialog extends Dialog {

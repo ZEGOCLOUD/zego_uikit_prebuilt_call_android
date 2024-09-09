@@ -17,7 +17,7 @@ import com.permissionx.guolindev.request.ExplainScope;
 import com.zegocloud.uikit.components.common.ZEGOImageButton;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.utils.Utils;
 import java.util.List;
 

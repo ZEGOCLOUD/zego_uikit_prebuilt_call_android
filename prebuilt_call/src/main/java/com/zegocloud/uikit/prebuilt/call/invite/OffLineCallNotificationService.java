@@ -5,10 +5,10 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import androidx.core.app.NotificationManagerCompat;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallNotificationManager;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.ZIMPushMessage;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallInvitationData;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.notification.PrebuiltCallNotificationManager;
+import com.zegocloud.uikit.prebuilt.call.core.push.ZIMPushMessage;
+import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
 import timber.log.Timber;
 
 /**
@@ -30,7 +30,7 @@ public class OffLineCallNotificationService extends Service {
         Timber.d("onStartCommand() called with: intent.getAction() = [" + intent.getAction() + "]");
 
         ZIMPushMessage zimPushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
-        if (CallNotificationManager.ACTION_DECLINE_CALL.equals(intent.getAction())) {
+        if (PrebuiltCallNotificationManager.ACTION_DECLINE_CALL.equals(intent.getAction())) {
             if (zimPushMessage == null) {
                 ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance()
                     .getCallInvitationData();
@@ -40,19 +40,18 @@ public class OffLineCallNotificationService extends Service {
             } else {
                 //after init will receive onInvitationReceived,and ACTION_DECLINE_CALL will cause rejectInvitation
                 // and unInitToReceiveOffline to ready for offline invite again.
-                CallInvitationServiceImpl.getInstance()
-                    .setNotificationClickAction(intent.getAction(), zimPushMessage.invitationID);
-                CallInvitationServiceImpl.getInstance().autoInitAndLoginUser(getApplication());
+                CallInvitationServiceImpl.getInstance().setNotificationClickAction(intent.getAction());
+                CallInvitationServiceImpl.getInstance().initAndLoginUserByLastRecord(getApplication());
                 CallInvitationServiceImpl.getInstance().parsePayload();
             }
             CallInvitationServiceImpl.getInstance().dismissCallNotification(getApplicationContext());
-        } else if (CallNotificationManager.ACTION_CLICK.equals(intent.getAction())) {
+        } else if (PrebuiltCallNotificationManager.ACTION_CLICK.equals(intent.getAction())) {
             // click will start service ,then start app,inject action here
             // while click accept button will start app directly
             //            CallInvitationServiceImpl.getInstance().setNotificationClickAction(intent.getAction(), zimPushMessage.invitationID);
             //            startApp();
             //            CallInvitationServiceImpl.getInstance().dismissCallNotification(getApplicationContext());
-        } else if (CallNotificationManager.ACTION_ACCEPT_CALL.equals(intent.getAction())) {
+        } else if (PrebuiltCallNotificationManager.ACTION_ACCEPT_CALL.equals(intent.getAction())) {
             //            CallInvitationServiceImpl.getInstance().setNotificationClickAction(intent.getAction(), zimPushMessage.invitationID);
             //            startApp();
             //            CallInvitationServiceImpl.getInstance().dismissCallNotification(getApplicationContext());
@@ -65,7 +64,7 @@ public class OffLineCallNotificationService extends Service {
 //                } else {
 //                    startForeground(CallNotificationManager.callNotificationID, callNotification);
 //                }
-                NotificationManagerCompat.from(this).notify(CallNotificationManager.callNotificationID, callNotification);
+                NotificationManagerCompat.from(this).notify(PrebuiltCallNotificationManager.callNotificationID, callNotification);
             }
         }
 

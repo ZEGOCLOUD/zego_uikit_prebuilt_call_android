@@ -12,6 +12,8 @@ import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallDialogInvitationBinding;
 
 public class CallInvitationDialog {
@@ -91,9 +93,9 @@ public class CallInvitationDialog {
             CallInviteActivity.startIncomingPage(context);
         });
 
-        CallInvitationServiceImpl service = CallInvitationServiceImpl.getInstance();
-        if (service.getProvider() != null) {
-            ZegoUIKitPrebuiltCallConfig prebuiltCallConfig = service.getProvider().requireConfig(invitationData);
+        ZegoUIKitPrebuiltCallConfigProvider provider = CallInvitationServiceImpl.getInstance().getPrebuiltCallConfigProvider();
+        if (provider != null) {
+            ZegoUIKitPrebuiltCallConfig prebuiltCallConfig = provider.requireConfig(invitationData);
             if (prebuiltCallConfig.audioVideoViewConfig != null
                 && prebuiltCallConfig.avatarViewProvider != null) {
                 View view = prebuiltCallConfig.avatarViewProvider.onUserIDUpdated(

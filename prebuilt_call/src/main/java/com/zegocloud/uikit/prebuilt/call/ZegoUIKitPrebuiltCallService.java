@@ -10,10 +10,10 @@ import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoBottomMenuBarConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.event.Events;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
 import com.zegocloud.uikit.service.defines.ZegoAudioOutputDevice;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.List;
@@ -39,9 +39,7 @@ public class ZegoUIKitPrebuiltCallService {
      */
     public static void init(Application application, long appID, String appSign, String userID, String userName,
         ZegoUIKitPrebuiltCallInvitationConfig config) {
-        CallInvitationServiceImpl.getInstance().init(application, appID, appSign, null);
-        CallInvitationServiceImpl.getInstance().loginUser(userID, userName);
-        CallInvitationServiceImpl.getInstance().setCallInvitationConfig(config);
+        CallInvitationServiceImpl.getInstance().init(application, appID, appSign, null, userID, userName, config);
     }
 
     /**
@@ -61,9 +59,7 @@ public class ZegoUIKitPrebuiltCallService {
      */
     public static void initWithToken(Application application, long appID, String token, String userID, String userName,
         ZegoUIKitPrebuiltCallInvitationConfig config) {
-        CallInvitationServiceImpl.getInstance().init(application, appID, null, token);
-        CallInvitationServiceImpl.getInstance().loginUser(userID, userName);
-        CallInvitationServiceImpl.getInstance().setCallInvitationConfig(config);
+        CallInvitationServiceImpl.getInstance().init(application, appID, null, token, userID, userName, config);
     }
 
     /**
@@ -71,8 +67,6 @@ public class ZegoUIKitPrebuiltCallService {
      * use this method.
      */
     public static void unInit() {
-        CallInvitationServiceImpl.getInstance().endCall();
-        CallInvitationServiceImpl.getInstance().logoutUser();
         CallInvitationServiceImpl.getInstance().unInit();
     }
 
@@ -174,6 +168,14 @@ public class ZegoUIKitPrebuiltCallService {
         ZegoSignalingPluginNotificationConfig notificationConfig, PluginCallbackListener callbackListener) {
         CallInvitationServiceImpl.getInstance()
             .sendInvitationWithUIChange(activity, invitees, type, customData, 60, callID, notificationConfig,
+                callbackListener);
+    }
+
+    public static void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType invitationType,
+        String customData, int timeout, String callID, ZegoSignalingPluginNotificationConfig notificationConfig,
+        PluginCallbackListener callbackListener) {
+        CallInvitationServiceImpl.getInstance()
+            .sendInvitation(invitees, invitationType, customData, timeout, callID, notificationConfig,
                 callbackListener);
     }
 

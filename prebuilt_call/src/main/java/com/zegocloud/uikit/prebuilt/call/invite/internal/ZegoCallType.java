@@ -13,6 +13,4 @@ public enum ZegoCallType {
     public int value() {
         return this.value;
     }
-
-
 }

@@ -1,4 +1,4 @@
-package com.zegocloud.uikit.prebuilt.call.invite.internal;
+package com.zegocloud.uikit.prebuilt.call.core.push;
 
 public class ZIMPushMessage {
 

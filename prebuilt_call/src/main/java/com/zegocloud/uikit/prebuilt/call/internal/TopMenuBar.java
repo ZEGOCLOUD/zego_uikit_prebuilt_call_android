@@ -31,7 +31,7 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltVideoConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig;
 import com.zegocloud.uikit.prebuilt.call.event.ZegoMenuBarButtonClickListener;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;

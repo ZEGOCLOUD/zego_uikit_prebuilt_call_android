@@ -5,8 +5,7 @@ import android.util.AttributeSet;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.zegocloud.uikit.plugin.invitation.components.ZegoRefuseInvitationButton;
-import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 
 public class ZegoRefuseCallInvitationButton extends ZegoRefuseInvitationButton {
 

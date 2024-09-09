@@ -20,8 +20,12 @@ import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.invite.PrebuiltCallRepository;
+import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
+import com.zegocloud.uikit.prebuilt.call.core.notification.PrebuiltCallNotificationManager;
+import com.zegocloud.uikit.prebuilt.call.core.push.ZIMPushMessage;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
-import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import java.util.Map;
 import timber.log.Timber;
 
@@ -70,6 +74,7 @@ public class CallInviteActivity extends AppCompatActivity {
 
 
     public static void startCallPage(Context context) {
+        Timber.d("startCallPage() called with: context = [" + context + "]");
         Intent intent = new Intent(context, CallInviteActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("page", "call");
@@ -117,13 +122,15 @@ public class CallInviteActivity extends AppCompatActivity {
         callStateListener = new CallStateListener() {
             @Override
             public void onStateChanged(int before, int after) {
-                if (after == CallInvitationServiceImpl.CONNECTED) {
+                if (after == PrebuiltCallRepository.CONNECTED) {
                     showCallFragment();
                 } else {
-                    String userID = ZegoUIKit.getLocalUser().userID;
-                    if (!TextUtils.isEmpty(userID)) {
-                        if (ZegoUIKit.isCameraOn(userID)) {
-                            ZegoUIKit.turnCameraOn(userID, false);
+                    if (ZegoUIKit.getLocalUser() != null) {
+                        String userID = ZegoUIKit.getLocalUser().userID;
+                        if (!TextUtils.isEmpty(userID)) {
+                            if (ZegoUIKit.isCameraOn(userID)) {
+                                ZegoUIKit.turnCameraOn(userID, false);
+                            }
                         }
                     }
                     CallInvitationServiceImpl.getInstance().removeCallStateListener(callStateListener);
@@ -138,14 +145,14 @@ public class CallInviteActivity extends AppCompatActivity {
         ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
         Timber.d("onCreate() called with: callInvitationData = [" + callInvitationData + "]");
         if (callInvitationData == null) {
-            CallInvitationServiceImpl.getInstance().leaveRoomInternal();
+            CallInvitationServiceImpl.getInstance().leaveRoom();
             finish();
             return;
         }
 
         String intentAction = getIntent().getAction();
         Timber.d("onCreate() called with: intentAction = [" + intentAction + "]");
-        if (CallNotificationManager.ACTION_ACCEPT_CALL.equals(intentAction)) {
+        if (PrebuiltCallNotificationManager.ACTION_ACCEPT_CALL.equals(intentAction)) {
             if (pushMessage != null) {
                 ZegoUIKit.getSignalingPlugin().callAccept(pushMessage.invitationID, "", new PluginCallbackListener() {
                     @Override
@@ -161,17 +168,18 @@ public class CallInviteActivity extends AppCompatActivity {
                     }
                 });
             }
-        } else if (CallNotificationManager.ACTION_DECLINE_CALL.equals(intentAction)) {
+        } else if (PrebuiltCallNotificationManager.ACTION_DECLINE_CALL.equals(intentAction)) {
 
-        } else if (CallNotificationManager.ACTION_CLICK.equals(intentAction)) {
+        } else if (PrebuiltCallNotificationManager.ACTION_CLICK.equals(intentAction)) {
             // background,receive call, click notification
             RingtoneManager.playRingTone(true);
             showWaitingFragment(true);
-        } else if (CallNotificationManager.SHOW_FULL_ON_LOCK_SCREEN.equals(intentAction)) {
+        } else if (PrebuiltCallNotificationManager.SHOW_FULL_ON_LOCK_SCREEN.equals(intentAction)) {
             showWaitingFragment(true);
         } else {
             Bundle bundle = getIntent().getParcelableExtra("bundle");
             String page = bundle.getString("page");
+            Timber.d("onCreate() called with: page = [" + page + "]");
 
             boolean isOneOnOneOnGoingCall = "outgoing".equals(page) && callInvitationData.invitees.size() == 1;
             boolean isIncoming = "incoming".equals(page);
@@ -183,7 +191,7 @@ public class CallInviteActivity extends AppCompatActivity {
         }
         // if activity is show on lock screen,keep notification until user clicked
         // accept or reject.
-        if (!CallNotificationManager.SHOW_FULL_ON_LOCK_SCREEN.equals(intentAction)) {
+        if (!PrebuiltCallNotificationManager.SHOW_FULL_ON_LOCK_SCREEN.equals(intentAction)) {
             CallInvitationServiceImpl.getInstance().dismissCallNotification(this);
         }
     }
@@ -191,8 +199,6 @@ public class CallInviteActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Timber.d("onDestroy() called");
-
         CallInvitationServiceImpl.getInstance().dismissCallNotification(this);
         CallInvitationServiceImpl.getInstance().removeCallStateListener(callStateListener);
     }
@@ -220,12 +226,9 @@ public class CallInviteActivity extends AppCompatActivity {
             callConfig);
 
         if (invitationData.invitees.size() > 1) {
-            fragment.setOnOnlySelfInRoomListener(new ZegoOnlySelfInRoomListener() {
-                @Override
-                public void onOnlySelfInRoom() {
-
-                }
-            });
+            CallInvitationServiceImpl.getInstance().setLeaveWhenOnlySelf(false);
+        }else {
+            CallInvitationServiceImpl.getInstance().setLeaveWhenOnlySelf(true);
         }
         getSupportFragmentManager().beginTransaction().replace(R.id.call_fragment_container, fragment).commitNow();
     }
@@ -233,7 +236,7 @@ public class CallInviteActivity extends AppCompatActivity {
     private static @Nullable ZegoUIKitPrebuiltCallConfig getCustomCallConfig() {
         ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
         ZegoUIKitPrebuiltCallConfig config = null;
-        ZegoUIKitPrebuiltCallConfigProvider provider = CallInvitationServiceImpl.getInstance().getProvider();
+        ZegoUIKitPrebuiltCallConfigProvider provider = CallInvitationServiceImpl.getInstance().getPrebuiltCallConfigProvider();
         if (provider != null) {
             config = provider.requireConfig(invitationData);
         }
@@ -246,8 +249,8 @@ public class CallInviteActivity extends AppCompatActivity {
 
         ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
         CallInvitationServiceImpl service = CallInvitationServiceImpl.getInstance();
-        if (service.getProvider() != null) {
-            ZegoUIKitPrebuiltCallConfig prebuiltCallConfig = service.getProvider().requireConfig(invitationData);
+        if (service.getPrebuiltCallConfigProvider() != null) {
+            ZegoUIKitPrebuiltCallConfig prebuiltCallConfig = service.getPrebuiltCallConfigProvider().requireConfig(invitationData);
             if (prebuiltCallConfig.audioVideoViewConfig != null && prebuiltCallConfig.avatarViewProvider != null) {
                 fragment.setAvatarViewProvider(prebuiltCallConfig.avatarViewProvider);
             }

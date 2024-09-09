@@ -4,7 +4,8 @@ import android.graphics.drawable.Drawable;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoNotificationConfig;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallInvitationData;
+import com.zegocloud.uikit.prebuilt.call.core.invite.advanced.ZegoCallInvitationInCallingConfig;
+import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoInnerText;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoTranslationText;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoUIKitPrebuiltCallConfigProvider;
@@ -24,6 +25,9 @@ public class ZegoUIKitPrebuiltCallInvitationConfig {
 
     public ZegoInnerText innerText = new ZegoInnerText();
     public ZegoTranslationText translationText = new ZegoTranslationText();
+
+    public ZegoCallInvitationInCallingConfig callingConfig;
+    public boolean endCallWhenInitiatorLeave;
 
     public static ZegoUIKitPrebuiltCallConfig generateDefaultConfig(ZegoCallInvitationData invitationData) {
         ZegoUIKitPrebuiltCallConfig config = null;

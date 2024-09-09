@@ -1,7 +1,6 @@
-package com.zegocloud.uikit.prebuilt.call.invite.internal;
+package com.zegocloud.uikit.prebuilt.call.core.notification;
 
 import android.app.Activity;
-import android.app.Application;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationChannel;
@@ -27,12 +26,18 @@ import androidx.core.graphics.drawable.IconCompat;
 import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
+import com.zegocloud.uikit.prebuilt.call.core.push.ZIMPushMessage;
 import com.zegocloud.uikit.prebuilt.call.invite.OffLineCallNotificationService;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.RingtoneManager;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoTranslationText;
 import java.util.List;
 import timber.log.Timber;
 
-public class CallNotificationManager {
+public class PrebuiltCallNotificationManager {
 
     public static final String ACTION_ACCEPT_CALL = "accept";
     public static final String ACTION_DECLINE_CALL = "decline";
@@ -58,7 +63,7 @@ public class CallNotificationManager {
     public void showCallNotification(Context context) {
         Timber.d("showCallNotification() called with: context = [" + context + "]");
         boolean canShowNotification = checkIfAppCanShowNotification(context);
-//        ContextCompat.startForegroundService(context, new Intent(context, OffLineCallNotificationService.class));
+        //        ContextCompat.startForegroundService(context, new Intent(context, OffLineCallNotificationService.class));
         context.startService(new Intent(context, OffLineCallNotificationService.class));
         if (canShowNotification) {
             handler.postDelayed(dismissNotificationRunnable, TIMEOUT_AFTER);
@@ -132,7 +137,7 @@ public class CallNotificationManager {
         return notificationTitle;
     }
 
-    public void createCallNotificationChannel(ZegoUIKitPrebuiltCallInvitationConfig invitationConfig,Context context) {
+    public void createCallNotificationChannel(Context context, ZegoUIKitPrebuiltCallInvitationConfig invitationConfig) {
         String channelID;
         String channelName;
         String channelDesc;
@@ -235,12 +240,6 @@ public class CallNotificationManager {
         boolean willStartForegroundService = zimPushMessage != null;
         boolean backgroundNotification = zimPushMessage == null && topActivity != null;
 
-        if (zimPushMessage != null || topActivity == null) {
-            // offline service
-            Application application = (Application) context.getApplicationContext();
-            CallInvitationServiceImpl.getInstance().registerLifeCycleCallback(application);
-        }
-
         PendingIntent clickIntent = getClickIntent(context);
         PendingIntent acceptIntent = getAcceptIntent(context);
         PendingIntent declineIntent = getDeclineIntent(context);
@@ -260,34 +259,34 @@ public class CallNotificationManager {
             //                builder.setFullScreenIntent(lockScreenIntent, true);
             //            }
 
-//            if (willStartForegroundService) {
-//                //callStyle need foreground service or fullscreen intent
-//                android.app.Person caller = new android.app.Person.Builder().setName(title).setImportant(true).build();
-//                Notification.CallStyle callStyle = Notification.CallStyle.forIncomingCall(caller, declineIntent,
-//                    acceptIntent);
-//                builder.setStyle(callStyle);
-//            } else {
+            //            if (willStartForegroundService) {
+            //                //callStyle need foreground service or fullscreen intent
+            //                android.app.Person caller = new android.app.Person.Builder().setName(title).setImportant(true).build();
+            //                Notification.CallStyle callStyle = Notification.CallStyle.forIncomingCall(caller, declineIntent,
+            //                    acceptIntent);
+            //                builder.setStyle(callStyle);
+            //            } else {
 
-                String accept = context.getString(R.string.call_page_action_accept);
+            String accept = context.getString(R.string.call_page_action_accept);
 
-                String decline = context.getString(R.string.call_page_action_decline);
+            String decline = context.getString(R.string.call_page_action_decline);
 
-                Notification.Action.Builder acceptAction = new Notification.Action.Builder(
-                    // The icon that will be displayed on the button (or not, depends on the Android version)
-                    Icon.createWithResource(context, R.drawable.call_selector_dialog_voice_accept),
-                    // The text on the button
-                    accept, acceptIntent);
+            Notification.Action.Builder acceptAction = new Notification.Action.Builder(
+                // The icon that will be displayed on the button (or not, depends on the Android version)
+                Icon.createWithResource(context, R.drawable.call_selector_dialog_voice_accept),
+                // The text on the button
+                accept, acceptIntent);
 
-                Notification.Action.Builder declineAction = new Notification.Action.Builder(
-                    // The icon that will be displayed on the button (or not, depends on the Android version)
-                    Icon.createWithResource(context,
-                        com.zegocloud.uikit.R.drawable.zego_uikit_icon_dialog_voice_decline),
-                    // The text on the button
-                    decline, declineIntent);
+            Notification.Action.Builder declineAction = new Notification.Action.Builder(
+                // The icon that will be displayed on the button (or not, depends on the Android version)
+                Icon.createWithResource(context,
+                    com.zegocloud.uikit.R.drawable.zego_uikit_icon_dialog_voice_decline),
+                // The text on the button
+                decline, declineIntent);
 
-                builder.addAction(acceptAction.build());
-                builder.addAction(declineAction.build());
-//            }
+            builder.addAction(acceptAction.build());
+            builder.addAction(declineAction.build());
+            //            }
             builder.setTimeoutAfter(TIMEOUT_AFTER + 1000);
             return builder.build();
         } else {
@@ -297,10 +296,10 @@ public class CallNotificationManager {
                 .setContentText(body).setContentIntent(clickIntent).setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC).setCategory(NotificationCompat.CATEGORY_CALL)
                 .setOngoing(true).setAutoCancel(true);
-//            if (backgroundNotification && canShowFullOnLockScreen) {
-//                PendingIntent lockScreenIntent = getLockScreenIntent(context);
-//                builder.setFullScreenIntent(lockScreenIntent, true);
-//            }
+            //            if (backgroundNotification && canShowFullOnLockScreen) {
+            //                PendingIntent lockScreenIntent = getLockScreenIntent(context);
+            //                builder.setFullScreenIntent(lockScreenIntent, true);
+            //            }
 
             String accept = context.getString(R.string.call_page_action_accept);
 
@@ -399,7 +398,8 @@ public class CallNotificationManager {
                 openIntent = PendingIntent.getActivity(context, 0, incomingPageIntent,
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
             } else {
-                openIntent = PendingIntent.getActivity(context, 0, incomingPageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                openIntent = PendingIntent.getActivity(context, 0, incomingPageIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
             }
             return openIntent;
         } else {

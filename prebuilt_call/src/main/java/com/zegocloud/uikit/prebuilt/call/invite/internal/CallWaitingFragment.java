@@ -24,8 +24,10 @@ import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
 import com.zegocloud.uikit.plugin.adapter.utils.GenericUtils;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.R;
-import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.invite.PrebuiltCallRepository;
+import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallLayoutWaitingBinding;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
@@ -184,7 +186,7 @@ public class CallWaitingFragment extends Fragment {
             if (incomingCallButtonListener != null) {
                 incomingCallButtonListener.onIncomingCallAcceptButtonPressed();
             }
-            CallInvitationServiceImpl.getInstance().setCallState(CallInvitationServiceImpl.CONNECTED);
+            CallInvitationServiceImpl.getInstance().setCallState(PrebuiltCallRepository.CONNECTED);
             CallInvitationServiceImpl.getInstance().dismissCallNotification();
             CallInvitationServiceImpl.getInstance().clearPushMessage();
         });

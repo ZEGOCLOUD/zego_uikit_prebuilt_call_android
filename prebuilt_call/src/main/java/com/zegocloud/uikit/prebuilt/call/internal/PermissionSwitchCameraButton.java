@@ -16,7 +16,7 @@ import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.event.ZegoMenuBarButtonClickListener;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

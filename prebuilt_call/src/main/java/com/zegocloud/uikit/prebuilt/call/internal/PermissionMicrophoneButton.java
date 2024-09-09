@@ -15,7 +15,7 @@ import com.zegocloud.uikit.components.audiovideo.ZegoToggleMicrophoneButton;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.event.ZegoMenuBarButtonClickListener;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallText;
 import java.util.ArrayList;
 import java.util.Arrays;
