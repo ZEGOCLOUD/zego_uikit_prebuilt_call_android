@@ -243,6 +243,7 @@ public class PrebuiltCallNotificationManager {
         PendingIntent clickIntent = getClickIntent(context);
         PendingIntent acceptIntent = getAcceptIntent(context);
         PendingIntent declineIntent = getDeclineIntent(context);
+        PendingIntent lockScreenIntent = getLockScreenIntent(context);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 
@@ -256,7 +257,7 @@ public class PrebuiltCallNotificationManager {
             // lock screen.
             //            if (backgroundNotification && canShowFullOnLockScreen) {
             //                PendingIntent lockScreenIntent = getLockScreenIntent(context);
-            //                builder.setFullScreenIntent(lockScreenIntent, true);
+//                            builder.setFullScreenIntent(lockScreenIntent, true);
             //            }
 
             //            if (willStartForegroundService) {
@@ -321,6 +322,7 @@ public class PrebuiltCallNotificationManager {
             builder.addAction(acceptAction.build());
             builder.addAction(declineAction.build());
             builder.setTimeoutAfter(TIMEOUT_AFTER + 1000);
+//            builder.setFullScreenIntent(lockScreenIntent, true);
             return builder.build();
         }
     }

@@ -22,6 +22,7 @@ public class PrebuiltUserRepository {
     private PrebuiltCallZIMBridge zimBridge;
     private boolean isLoginIng = false;
     private ZIMUserInfo zimUserInfo;
+    private boolean hasNotified;
 
     private ZIMEventHandler zimEventHandler = new ZIMEventHandler() {
         @Override
@@ -32,19 +33,16 @@ public class PrebuiltUserRepository {
                 + event + "], extendedData = [" + extendedData + "]");
             if (state == ZIMConnectionState.DISCONNECTED && event == ZIMConnectionEvent.SUCCESS) {
 
-                CallInvitationServiceImpl.getInstance().onPrebuiltCallUserLogout(zimUserInfo.userID, zimUserInfo.userName);
-                zimUserInfo = null;
+                onUserLogoutSuccess();
 
                 SignalPluginConnectListener pluginConnectListener = ZegoUIKitPrebuiltCallService.events.invitationEvents.getPluginConnectListener();
                 if (pluginConnectListener != null) {
                     pluginConnectListener.onSignalPluginConnectionStateChanged(state, event, extendedData);
                 }
-                removeCallbacks();
             }
 
             if (state == ZIMConnectionState.CONNECTED && event == ZIMConnectionEvent.ACTIVE_LOGIN) {
-                zimUserInfo = zimBridge.getLocalUser();
-                CallInvitationServiceImpl.getInstance().onPrebuiltCallUserLogin(zimUserInfo.userID, zimUserInfo.userName);
+                onUserLoginSuccess();
             }
 
         }
@@ -76,7 +74,13 @@ public class PrebuiltUserRepository {
             @Override
             public void onResult(int errorCode, String message) {
                 isLoginIng = false;
-                Timber.d("loginUser ZIM onResult() called with: errorCode = [" + errorCode + "], message = [" + message + "]");
+                Timber.d("loginUser ZIM onResult() called with: errorCode = [" + errorCode + "], message = [" + message
+                    + "]");
+                // if has already login in other place,there is no onConnectionStateChanged then .
+                // so invoke onUserLoginSuccess here.
+                if (errorCode == 0) {
+                    onUserLoginSuccess();
+                }
                 if (callback != null) {
                     callback.onResult(errorCode, message);
                 }
@@ -87,11 +91,35 @@ public class PrebuiltUserRepository {
         mmkv.putString("userName", userName);
     }
 
+    /**
+     * if has already login in other place,there is no onConnectionStateChanged then . So invoke onUserLoginSuccess in
+     * loginUser callback too. Be cautious of the situation where it is called multiple times.
+     */
+    private void onUserLoginSuccess() {
+        if (zimUserInfo == null) {
+            zimUserInfo = zimBridge.getLocalUser();
+            CallInvitationServiceImpl.getInstance().onPrebuiltCallUserLogin(zimUserInfo.userID, zimUserInfo.userName);
+        }
+    }
+
     public void logoutUser() {
         Timber.d("logoutUser() called");
         expressBridge.logoutUser();
         zimBridge.logout();
+        onUserLogoutSuccess();
     }
+
+    /**
+     * Be cautious of the situation where it is called multiple times.
+     */
+    private void onUserLogoutSuccess() {
+        if (zimUserInfo != null) {
+            CallInvitationServiceImpl.getInstance().onPrebuiltCallUserLogout(zimUserInfo.userID, zimUserInfo.userName);
+        }
+        zimUserInfo = null;
+        removeCallbacks();
+    }
+
 
     private void setupCallbacks() {
         zimBridge.registerZIMEventHandler(zimEventHandler);

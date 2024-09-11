@@ -495,6 +495,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         for (String permission : permissions) {
             if (ContextCompat.checkSelfPermission(getContext(), permission) != PackageManager.PERMISSION_GRANTED) {
                 allGranted = false;
+                break;
             }
         }
         if (allGranted) {

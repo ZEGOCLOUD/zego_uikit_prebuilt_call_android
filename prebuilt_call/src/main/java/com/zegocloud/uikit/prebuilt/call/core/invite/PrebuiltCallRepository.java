@@ -870,7 +870,7 @@ public class PrebuiltCallRepository {
         @Override
         public void onCallInvitationReceived(ZIM zim, ZIMCallInvitationReceivedInfo info, String callID) {
             super.onCallInvitationReceived(zim, info, callID);
-            Log.d(TAG, "onCallInvitationReceived() called with: zim = [" + zim + "], info = [" + info + "], callID = ["
+            Timber.d("onCallInvitationReceived() called with: zim = [" + zim + "], info = [" + info + "], callID = ["
                 + callID + "]");
             zimCallInvitationReceived(zim, info, callID);
         }
@@ -878,7 +878,7 @@ public class PrebuiltCallRepository {
         @Override
         public void onCallInvitationCancelled(ZIM zim, ZIMCallInvitationCancelledInfo info, String callID) {
             super.onCallInvitationCancelled(zim, info, callID);
-            Log.d(TAG, "onCallInvitationCancelled() called with: zim = [" + zim + "], info = [" + info + "], callID = ["
+            Timber.d("onCallInvitationCancelled() called with: zim = [" + zim + "], info = [" + info + "], callID = ["
                 + callID + "]");
             zimCallInvitationCancelled(zim, info, callID);
         }
@@ -886,7 +886,7 @@ public class PrebuiltCallRepository {
         @Override
         public void onCallInvitationTimeout(ZIM zim, ZIMCallInvitationTimeoutInfo info, String callID) {
             super.onCallInvitationTimeout(zim, info, callID);
-            Log.d(TAG,
+            Timber.d(
                 "onCallInvitationTimeout() called with: zim = [" + zim + "], info = [" + info + "], callID = [" + callID
                     + "]");
             zimCallInvitationTimeout(zim, info, callID);
@@ -895,7 +895,7 @@ public class PrebuiltCallRepository {
         @Override
         public void onCallUserStateChanged(ZIM zim, ZIMCallUserStateChangeInfo info, String callID) {
             super.onCallUserStateChanged(zim, info, callID);
-            Log.d(TAG,
+            Timber.d(
                 "onCallUserStateChanged() called with: zim = [" + zim + "], info = [" + info + "], callID = [" + callID
                     + "]");
             zimCallUserStateChanged(zim, info, callID);
@@ -904,7 +904,7 @@ public class PrebuiltCallRepository {
         @Override
         public void onCallInvitationEnded(ZIM zim, ZIMCallInvitationEndedInfo info, String callID) {
             super.onCallInvitationEnded(zim, info, callID);
-            Log.d(TAG,
+            Timber.d(
                 "onCallInvitationEnded() called with: zim = [" + zim + "], info = [" + info + "], callID = [" + callID
                     + "]");
             zimCallInvitationEnded(zim, info, callID);
@@ -912,27 +912,27 @@ public class PrebuiltCallRepository {
 
         @Deprecated
         public void onCallInvitationRejected(ZIM zim, ZIMCallInvitationRejectedInfo info, String callID) {
-            Log.d(TAG, "onCallInvitationRejected() called with: zim = [" + zim + "], info = [" + info + "], callID = ["
+            Timber.d("onCallInvitationRejected() called with: zim = [" + zim + "], info = [" + info + "], callID = ["
                 + callID + "]");
         }
 
 
         @Deprecated
         public void onCallInvitationAccepted(ZIM zim, ZIMCallInvitationAcceptedInfo info, String callID) {
-            Log.d(TAG, "onCallInvitationAccepted() called with: zim = [" + zim + "], info = [" + info + "], callID = ["
+            Timber.d("onCallInvitationAccepted() called with: zim = [" + zim + "], info = [" + info + "], callID = ["
                 + callID + "]");
         }
 
         @Deprecated
         public void onCallInviteesAnsweredTimeout(ZIM zim, ArrayList<String> invitees, String callID) {
-            Log.d(TAG, "onCallInviteesAnsweredTimeout() called with: zim = [" + zim + "], invitees = [" + invitees
+            Timber.d("onCallInviteesAnsweredTimeout() called with: zim = [" + zim + "], invitees = [" + invitees
                 + "], callID = [" + callID + "]");
         }
 
         @Override
         public void onCallInvitationTimeout(ZIM zim, String callID) {
             super.onCallInvitationTimeout(zim, callID);
-            Log.d(TAG, "onCallInvitationTimeout() called with: zim = [" + zim + "], callID = [" + callID + "]");
+            Timber.d("onCallInvitationTimeout() called with: zim = [" + zim + "], callID = [" + callID + "]");
         }
     };
 

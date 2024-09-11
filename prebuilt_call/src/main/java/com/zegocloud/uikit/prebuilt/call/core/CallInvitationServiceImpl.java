@@ -212,7 +212,7 @@ public class CallInvitationServiceImpl {
                 errorEvents.onError(ErrorEventsListener.INIT_ALREADY,
                     "ZEGO Express Engine is already initialized, do not initialize again");
             }
-            return false;
+            return true;
         }
 
         boolean result = ZegoUIKit.init(application, appID, appSign, ZegoScenario.STANDARD_VIDEO_CALL);
