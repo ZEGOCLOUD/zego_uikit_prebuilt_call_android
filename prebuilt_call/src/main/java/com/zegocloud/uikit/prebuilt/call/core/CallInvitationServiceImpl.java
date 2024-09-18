@@ -512,4 +512,8 @@ public class CallInvitationServiceImpl {
             "onPrebuiltCallRoomUserLeft() called with: userList = [" + leaveUsers + "], roomID = [" + roomID + "]");
         callRepository.onPrebuiltCallRoomUserLeft(leaveUsers, roomID);
     }
+
+    public String getPrebuiltCallRoom() {
+        return roomRepository.getPrebuiltRoomID();
+    }
 }

@@ -18,7 +18,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
@@ -71,18 +70,14 @@ public class PrebuiltCallLifecycleHandler {
         @Override
         public void onActivityResumed(@NonNull Activity activity) {
             setTopActivity(activity);
+
             boolean notificationShowed = CallInvitationServiceImpl.getInstance().isCallNotificationShowed();
             ZIMPushMessage pushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
             Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
             String notificationAction = CallInvitationServiceImpl.getInstance().getNotificationAction();
             Timber.d("onActivityResumed() called with: topActivity = [" + topActivity + "],pushMessage:" + pushMessage
                 + ",notificationAction:" + notificationAction);
-            ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = CallInvitationServiceImpl.getInstance()
-                .getCallInvitationConfig();
-            ZegoUIKitPrebuiltCallFragment prebuiltCallFragment = CallInvitationServiceImpl.getInstance()
-                .getZegoUIKitPrebuiltCallFragment();
-            ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
-            ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
+
             // if app is online and background,received a call notification
             if (notificationShowed && pushMessage == null) {
                 // if app's topActivity is not CallInviteActivity.then start it
@@ -109,48 +104,56 @@ public class PrebuiltCallLifecycleHandler {
             //            } else {
             CallInvitationServiceImpl.getInstance().dismissCallNotification(topActivity);
             //            }
-
             ActivityManager am = (ActivityManager) topActivity.getSystemService(Context.ACTIVITY_SERVICE);
-            if (am != null) {
-                if (!(topActivity instanceof CallInviteActivity)
-                    && !(topActivity instanceof ZegoScreenCaptureAssistantActivity)) {
-                    boolean isCallInvite = callInvitationConfig != null;
-                    // call-invite,in room,hasMiniButton,but no permission, and app goes background.
-                    // Now, when returning to the app, it is necessary to bring the CallInviteActivity to the foreground
-                    // (because the CallInviteActivity was hidden in the recent apps, it won't show up if not brought to the foreground).
-                    boolean isInRoom = ZegoUIKit.getRoom() != null && !TextUtils.isEmpty(ZegoUIKit.getRoom().roomID);
-                    if (isCallInvite) {
-                        if (isInRoom) {
-                            boolean hasMiniButton =
-                                callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
-                                    || callConfig.topMenuBarConfig.buttons.contains(
-                                    ZegoMenuBarButtonName.MINIMIZING_BUTTON);
-                            boolean noSystemOverlayPermission =
-                                VERSION.SDK_INT >= VERSION_CODES.M && !Settings.canDrawOverlays(topActivity);
-                            if (hasMiniButton && noSystemOverlayPermission) {
-                                if (prebuiltCallFragment != null) {
-                                    bringCallInviteActivityToFront(am);
-                                }
-                            }
-                        } else {
-                            if (callInvitationData != null) {
-                                // not in room ,but in waiting page，need to bring CallInviteActivity to front
-                                boolean isCallInviteActivityStarted = false;
-                                List<RunningTaskInfo> runningTasks = am.getRunningTasks(Integer.MAX_VALUE);
-                                for (RunningTaskInfo runningTask : runningTasks) {
-                                    if (Objects.equals(runningTask.topActivity.getClassName(),
-                                        CallInviteActivity.class.getName())) {
-                                        isCallInviteActivityStarted = true;
-                                        break;
-                                    }
-                                }
-                                if (isCallInviteActivityStarted) {
-                                    bringCallInviteActivityToFront(am);
-                                }
-                            }
+            if (am == null) {
+                return;
+            }
+
+            ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = CallInvitationServiceImpl.getInstance()
+                .getCallInvitationConfig();
+            boolean isCallInvite = callInvitationConfig != null;
+            if (!isCallInvite) {
+                return;
+            }
+            if (!(topActivity instanceof CallInviteActivity)
+                && !(topActivity instanceof ZegoScreenCaptureAssistantActivity)) {
+
+                // call-invite,in room,hasMiniButton,but no permission, and app goes background.
+                // Now, when returning to the app, it is necessary to bring the CallInviteActivity to the foreground
+                // (because the CallInviteActivity was hidden in the recent apps, it won't show up if not brought to the foreground).
+                boolean inCallRoom = CallInvitationServiceImpl.getInstance().isInCallRoom();
+                ZegoUIKitPrebuiltCallFragment prebuiltCallFragment = CallInvitationServiceImpl.getInstance()
+                    .getZegoUIKitPrebuiltCallFragment();
+                ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
+                ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance()
+                    .getCallInvitationData();
+                if (inCallRoom) {
+                    boolean hasMiniButton =
+                        callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
+                            || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON);
+                    boolean noSystemOverlayPermission =
+                        VERSION.SDK_INT >= VERSION_CODES.M && !Settings.canDrawOverlays(topActivity);
+                    if (hasMiniButton && noSystemOverlayPermission) {
+                        if (prebuiltCallFragment != null) {
+                            bringCallInviteActivityToFront(am);
                         }
                     }
-
+                } else {
+                    if (callInvitationData != null) {
+                        // not in room ,but in waiting page，need to bring CallInviteActivity to front
+                        boolean isCallInviteActivityStarted = false;
+                        List<RunningTaskInfo> runningTasks = am.getRunningTasks(Integer.MAX_VALUE);
+                        for (RunningTaskInfo runningTask : runningTasks) {
+                            if (Objects.equals(runningTask.topActivity.getClassName(),
+                                CallInviteActivity.class.getName())) {
+                                isCallInviteActivityStarted = true;
+                                break;
+                            }
+                        }
+                        if (isCallInviteActivityStarted) {
+                            bringCallInviteActivityToFront(am);
+                        }
+                    }
                 }
             }
         }
@@ -192,7 +195,7 @@ public class PrebuiltCallLifecycleHandler {
 
     public static void bringCallInviteActivityToFront(ActivityManager am) {
         List<AppTask> tasks = am.getAppTasks();
-        if (tasks != null && tasks.size() > 0) {
+        if (tasks != null && !tasks.isEmpty()) {
             for (AppTask task : tasks) {
                 RecentTaskInfo taskInfo = task.getTaskInfo();
                 if (taskInfo.baseIntent.getComponent().toShortString().contains(CallInviteActivity.class.getName())) {
@@ -209,7 +212,7 @@ public class PrebuiltCallLifecycleHandler {
         intent.setPackage(application.getPackageName());
         PackageManager pm = application.getPackageManager();
         List<ResolveInfo> info = pm.queryIntentActivities(intent, 0);
-        if (info == null || info.size() == 0) {
+        if (info == null || info.isEmpty()) {
             return "";
         }
         return info.get(0).activityInfo.name;

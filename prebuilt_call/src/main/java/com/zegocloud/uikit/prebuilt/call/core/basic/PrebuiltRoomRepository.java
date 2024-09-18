@@ -30,6 +30,7 @@ public class PrebuiltRoomRepository {
     private PrebuiltCallTimer callTimer = new PrebuiltCallTimer();
     private ZegoUIKitPrebuiltCallFragment callFragment;
     private boolean leaveWhenOnlySelf;
+    private boolean isJoiningCallRoom;
 
     private IExpressEngineEventHandler eventHandler = new IExpressEngineEventHandler() {
         @Override
@@ -40,7 +41,9 @@ public class PrebuiltRoomRepository {
                 "onRoomStateChanged() called with: roomID = [" + roomID + "], reason = [" + reason + "], errorCode = ["
                     + errorCode + "], extendedData = [" + extendedData + "]");
             if (reason == ZegoRoomStateChangedReason.LOGINED) {
-                CallInvitationServiceImpl.getInstance().onPrebuiltCallRoomJoined(roomID);
+                if (isJoiningCallRoom) {
+                    CallInvitationServiceImpl.getInstance().onPrebuiltCallRoomJoined(roomID);
+                }
             }
             if (reason == ZegoRoomStateChangedReason.LOGOUT) {
                 if (Objects.equals(prebuiltRoomID, roomID)) { //in case multi room
@@ -89,23 +92,40 @@ public class PrebuiltRoomRepository {
         public void onRoomUserUpdate(String roomID, ZegoUpdateType updateType, ArrayList<ZegoUser> userList) {
             super.onRoomUserUpdate(roomID, updateType, userList);
             if (updateType == ZegoUpdateType.DELETE) {
-                CallInvitationServiceImpl.getInstance().onPrebuiltCallRoomUserLeft(userList,roomID);
+                CallInvitationServiceImpl.getInstance().onPrebuiltCallRoomUserLeft(userList, roomID);
             }
         }
     };
+    private ZegoOnlySelfInRoomListener onlySelfInRoomListener;
 
     public PrebuiltRoomRepository(PrebuiltCallExpressBridge expressBridge) {
         this.expressBridge = expressBridge;
+        onlySelfInRoomListener = () -> {
+            ZegoOnlySelfInRoomListener selfInRoomListener = ZegoUIKitPrebuiltCallService.events.callEvents.getOnlySelfInRoomListener();
+            if (selfInRoomListener != null) {
+                selfInRoomListener.onOnlySelfInRoom();
+            } else {
+                if (leaveWhenOnlySelf) {
+                    leaveSDKRoomInner();
+                    invokeRemoteHangUpCallback();
+                }
+            }
+        };
     }
 
     public void joinRoom(String roomID, ZegoUIKitCallback callback) {
         Timber.d("joinRoom() called with: roomID = [" + roomID + "], callback = [" + callback + "]");
+        if (isJoiningCallRoom) {
+            return;
+        }
+        isJoiningCallRoom = true;
         setupCallbacks();
         expressBridge.joinSDKRoom(roomID, new ZegoUIKitCallback() {
             @Override
             public void onResult(int errorCode) {
                 Timber.d("joinRoom  Express onResult() called with: errorCode = [" + errorCode + "]");
                 inCallRoom = errorCode == 0;
+                isJoiningCallRoom = false;
                 if (inCallRoom) {
                     prebuiltRoomID = roomID;
                     callTimer.startRoomTimeCount();
@@ -138,13 +158,16 @@ public class PrebuiltRoomRepository {
         if (inCallRoom) {
             inCallRoom = false;
             leaveSDKRoomInner();
+            clearRoomData();
             invokeLocalHangUpCallback();
         }
+        isJoiningCallRoom = false;
     }
 
 
     private void clearRoomData() {
         inCallRoom = false;
+        isJoiningCallRoom = false;
         prebuiltRoomID = null;
         if (callTimer != null) {
             callTimer.stopRoomTimeCount();
@@ -166,21 +189,11 @@ public class PrebuiltRoomRepository {
 
     private void setupCallbacks() {
         expressBridge.addEventHandler(eventHandler);
-
-        ZegoUIKit.addOnOnlySelfInRoomListener(() -> {
-            ZegoOnlySelfInRoomListener selfInRoomListener = ZegoUIKitPrebuiltCallService.events.callEvents.getOnlySelfInRoomListener();
-            if (selfInRoomListener != null) {
-                selfInRoomListener.onOnlySelfInRoom();
-            } else {
-                if (leaveWhenOnlySelf) {
-                    leaveSDKRoomInner();
-                    invokeRemoteHangUpCallback();
-                }
-            }
-        });
+        ZegoUIKit.addOnOnlySelfInRoomListener(onlySelfInRoomListener);
     }
 
     private void removeCallbacks() {
+        ZegoUIKit.removeOnOnlySelfInRoomListener(onlySelfInRoomListener);
         expressBridge.removeEventHandler(eventHandler);
     }
 
