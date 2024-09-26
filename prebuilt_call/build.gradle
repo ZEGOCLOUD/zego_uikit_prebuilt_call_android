@@ -32,8 +32,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    api 'com.github.ZEGOCLOUD:zego_uikit_android:[3.5.0,)'
-    api 'com.github.ZEGOCLOUD:zego_uikit_signaling_plugin_android:[2.8.3,)'
+    api 'com.github.ZEGOCLOUD:zego_uikit_android:[3.5.1,)'
+    api 'com.github.ZEGOCLOUD:zego_uikit_signaling_plugin_android:[2.9.0,)'
     api 'com.tencent:mmkv:1.3.1'
     implementation "com.google.code.gson:gson:2.9.1"
 }

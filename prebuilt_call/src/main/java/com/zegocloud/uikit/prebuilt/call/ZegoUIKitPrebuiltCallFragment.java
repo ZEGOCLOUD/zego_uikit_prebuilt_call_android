@@ -37,6 +37,7 @@ import com.zegocloud.uikit.prebuilt.call.config.DurationUpdateListener;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoHangUpConfirmDialogInfo;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.notification.NotificationUtil;
 import com.zegocloud.uikit.prebuilt.call.databinding.CallFragmentCallBinding;
 import com.zegocloud.uikit.prebuilt.call.event.BackPressEvent;
 import com.zegocloud.uikit.prebuilt.call.event.CallEvents;
@@ -44,6 +45,7 @@ import com.zegocloud.uikit.prebuilt.call.internal.MiniVideoView;
 import com.zegocloud.uikit.prebuilt.call.internal.MiniVideoWindow;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoAudioVideoForegroundView;
 import com.zegocloud.uikit.prebuilt.call.internal.ZegoScreenShareForegroundView;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallText;
 import com.zegocloud.uikit.service.defines.ZegoOnlySelfInRoomListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
@@ -68,24 +70,19 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     private BroadcastReceiver configurationChangeReceiver;
     private MiniVideoWindow miniVideoWindow;
     private MiniVideoView contentView;
-    private boolean finishedInOnPause;
+    private boolean finishedInOnPauseLifeCycle;
 
     /**
      * start by call-invite，is already init first,only need callID to join room.
      *
      * @param callID the roomID received from call-invite to join
-     * @param config get by ZegoUIKitPrebuiltCallInvitationConfig.provider passed by user
      * @return
      */
-    public static ZegoUIKitPrebuiltCallFragment newInstance(Context context, String callID,
-        ZegoUIKitPrebuiltCallConfig config) {
-
+    public static ZegoUIKitPrebuiltCallFragment newInstance(String callID) {
         ZegoUIKitPrebuiltCallFragment fragment = new ZegoUIKitPrebuiltCallFragment();
         Bundle bundle = new Bundle();
         bundle.putString("callID", callID);
         fragment.setArguments(bundle);
-        CallInvitationServiceImpl.getInstance().setCallConfig(config);
-        CallInvitationServiceImpl.getInstance().setPrebuiltCallFragment(fragment);
         return fragment;
     }
 
@@ -164,9 +161,27 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             }
         }
 
-        if (callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)
-            || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)) {
+        boolean hasBeautyButton = callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)
+            || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON);
+        if (hasBeautyButton) {
             CallInvitationServiceImpl.getInstance().initBeautyPlugin();
+        }
+        boolean hasScreenShareButton =
+            callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.SCREEN_SHARING_TOGGLE_BUTTON)
+                || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.SCREEN_SHARING_TOGGLE_BUTTON);
+        if (hasScreenShareButton) {
+            boolean foregroundService = NotificationUtil.hasForegroundServicePermissionDeclared(getContext());
+            boolean mediaProjection = NotificationUtil.hasMediaProjectionPermissionDeclared(getContext());
+            if (!foregroundService || !mediaProjection) {
+                //                try {
+                throw new UnsupportedOperationException(
+                    "You have to declare foregroundService and mediaProjection permissions in manifest file to use screen share feature."
+                        + "According to [google play store polices](https://support.google.com/googleplay/android-developer/answer/13392821?hl=en),"
+                        + "And declare the information in Play Console to avoid been rejected by google play store.");
+                //                } catch (Exception e) {
+                //                    e.printStackTrace();
+                //                }
+            }
         }
 
         ZegoCallText zegoCallText = CallInvitationServiceImpl.getInstance().getCallConfig().zegoCallText;
@@ -269,7 +284,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     public void onPause() {
         super.onPause();
         if (requireActivity().isFinishing()) {
-            finishedInOnPause = true;
+            finishedInOnPauseLifeCycle = true;
             if (configurationChangeReceiver != null) {
                 requireActivity().unregisterReceiver(configurationChangeReceiver);
                 configurationChangeReceiver = null;
@@ -281,7 +296,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (!finishedInOnPause) {
+        if (!finishedInOnPauseLifeCycle) {
             binding.bottomMenuBar.dismissMoreDialog();
             if (configurationChangeReceiver != null) {
                 requireActivity().unregisterReceiver(configurationChangeReceiver);
@@ -393,18 +408,22 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         });
     }
 
-    private void dismissMiniVideoWindow() {
-        if (miniVideoWindow != null && miniVideoWindow.isShown()) {
-            miniVideoWindow.dismissMinimalWindow();
-        }
-    }
-
     private boolean checkAlertWindowPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return Settings.canDrawOverlays(getContext());
         } else {
             return true;
         }
+    }
+
+    private void dismissMiniVideoWindow() {
+        if (isMiniVideoShown()) {
+            miniVideoWindow.dismissMinimalWindow();
+        }
+    }
+
+    public boolean isMiniVideoShown() {
+        return miniVideoWindow != null && miniVideoWindow.isShown();
     }
 
     private void showMiniVideoWindow() {
@@ -424,7 +443,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 contentView.setText(getElapsedTimeString(seconds));
             }
         });
-        if (!miniVideoWindow.isShown()) {
+        if (!isMiniVideoShown()) {
             miniVideoWindow.showMinimalWindow(contentView);
         }
     }
@@ -689,7 +708,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         Timber.d("endCall() called");
         dismissMiniVideoWindow();
         if (getActivity() != null) {
-            requireActivity().finish();
+            ((CallInviteActivity) requireActivity()).finishCallActivityAndMoveToFront();
         }
         CallInvitationServiceImpl.getInstance().leaveRoom();
     }

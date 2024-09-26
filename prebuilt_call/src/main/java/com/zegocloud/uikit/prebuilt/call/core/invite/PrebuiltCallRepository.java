@@ -1,8 +1,8 @@
 package com.zegocloud.uikit.prebuilt.call.core.invite;
 
 import android.app.Activity;
+import android.app.Application;
 import android.text.TextUtils;
-import android.util.Log;
 import com.google.gson.Gson;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginNotificationConfig;
@@ -28,12 +28,14 @@ import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallUser;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoInvitationCallListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import im.zego.zim.ZIM;
+import im.zego.zim.callback.ZIMCallAcceptanceSentCallback;
 import im.zego.zim.callback.ZIMCallCancelSentCallback;
 import im.zego.zim.callback.ZIMCallEndSentCallback;
 import im.zego.zim.callback.ZIMCallInvitationSentCallback;
 import im.zego.zim.callback.ZIMCallQuitSentCallback;
 import im.zego.zim.callback.ZIMCallingInvitationSentCallback;
 import im.zego.zim.callback.ZIMEventHandler;
+import im.zego.zim.entity.ZIMCallAcceptConfig;
 import im.zego.zim.entity.ZIMCallCancelConfig;
 import im.zego.zim.entity.ZIMCallEndConfig;
 import im.zego.zim.entity.ZIMCallInfo;
@@ -117,10 +119,6 @@ public class PrebuiltCallRepository {
         return callState == OUTGOING;
     }
 
-    public void setCallInvitationData(ZegoCallInvitationData callInvitationData) {
-        this.callInvitationData = callInvitationData;
-    }
-
     private void showIncomingCallDialog(ZegoCallInvitationData callInvitationData) {
         CallInvitationServiceImpl.getInstance().showIncomingCallDialog(callInvitationData);
     }
@@ -129,12 +127,9 @@ public class PrebuiltCallRepository {
         CallInvitationServiceImpl.getInstance().hideIncomingCallDialog();
     }
 
-    private void showCallBackgroundNotification() {
-        CallInvitationServiceImpl.getInstance().showCallBackgroundNotification();
-    }
-
     private void dismissIncomingCallNotification() {
-        CallInvitationServiceImpl.getInstance().dismissIncomingCallNotification();
+        Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
+        notificationManager.dismissCallNotification(topActivity);
     }
 
     private static void stopRingTone() {
@@ -252,12 +247,19 @@ public class PrebuiltCallRepository {
                 return new ZegoUIKitUser(memoryUserInfo.baseInfo.userID, memoryUserInfo.baseInfo.userName);
             }).collect(Collectors.toList());
 
+        CallInvitationServiceImpl.getInstance().generateCallConfigFromInvite(callInvitationData);
         setCallState(INCOMING);
 
         // is offline start app and receive the same zimCallID with offline message
         if (pushMessage != null && Objects.equals(pushMessage.invitationID, callInvitationData.invitationID)) {
             // receive offline notification,click accept,start service and start app
-            if (PrebuiltCallNotificationManager.ACTION_ACCEPT_CALL.equals(notificationAction)) {
+            Application application = CallInvitationServiceImpl.getInstance().getApplication();
+            String actionAccept =
+                application.getPackageName() + "." + PrebuiltCallNotificationManager.ACTION_ACCEPT_CALL;
+            String actionClick = application.getPackageName() + "." + PrebuiltCallNotificationManager.ACTION_CLICK;
+            String actionDecline =
+                application.getPackageName() + "." + PrebuiltCallNotificationManager.ACTION_DECLINE_CALL;
+            if (Objects.equals(actionAccept, notificationAction)) {
                 stopRingTone();
                 if (callInvitationData != null && caller.equals(callInvitationData.inviter)) {
                     ZegoUIKit.getSignalingPlugin().acceptInvitation(caller.userID, "", new PluginCallbackListener() {
@@ -273,11 +275,11 @@ public class PrebuiltCallRepository {
                     setCallState(CONNECTED);
                     dismissIncomingCallNotification();
                 }
-            } else if (PrebuiltCallNotificationManager.ACTION_CLICK.equals(notificationAction)) {
+            } else if (Objects.equals(actionClick, notificationAction)) {
                 // receive offline notification,click notification,show dialog normally
                 showIncomingCallDialog(callInvitationData);
                 clearPushMessage();
-            } else if (PrebuiltCallNotificationManager.ACTION_DECLINE_CALL.equals(notificationAction)) {
+            } else if (Objects.equals(actionDecline, notificationAction)) {
                 // offline push
                 ZegoUIKit.getSignalingPlugin().refuseInvitation(caller.userID, "", new PluginCallbackListener() {
                     @Override
@@ -296,7 +298,7 @@ public class PrebuiltCallRepository {
         } else {
             if (topActivity != null) {
                 if (PrebuiltCallUtil.isAppBackground(topActivity)) {
-                    showCallBackgroundNotification();
+                    notificationManager.showCallNotification(topActivity);
                 } else {
                     showIncomingCallDialog(callInvitationData);
                 }
@@ -307,6 +309,9 @@ public class PrebuiltCallRepository {
     }
 
     public void zimCallInvitationCancelled(ZIM zim, ZIMCallInvitationCancelledInfo info, String callID) {
+        if (callInvitationData == null || !Objects.equals(callID, callInvitationData.invitationID)) {
+            return;
+        }
         List<String> userIDList = Collections.singletonList(info.inviter);
         ZIMUsersInfoQueryConfig queryConfig = new ZIMUsersInfoQueryConfig();
         ZegoSignalingPlugin.getInstance()
@@ -315,27 +320,22 @@ public class PrebuiltCallRepository {
                     ZIMUserFullInfo zimInviter = zimBridge.getMemoryUserInfo(info.inviter);
                     ZegoUIKitUser inviter = new ZegoUIKitUser(zimInviter.baseInfo.userID, zimInviter.baseInfo.userName);
 
-                    onPrebuiltReceiveCallCanceled(callID, inviter, info.extendedData);
+                    hideIncomingCallDialog();
+                    dismissIncomingCallNotification();
+                    clearPushMessage();
+                    if (callState == CONNECTED) {
+                        return;
+                    }
+                    setCallState(NONE_CANCELED);
+                    notifyIncomingCallCanceled(inviter, callID);
                 }
             });
     }
 
-
-    private void onPrebuiltReceiveCallCanceled(String zimCallID, ZegoUIKitUser inviter, String data) {
-        if (callInvitationData != null && Objects.equals(zimCallID, callInvitationData.invitationID)) {
-            String callID = callInvitationData.callID;
-            hideIncomingCallDialog();
-            dismissIncomingCallNotification();
-            clearPushMessage();
-            if (callState == CONNECTED) {
-                return;
-            }
-            setCallState(NONE_CANCELED);
-            notifyIncomingCallCanceled(inviter, callID);
-        }
-    }
-
     public void zimCallInvitationTimeout(ZIM zim, ZIMCallInvitationTimeoutInfo info, String callID) {
+        if (callInvitationData == null || !Objects.equals(callID, callInvitationData.invitationID)) {
+            return;
+        }
         ZIMCallInfo zimCallInfo = ZegoSignalingPlugin.getInstance().getZIMCallInfo(callID);
         if (zimCallInfo == null) {
             return;
@@ -343,17 +343,10 @@ public class PrebuiltCallRepository {
         ZIMUserFullInfo fullUseInfo = zimBridge.getMemoryUserInfo(zimCallInfo.caller);
         ZegoUIKitUser uiKitUser = new ZegoUIKitUser(fullUseInfo.baseInfo.userID, fullUseInfo.baseInfo.userName);
 
-        onPrebuiltReceiveCallTimeout(callID, uiKitUser);
-    }
-
-    private void onPrebuiltReceiveCallTimeout(String zimCallID, ZegoUIKitUser inviter) {
-        if (callInvitationData != null && Objects.equals(zimCallID, callInvitationData.invitationID)) {
-            String callID = callInvitationData.callID;
-            hideIncomingCallDialog();
-            dismissIncomingCallNotification();
-            setCallState(NONE_RECEIVE_MISSED);
-            notifyIncomingCallTimeout(inviter, callID);
-        }
+        hideIncomingCallDialog();
+        dismissIncomingCallNotification();
+        setCallState(NONE_RECEIVE_MISSED);
+        notifyIncomingCallTimeout(uiKitUser, callID);
     }
 
     public void zimCallUserStateChanged(ZIM zim, ZIMCallUserStateChangeInfo info, String zimCallID) {
@@ -362,12 +355,13 @@ public class PrebuiltCallRepository {
         if (zimCallInfo == null || selfUserInfo == null) {
             return;
         }
-
-        if (callInvitationData != null) {
-            callInvitationData.invitees = zimCallInfo.callUserList.stream()
-                .filter(zimCallUserInfo -> !Objects.equals(zimCallInfo.caller, zimCallUserInfo.userID))
-                .map(zimCallUserInfo -> new ZegoUIKitUser(zimCallUserInfo.userID)).collect(Collectors.toList());
+        if (callInvitationData == null || !Objects.equals(zimCallID, callInvitationData.invitationID)) {
+            return;
         }
+
+        callInvitationData.invitees = zimCallInfo.callUserList.stream()
+            .filter(zimCallUserInfo -> !Objects.equals(zimCallInfo.caller, zimCallUserInfo.userID))
+            .map(zimCallUserInfo -> new ZegoUIKitUser(zimCallUserInfo.userID)).collect(Collectors.toList());
 
         List<String> changedUserIDList = info.callUserList.stream().map(zimCallUserInfo -> zimCallUserInfo.userID)
             .collect(Collectors.toList());
@@ -385,7 +379,7 @@ public class PrebuiltCallRepository {
                             }).collect(Collectors.toList());
 
                     }
-                    Log.d(TAG, "zimCallUserStateChanged() called with: callInvitationData = [" + callInvitationData);
+                    Timber.d("zimCallUserStateChanged() called with: callInvitationData : [" + callInvitationData);
                     processRejectedUsers(info, zimCallID);
                     processAcceptedUser(info, zimCallID);
                     processTimeoutUser(info, zimCallID);
@@ -731,7 +725,7 @@ public class PrebuiltCallRepository {
 
     private void onCallInvitationSentSucceed(List<ZegoUIKitUser> invitees, ZegoInvitationType invitationType,
         String customData, String invitationID, Data data) {
-        ZegoCallInvitationData callInvitationData = new ZegoCallInvitationData();
+        callInvitationData = new ZegoCallInvitationData();
         callInvitationData.type = invitationType.getValue();
         callInvitationData.inviter = ZegoUIKit.getLocalUser();
         callInvitationData.caller = ZegoUIKit.getLocalUser();
@@ -740,7 +734,7 @@ public class PrebuiltCallRepository {
         callInvitationData.customData = customData;
         callInvitationData.invitees = invitees;
 
-        setCallInvitationData(callInvitationData);
+        CallInvitationServiceImpl.getInstance().generateCallConfigFromInvite(callInvitationData);
 
         setCallState(PrebuiltCallRepository.OUTGOING);
         playOutgoingRingTone();
@@ -773,12 +767,13 @@ public class PrebuiltCallRepository {
         boolean isGroup = invitees.size() > 1;
 
         if (TextUtils.isEmpty(pushNotificationConfig.getTitle())) {
-            String offlineTitle = notificationManager.getBackgroundNotificationTitle(isVideoCall, isGroup,
+            String offlineTitle = PrebuiltCallNotificationManager.getBackgroundNotificationTitle(isVideoCall, isGroup,
                 localUser.userName);
             pushNotificationConfig.setTitle(offlineTitle);
         }
         if (TextUtils.isEmpty(pushNotificationConfig.getMessage())) {
-            String offlineMessage = notificationManager.getBackgroundNotificationMessage(isVideoCall, isGroup);
+            String offlineMessage = PrebuiltCallNotificationManager.getBackgroundNotificationMessage(isVideoCall,
+                isGroup);
             pushNotificationConfig.setMessage(offlineMessage);
         }
         if (TextUtils.isEmpty(pushNotificationConfig.getResourceID())) {
@@ -861,7 +856,7 @@ public class PrebuiltCallRepository {
 
         public void onCallInvitationCreated(ZIM zim, ZIMCallInvitationCreatedInfo info, String callID) {
             super.onCallInvitationCreated(zim, info, callID);
-            Log.d(TAG,
+            Timber.d(
                 "onCallInvitationCreated() called with: zim = [" + zim + "], info = [" + info + "], callID = [" + callID
                     + "]");
             zimCallInvitationCreated(zim, info, callID);
@@ -936,6 +931,13 @@ public class PrebuiltCallRepository {
         }
     };
 
+    private void callAccept(String callID, String extendedData, ZIMCallAcceptanceSentCallback callback) {
+        ZIMCallAcceptConfig config = new ZIMCallAcceptConfig();
+        zimBridge.callAccept(callID, config, callback);
+
+        setCallState(PrebuiltCallRepository.CONNECTED);
+        stopRingTone();
+    }
 
     private void callingInvite(List<String> invitees, String extendedData, String zimCallID,
         ZegoSignalingPluginNotificationConfig notificationConfig, ZIMCallingInvitationSentCallback callback) {
@@ -1078,26 +1080,15 @@ public class PrebuiltCallRepository {
     }
 
     public void setPushMessage(ZIMPushMessage pushMessage) {
+        if (pushMessage != null && !TextUtils.isEmpty(pushMessage.payLoad)) {
+            PrebuiltCallInviteExtendedData extendedData = gson.fromJson(pushMessage.payLoad,
+                PrebuiltCallInviteExtendedData.class);
+            pushMessage.zimExtendedData = extendedData;
+            if (extendedData != null && !TextUtils.isEmpty(extendedData.getData())) {
+                pushMessage.callData = gson.fromJson(extendedData.getData(), Data.class);
+            }
+        }
         pushRepository.setPushMessage(pushMessage);
-    }
-
-    public void parsePayload() {
-        PrebuiltCallInviteExtendedData extendedData = gson.fromJson(getPushMessage().payLoad,
-            PrebuiltCallInviteExtendedData.class);
-        PrebuiltCallInviteExtendedData.Data data = gson.fromJson(extendedData.getData(),
-            PrebuiltCallInviteExtendedData.Data.class);
-        ZegoCallInvitationData invitationData = new ZegoCallInvitationData();
-        invitationData.invitationID = getPushMessage().invitationID;
-        invitationData.callID = data.getCallId();
-        invitationData.customData = data.getCustomData();
-        invitationData.invitees = data.getInvitees().stream()
-            .map(invitees -> new ZegoUIKitUser(invitees.getUserId(), invitees.getUserName()))
-            .collect(Collectors.toList());
-        invitationData.type = extendedData.getType();
-        invitationData.inviter = new ZegoUIKitUser(extendedData.getInviterName(), extendedData.getInviterName());
-        invitationData.caller = new ZegoUIKitUser(extendedData.getInviterName(), extendedData.getInviterName());
-
-        callInvitationData = invitationData;
     }
 
     public void disableFCMPush() {
@@ -1138,10 +1129,6 @@ public class PrebuiltCallRepository {
 
     public void setNotificationAction(String action) {
         pushRepository.setNotificationAction(action);
-    }
-
-    public String getNotificationAction() {
-        return pushRepository.getNotificationAction();
     }
 
     public void onPrebuiltCallRoomUserLeft(List<String> userList, String roomID) {

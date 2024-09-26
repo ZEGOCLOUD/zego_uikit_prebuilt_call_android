@@ -5,25 +5,33 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.notification.RingtoneManager;
 
 /**
  * invoked when app start,before Application.onCreate
  */
 public class PrebuiltCallInitializer extends ContentProvider {
 
+    private static final String TAG = "PrebuiltCallInitializer";
+
     @Override
     public boolean onCreate() {
+        Log.d(TAG, "PrebuiltCallInitializer onCreate() called");
+
         MMKV.initialize(getContext());
         Application application = (Application) getContext();
         if (application != null) {
             ZegoUIKit.debugMode(application);
             CallInvitationServiceImpl.getInstance().setUpCallbacksOnAppStart(application);
+            RingtoneManager.init(application);
         }
+
         return true;
     }
 

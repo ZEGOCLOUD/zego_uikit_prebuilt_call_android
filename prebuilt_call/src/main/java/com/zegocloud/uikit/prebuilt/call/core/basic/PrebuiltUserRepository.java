@@ -112,7 +112,7 @@ public class PrebuiltUserRepository {
     /**
      * Be cautious of the situation where it is called multiple times.
      */
-    private void onUserLogoutSuccess() {
+    public void onUserLogoutSuccess() {
         if (zimUserInfo != null) {
             CallInvitationServiceImpl.getInstance().onPrebuiltCallUserLogout(zimUserInfo.userID, zimUserInfo.userName);
         }
@@ -123,6 +123,10 @@ public class PrebuiltUserRepository {
 
     private void setupCallbacks() {
         zimBridge.registerZIMEventHandler(zimEventHandler);
+    }
+
+    public ZIMUserInfo getUserInfo() {
+        return zimUserInfo;
     }
 
     //If call logout immediately followed by unregisterZIMEventHandler, will not receive the onConnectionStateChanged callback.

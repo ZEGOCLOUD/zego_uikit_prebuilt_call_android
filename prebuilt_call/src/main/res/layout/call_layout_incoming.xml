@@ -4,20 +4,6 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
-  <TextureView
-    android:id="@+id/texture_view"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" />
-
-  <com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraButton
-    android:id="@+id/camera_switch"
-    android:layout_width="42dp"
-    android:layout_height="42dp"
-    android:layout_marginTop="24dp"
-    android:layout_marginEnd="12dp"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
-
   <com.zegocloud.uikit.components.internal.RippleIconView
     android:id="@+id/call_user_icon"
     android:layout_width="wrap_content"
@@ -30,7 +16,7 @@
     app:layout_constraintTop_toTopOf="parent" />
 
   <FrameLayout
-    android:id="@+id/call_user_custom_icon"
+    android:id="@+id/custom_icon"
     android:layout_width="0dp"
     android:layout_height="0dp"
     app:layout_constraintBottom_toBottomOf="@id/call_user_icon"
@@ -82,30 +68,23 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/call_state_text" />
 
-  <com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoCancelCallInvitationButton
-    android:id="@+id/call_waiting_cancel"
-    android:layout_width="60dp"
-    android:layout_height="60dp"
-    android:layout_marginBottom="52dp"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent" />
-
-  <com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoRefuseCallInvitationButton
+  <ImageView
     android:id="@+id/call_waiting_refuse"
     android:layout_width="60dp"
     android:layout_height="60dp"
     android:layout_marginBottom="52dp"
+    android:scaleType="center"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@+id/call_waiting_accept"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent" />
 
-  <com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoAcceptCallInvitationButton
+  <ImageView
     android:id="@+id/call_waiting_accept"
     android:layout_width="60dp"
     android:layout_height="60dp"
     android:layout_marginBottom="52dp"
+    android:scaleType="center"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"

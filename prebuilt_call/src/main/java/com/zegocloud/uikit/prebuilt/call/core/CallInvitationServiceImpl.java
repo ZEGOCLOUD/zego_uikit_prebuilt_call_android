@@ -2,13 +2,12 @@ package com.zegocloud.uikit.prebuilt.call.core;
 
 import android.app.Activity;
 import android.app.Application;
-import android.app.Notification;
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
 import android.text.TextUtils;
 import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
+import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
 import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginNotificationConfig;
 import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
@@ -23,12 +22,14 @@ import com.zegocloud.uikit.prebuilt.call.core.invite.PrebuiltCallLifecycleHandle
 import com.zegocloud.uikit.prebuilt.call.core.invite.PrebuiltCallRepository;
 import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.core.notification.PrebuiltCallNotificationManager;
+import com.zegocloud.uikit.prebuilt.call.core.notification.RingtoneManager;
 import com.zegocloud.uikit.prebuilt.call.core.push.ZIMPushMessage;
 import com.zegocloud.uikit.prebuilt.call.event.ErrorEventsListener;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationDialog;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallStateListener;
-import com.zegocloud.uikit.prebuilt.call.invite.internal.RingtoneManager;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.InvitationTextCHS;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallText;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoTranslationText;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoUIKitPrebuiltCallConfigProvider;
 import com.zegocloud.uikit.service.defines.ZegoAudioOutputDevice;
@@ -74,11 +75,17 @@ public class CallInvitationServiceImpl {
     private ZegoUIKitPrebuiltCallConfig callConfig;
 
     public void showIncomingCallDialog(ZegoCallInvitationData callInvitationData) {
-        playIncomingRingTone();
+        Timber.d("showIncomingCallDialog() called with: callInvitationData = [" + callInvitationData + "]");
+        if (!isIncomingCallDialogShown()) {
+            playIncomingRingTone();
+            Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
+            invitationDialog = new CallInvitationDialog(topActivity, callInvitationData);
+            invitationDialog.show();
+        }
+    }
 
-        Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
-        invitationDialog = new CallInvitationDialog(topActivity, callInvitationData);
-        invitationDialog.show();
+    public boolean isIncomingCallDialogShown() {
+        return invitationDialog != null && invitationDialog.isShowing();
     }
 
     public void hideIncomingCallDialog() {
@@ -86,18 +93,6 @@ public class CallInvitationServiceImpl {
             invitationDialog.hide();
         }
         invitationDialog = null;
-    }
-
-    public void showCallBackgroundNotification() {
-        Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
-        notificationManager.showCallBackgroundNotification(topActivity);
-    }
-
-    public void dismissIncomingCallNotification() {
-        Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
-        if (topActivity != null) {
-            notificationManager.dismissCallNotification(topActivity);
-        }
     }
 
     public void playIncomingRingTone() {
@@ -142,7 +137,12 @@ public class CallInvitationServiceImpl {
 
 
     public void setUpCallbacksOnAppStart(Application application) {
+        this.application = application;
         lifecycleHandler.setupCallbacks(application);
+    }
+
+    public Application getApplication() {
+        return application;
     }
 
     public void endCall() {
@@ -160,22 +160,28 @@ public class CallInvitationServiceImpl {
     }
 
     private static void initRingtoneManager(Application application, ZegoUIKitPrebuiltCallInvitationConfig config) {
-        RingtoneManager.init(application);
-        String outgoing;
+        String outgoingRingToneName;
         if (config == null || TextUtils.isEmpty(config.outgoingCallRingtone)) {
-            outgoing = "zego_outgoing";
+            outgoingRingToneName = "zego_outgoing";
         } else {
-            outgoing = config.outgoingCallRingtone;
+            outgoingRingToneName = config.outgoingCallRingtone;
         }
-        Uri ongoingUri = RingtoneManager.getUriFromRaw(application, outgoing);
+        int outgoingIdentifier = application.getResources()
+            .getIdentifier(outgoingRingToneName, "raw", application.getPackageName());
+        Uri ongoingUri = RingtoneManager.getUriFromID(application, outgoingIdentifier);
         RingtoneManager.setOutgoingUri(ongoingUri);
-        String incoming;
+
+        String incomingRingToneName;
         if (config == null || TextUtils.isEmpty(config.incomingCallRingtone)) {
-            incoming = "zego_incoming";
+            incomingRingToneName = "zego_incoming";
         } else {
-            incoming = config.incomingCallRingtone;
+            incomingRingToneName = config.incomingCallRingtone;
         }
-        Uri inComingUri = RingtoneManager.getUriFromRaw(application, incoming);
+
+        int incomingIdentifier = application.getResources()
+            .getIdentifier(incomingRingToneName, "raw", application.getPackageName());
+        Uri inComingUri = RingtoneManager.getUriFromID(application, incomingIdentifier);
+
         RingtoneManager.setIncomingUri(inComingUri);
     }
 
@@ -278,6 +284,22 @@ public class CallInvitationServiceImpl {
         return callConfig;
     }
 
+    public void generateCallConfigFromInvite(ZegoCallInvitationData invitationData) {
+        if (invitationConfig != null && invitationConfig.provider != null) {
+            callConfig = invitationConfig.provider.requireConfig(invitationData);
+        }
+        if (callConfig == null) {
+            callConfig = ZegoUIKitPrebuiltCallInvitationConfig.generateDefaultConfig(invitationData);
+        }
+
+        if (invitationConfig != null && invitationConfig.translationText != null
+            && invitationConfig.translationText.getInvitationBaseText() instanceof InvitationTextCHS) {
+            callConfig.zegoCallText = new ZegoCallText(ZegoUIKitLanguage.CHS);
+        } else {
+            callConfig.zegoCallText = new ZegoCallText(ZegoUIKitLanguage.ENGLISH);
+        }
+    }
+
     public Activity getTopActivity() {
         return lifecycleHandler.getTopActivity();
     }
@@ -316,7 +338,15 @@ public class CallInvitationServiceImpl {
     public void unInitSDK() {
         Timber.d("unInitSDK() called");
         onPrebuiltCallRoomLeft(null);
-        onPrebuiltCallUserLogout(null, null);
+
+        // when receive offline calls,no logout ,and just destroy,will keep receive
+        // offline calls. and should clear userRep data.
+        if (userRepository.getUserInfo() != null) {
+            userRepository.onUserLogoutSuccess();
+        } else {
+            onPrebuiltCallUserLogout(null, null);
+        }
+
         alreadyInit = false;
         invitationConfig = null;
         callConfig = null;
@@ -324,14 +354,6 @@ public class CallInvitationServiceImpl {
         // when receive offline calls,no logout ,and just destroy,will keep receive
         // offline calls.
         zimBridge.destroy();
-    }
-
-    public boolean canShowFullOnLockScreen() {
-        if (Build.MANUFACTURER.equalsIgnoreCase("xiaomi")) {
-            // xiaomi
-            return false;
-        }
-        return true;
     }
 
     public ZegoUIKitPrebuiltCallConfigProvider getPrebuiltCallConfigProvider() {
@@ -354,8 +376,10 @@ public class CallInvitationServiceImpl {
         callRepository.removeCallStateListener(callStateListener);
     }
 
-    public void showCallNotification(Context context) {
-        notificationManager.showCallNotification(context);
+    public void showCallNotification() {
+        if (application != null) {
+            notificationManager.showCallNotification(application);
+        }
     }
 
     public void dismissCallNotification() {
@@ -366,22 +390,6 @@ public class CallInvitationServiceImpl {
 
     public void dismissCallNotification(Context context) {
         notificationManager.dismissCallNotification(context);
-    }
-
-    public boolean isCallNotificationShowed() {
-        return notificationManager.isCallNotificationShowed();
-    }
-
-    public String getCallNotificationMessage(boolean isVideoCall, boolean isGroup) {
-        return notificationManager.getBackgroundNotificationMessage(isVideoCall, isGroup);
-    }
-
-    public String getCallNotificationTitle(boolean isVideoCall, boolean isGroup, String userName) {
-        return notificationManager.getBackgroundNotificationTitle(isVideoCall, isGroup, userName);
-    }
-
-    public Notification getCallNotification(Context context) {
-        return notificationManager.createCallNotification(context);
     }
 
     public boolean isInCallRoom() {
@@ -409,20 +417,12 @@ public class CallInvitationServiceImpl {
         callRepository.setNotificationAction(action);
     }
 
-    public String getNotificationAction() {
-        return callRepository.getNotificationAction();
-    }
-
     public ZIMPushMessage getZIMPushMessage() {
         return callRepository.getPushMessage();
     }
 
     public void setZIMPushMessage(ZIMPushMessage pushMessage) {
         callRepository.setPushMessage(pushMessage);
-    }
-
-    public void parsePayload() {
-        callRepository.parsePayload();
     }
 
     public void enableFCMPush() {
@@ -506,7 +506,6 @@ public class CallInvitationServiceImpl {
 
     public void onPrebuiltCallUserLogout(String userID, String userName) {
         Timber.d("onPrebuiltCallUserLogout() called with: userID = [" + userID + "], userName = [" + userName + "]");
-
         callRepository.onPrebuiltUserLogout();
     }
 

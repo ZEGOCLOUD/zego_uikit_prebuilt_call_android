@@ -12,6 +12,7 @@ import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.plugin.invitation.components.ZegoStartInvitationButton;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.notification.PrebuiltCallNotificationManager;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ClickListener;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallUser;
@@ -80,7 +81,8 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
         ZegoTranslationText translationText = CallInvitationServiceImpl.getInstance()
             .getCallInvitationConfig().translationText;
         ZegoInvitationType invitationType = ZegoInvitationType.getZegoInvitationType(type);
-        CallInvitationServiceImpl.getInstance().sendInvitation(invitees, invitationType, customData, timeout, this.callID, getSendInvitationConfig(),
+        CallInvitationServiceImpl.getInstance()
+            .sendInvitation(invitees, invitationType, customData, timeout, this.callID, getSendInvitationConfig(),
                 new PluginCallbackListener() {
                     @Override
                     public void callback(Map<String, Object> result) {
@@ -148,12 +150,12 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
     private ZegoSignalingPluginNotificationConfig getSendInvitationConfig() {
 
         String offlineResourceID;
-        String offlineMessage = CallInvitationServiceImpl.getInstance()
-            .getCallNotificationMessage(isVideoCall, invitees.size() > 1);
+        String offlineMessage = PrebuiltCallNotificationManager.getBackgroundNotificationMessage(isVideoCall,
+            invitees.size() > 1);
 
         ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
-        String offlineTitle = CallInvitationServiceImpl.getInstance()
-            .getCallNotificationTitle(isVideoCall, invitees.size() > 1, uiKitUser.userName);
+        String offlineTitle = PrebuiltCallNotificationManager.getBackgroundNotificationTitle(isVideoCall,
+            invitees.size() > 1, uiKitUser.userName);
 
         if (TextUtils.isEmpty(resourceID)) {
             offlineResourceID = "zegouikit_call";

@@ -68,7 +68,7 @@ public class CallWaitingFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = CallLayoutWaitingBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -91,13 +91,13 @@ public class CallWaitingFragment extends Fragment {
         ZegoUIKitUser inviter = invitationData.inviter;
         List<ZegoUIKitUser> invitees = invitationData.invitees;
 
-        zegoCanvas = new ZegoCanvas(binding.audioVideoView);
+        zegoCanvas = new ZegoCanvas(binding.textureView);
         zegoCanvas.viewMode = ZegoViewMode.ASPECT_FILL;
 
         ZegoUIKitUser showUser = null;
         if ("incoming".equals(page)) {
             showUser = inviter;
-            binding.audioVideoView.setVisibility(View.GONE);
+            binding.textureView.setVisibility(View.GONE);
             binding.cameraSwitch.setVisibility(View.GONE);
             binding.callWaitingCancel.setVisibility(View.GONE);
             binding.callWaitingAcceptText.setVisibility(View.VISIBLE);
@@ -114,13 +114,13 @@ public class CallWaitingFragment extends Fragment {
                 showUser = invitees.get(0);
             }
             if (type == ZegoInvitationType.VOICE_CALL.getValue()) {
-                binding.audioVideoView.setVisibility(View.GONE);
+                binding.textureView.setVisibility(View.GONE);
                 binding.cameraSwitch.setVisibility(View.GONE);
             } else {
                 ZegoUIKit.startPreview(zegoCanvas);
                 binding.cameraSwitch.setVisibility(View.VISIBLE);
-                binding.audioVideoView.setVisibility(View.VISIBLE);
-//                binding.audioVideoView.setUserID(userID);
+                binding.textureView.setVisibility(View.VISIBLE);
+                //                binding.audioVideoView.setUserID(userID);
             }
             binding.callWaitingCancel.setVisibility(View.VISIBLE);
             binding.callWaitingRefuse.setVisibility(View.GONE);

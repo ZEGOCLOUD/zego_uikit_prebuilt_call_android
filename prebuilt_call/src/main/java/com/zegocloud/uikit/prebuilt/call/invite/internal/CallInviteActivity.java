@@ -1,7 +1,11 @@
 package com.zegocloud.uikit.prebuilt.call.invite.internal;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.AppTask;
+import android.app.ActivityManager.RecentTaskInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
@@ -10,12 +14,10 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.Window;
 import android.view.WindowManager;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
-import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
-import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
@@ -23,10 +25,14 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.core.invite.PrebuiltCallRepository;
 import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
-import com.zegocloud.uikit.prebuilt.call.core.notification.PrebuiltCallNotificationManager;
+import com.zegocloud.uikit.prebuilt.call.core.invite.ui.ZegoPrebuiltCallInComingFragment;
+import com.zegocloud.uikit.prebuilt.call.core.invite.ui.ZegoPrebuiltCallOffLineLockScreenFragment;
+import com.zegocloud.uikit.prebuilt.call.core.invite.ui.ZegoPrebuiltCallOutGoingFragment;
+import com.zegocloud.uikit.prebuilt.call.core.notification.RingtoneManager;
 import com.zegocloud.uikit.prebuilt.call.core.push.ZIMPushMessage;
-import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
-import java.util.Map;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import timber.log.Timber;
 
 /**
@@ -34,76 +40,83 @@ import timber.log.Timber;
  */
 public class CallInviteActivity extends AppCompatActivity {
 
-    private CallStateListener callStateListener;
+    public static final String PAGE_INCOMING = "page_incoming";
+    public static final String PAGE_OUTGOING = "page_outgoing";
+    public static final String PAGE_LOCKSCREEN = "page_lockscreen";
+    public static final String PAGE_CALL = "page_call";
+    public static final String KEY_PAGE = "page";
+    public static final String KEY_ACTION = "action";
 
-    public static void startOutgoingPage(Context context) {
+    /**
+     * @param context
+     * @param page    one of PAGE_INCOMING,PAGE_OUTGOING,PAGE_LOCKSCREEN,PAGE_CALL
+     * @param action
+     * @return
+     */
+    public static Intent getPageIntent(Context context, String page, String action) {
         Intent intent = new Intent(context, CallInviteActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("page", "outgoing");
-        addFlags(intent, context);
-        intent.putExtra("bundle", bundle);
-        context.startActivity(intent);
+        intent.putExtra(KEY_PAGE, page);
+        if (!TextUtils.isEmpty(action)) {
+            intent.putExtra(KEY_ACTION, action);
+            intent.setAction(action); // be sure to set action
+        }
+        addFlagsOrNot(intent, context);
+        return intent;
     }
 
-    private static void addFlags(Intent intent, Context context) {
-        ZegoUIKitPrebuiltCallConfig callConfig = getCustomCallConfig();
-        if (callConfig != null) {
-            boolean hasMiniButton =
-                callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
-                    || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON);
-            boolean hasSystemOverlayPermission =
-                VERSION.SDK_INT <= VERSION_CODES.M || Settings.canDrawOverlays(context);
-            if (hasMiniButton && hasSystemOverlayPermission) {
-                // call invite and has miniButton，and hasSystemOverlayPermission, excludeFromRecent + singleTask
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            } else {
-                // call invite but no miniButton，normal launchMode.
-            }
+    private static void addFlagsOrNot(Intent intent, Context context) {
+        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
+        if (callConfig == null) {
+            return;
+        }
+        boolean hasMiniButton = callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
+            || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON);
+        boolean hasSystemOverlayPermission = VERSION.SDK_INT <= VERSION_CODES.M || Settings.canDrawOverlays(context);
+        if (hasMiniButton && hasSystemOverlayPermission) {
+            // call invite and has miniButton，and hasSystemOverlayPermission, excludeFromRecent + singleTask
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        } else {
+            // call invite but no miniButton，normal launchMode.
         }
     }
 
-    public static void startIncomingPage(Context context) {
-        Intent intent = new Intent(context, CallInviteActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("page", "incoming");
-        intent.putExtra("bundle", bundle);
-        addFlags(intent, context);
-        context.startActivity(intent);
+    public static void startOutgoingPage(Context context) {
+        context.startActivity(getPageIntent(context, PAGE_OUTGOING, null));
     }
 
+    public static void startIncomingPage(Context context) {
+        context.startActivity(getPageIntent(context, PAGE_INCOMING, null));
+    }
+
+    public static void startLockScreenPage(Context context) {
+        context.startActivity(getPageIntent(context, PAGE_LOCKSCREEN, null));
+    }
 
     public static void startCallPage(Context context) {
-        Timber.d("startCallPage() called with: context = [" + context + "]");
-        Intent intent = new Intent(context, CallInviteActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("page", "call");
-        intent.putExtra("bundle", bundle);
-        addFlags(intent, context);
-        context.startActivity(intent);
+        context.startActivity(getPageIntent(context, PAGE_CALL, null));
     }
 
-
-    public static Intent getStartCallPageIntent(Context context, String action) {
-        Intent intent = new Intent(context, CallInviteActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("page", "call");
-        intent.putExtra("bundle", bundle);
-        addFlags(intent, context);
-        intent.setAction(action);
-        return intent;
-    }
-
-
-    public static Intent getIncomingPageIntent(Context context, String action) {
-        Intent intent = new Intent(context, CallInviteActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("page", "incoming");
-        intent.putExtra("bundle", bundle);
-        addFlags(intent, context);
-        intent.setAction(action);
-        return intent;
-    }
+    private CallStateListener callStateListener = new CallStateListener() {
+        @Override
+        public void onStateChanged(int before, int after) {
+            Timber.d("onStateChanged() called with: before = [" + before + "], after = [" + after + "]");
+            if (after == PrebuiltCallRepository.CONNECTED) {
+                showCallFragment();
+            } else {
+                if (ZegoUIKit.getLocalUser() != null) {
+                    String userID = ZegoUIKit.getLocalUser().userID;
+                    if (!TextUtils.isEmpty(userID)) {
+                        if (ZegoUIKit.isCameraOn(userID)) {
+                            ZegoUIKit.turnCameraOn(userID, false);
+                        }
+                    }
+                }
+                CallInvitationServiceImpl.getInstance().removeCallStateListener(callStateListener);
+                finishCallActivityAndMoveToFront();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,153 +132,127 @@ public class CallInviteActivity extends AppCompatActivity {
         }
         setContentView(R.layout.call_activity_prebuilt);
 
-        callStateListener = new CallStateListener() {
-            @Override
-            public void onStateChanged(int before, int after) {
-                if (after == PrebuiltCallRepository.CONNECTED) {
-                    showCallFragment();
-                } else {
-                    if (ZegoUIKit.getLocalUser() != null) {
-                        String userID = ZegoUIKit.getLocalUser().userID;
-                        if (!TextUtils.isEmpty(userID)) {
-                            if (ZegoUIKit.isCameraOn(userID)) {
-                                ZegoUIKit.turnCameraOn(userID, false);
-                            }
-                        }
-                    }
-                    CallInvitationServiceImpl.getInstance().removeCallStateListener(callStateListener);
-                    finish();
-                }
-            }
-        };
-        CallInvitationServiceImpl.getInstance().addCallStateListener(callStateListener);
-
+        String action = getIntent().getStringExtra(KEY_ACTION);
+        String page = getIntent().getStringExtra(KEY_PAGE);
+        ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
         ZIMPushMessage pushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
 
-        ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
-        Timber.d("onCreate() called with: callInvitationData = [" + callInvitationData + "]");
-        if (callInvitationData == null) {
+        Timber.d("CallInviteActivity onCreate() called with: page = [" + page + "],action:" + action
+            + ",\n callInvitationData:" + callInvitationData + "\n pushMessage:" + pushMessage);
+
+        if (pushMessage != null) {
+            if (Objects.equals(PAGE_LOCKSCREEN, page)) {
+                showLockScreenOffLineFragment();
+            }
+        } else if (callInvitationData != null) {
+            CallInvitationServiceImpl.getInstance().dismissCallNotification();
+            CallInvitationServiceImpl.getInstance().addCallStateListener(callStateListener);
+
+            // normal coming
+            boolean oneOnOneCall = callInvitationData.invitees.size() == 1;
+            if (Objects.equals(PAGE_CALL, page)) {
+                showCallFragment();
+            } else if (PAGE_INCOMING.equals(page)) {
+                showInComingFragment();
+            } else if (PAGE_OUTGOING.equals(page) && oneOnOneCall) {
+                showOutgoingFragment();
+            } else if (Objects.equals(PAGE_LOCKSCREEN, page)) {
+                // cannot happen
+
+            } else {
+
+            }
+        } else {
+            Timber.e("CallInviteActivity start Error");
             CallInvitationServiceImpl.getInstance().leaveRoom();
-            finish();
+            finishCallActivityAndMoveToFront();
+        }
+    }
+
+    private void finishCallActivity(boolean moveToFront) {
+        ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if (am == null) {
+            return;
+        }
+        List<AppTask> appTasks = am.getAppTasks();
+        if (appTasks == null) {
             return;
         }
 
-        String intentAction = getIntent().getAction();
-        Timber.d("onCreate() called with: intentAction = [" + intentAction + "]");
-        if (PrebuiltCallNotificationManager.ACTION_ACCEPT_CALL.equals(intentAction)) {
-            if (pushMessage != null) {
-                ZegoUIKit.getSignalingPlugin().callAccept(pushMessage.invitationID, "", new PluginCallbackListener() {
-                    @Override
-                    public void callback(Map<String, Object> result) {
-                        showCallFragment();
-                    }
-                });
-            } else {
-                CallInvitationServiceImpl.getInstance().acceptInvitation(new PluginCallbackListener() {
-                    @Override
-                    public void callback(Map<String, Object> result) {
-                        showCallFragment();
-                    }
-                });
+        Optional<AppTask> taskOptional = appTasks.stream().filter(appTask -> {
+            RecentTaskInfo taskInfo = appTask.getTaskInfo();
+            if (taskInfo.baseActivity != null) {
+                String className = taskInfo.baseActivity.getClassName();
+                return Objects.equals(CallInviteActivity.class.getName(), className);
             }
-        } else if (PrebuiltCallNotificationManager.ACTION_DECLINE_CALL.equals(intentAction)) {
+            return false;
+        }).findAny();
 
-        } else if (PrebuiltCallNotificationManager.ACTION_CLICK.equals(intentAction)) {
-            // background,receive call, click notification
-            RingtoneManager.playRingTone(true);
-            showWaitingFragment(true);
-        } else if (PrebuiltCallNotificationManager.SHOW_FULL_ON_LOCK_SCREEN.equals(intentAction)) {
-            showWaitingFragment(true);
+        if (taskOptional.isPresent()) {
+            taskOptional.get().finishAndRemoveTask();
+            if (moveToFront) {
+                appTasks.remove(taskOptional.get());
+                if (!appTasks.isEmpty()) {
+                    AppTask appTask = appTasks.get(appTasks.size() - 1);
+                    appTask.moveToFront();
+                }
+            }
         } else {
-            Bundle bundle = getIntent().getParcelableExtra("bundle");
-            String page = bundle.getString("page");
-            Timber.d("onCreate() called with: page = [" + page + "]");
+            finish();
+        }
+    }
 
-            boolean isOneOnOneOnGoingCall = "outgoing".equals(page) && callInvitationData.invitees.size() == 1;
-            boolean isIncoming = "incoming".equals(page);
-            if (isIncoming || isOneOnOneOnGoingCall) {
-                showWaitingFragment(isIncoming);
-            } else {
-                showCallFragment();
-            }
-        }
-        // if activity is show on lock screen,keep notification until user clicked
-        // accept or reject.
-        if (!PrebuiltCallNotificationManager.SHOW_FULL_ON_LOCK_SCREEN.equals(intentAction)) {
-            CallInvitationServiceImpl.getInstance().dismissCallNotification(this);
-        }
+    public void finishCallActivity() {
+        finishCallActivity(false);
+    }
+
+    public void finishCallActivityAndMoveToFront() {
+        finishCallActivity(true);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        CallInvitationServiceImpl.getInstance().dismissCallNotification(this);
         CallInvitationServiceImpl.getInstance().removeCallStateListener(callStateListener);
     }
 
     private void showCallFragment() {
+        RingtoneManager.stopRingTone();
+
         Fragment fragmentById = getSupportFragmentManager().findFragmentById(R.id.call_fragment_container);
         if (fragmentById instanceof ZegoUIKitPrebuiltCallFragment) {
             return;
         }
         ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
-        ZegoUIKitPrebuiltCallConfig callConfig = getCustomCallConfig();
-        if (callConfig == null) {
-            callConfig = ZegoUIKitPrebuiltCallInvitationConfig.generateDefaultConfig(invitationData);
-        }
-        ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = CallInvitationServiceImpl.getInstance()
-            .getCallInvitationConfig();
-        if (callInvitationConfig != null && callInvitationConfig.translationText != null
-            && callInvitationConfig.translationText.getInvitationBaseText() instanceof InvitationTextCHS) {
-            callConfig.zegoCallText = new ZegoCallText(ZegoUIKitLanguage.CHS);
-        } else {
-            callConfig.zegoCallText = new ZegoCallText(ZegoUIKitLanguage.ENGLISH);
-        }
+        ZegoUIKitPrebuiltCallFragment fragment = ZegoUIKitPrebuiltCallFragment.newInstance(invitationData.callID);
+        CallInvitationServiceImpl.getInstance().setPrebuiltCallFragment(fragment);
+        CallInvitationServiceImpl.getInstance().setLeaveWhenOnlySelf(invitationData.invitees.size() <= 1);
 
-        ZegoUIKitPrebuiltCallFragment fragment = ZegoUIKitPrebuiltCallFragment.newInstance(this, invitationData.callID,
-            callConfig);
-
-        if (invitationData.invitees.size() > 1) {
-            CallInvitationServiceImpl.getInstance().setLeaveWhenOnlySelf(false);
-        }else {
-            CallInvitationServiceImpl.getInstance().setLeaveWhenOnlySelf(true);
-        }
         getSupportFragmentManager().beginTransaction().replace(R.id.call_fragment_container, fragment).commitNow();
     }
 
-    private static @Nullable ZegoUIKitPrebuiltCallConfig getCustomCallConfig() {
-        ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
-        ZegoUIKitPrebuiltCallConfig config = null;
-        ZegoUIKitPrebuiltCallConfigProvider provider = CallInvitationServiceImpl.getInstance().getPrebuiltCallConfigProvider();
-        if (provider != null) {
-            config = provider.requireConfig(invitationData);
-        }
-        return config;
+    private void showInComingFragment() {
+        RingtoneManager.playRingTone(true);
+        ZegoPrebuiltCallInComingFragment fragment = new ZegoPrebuiltCallInComingFragment();
+        getSupportFragmentManager().beginTransaction().replace(R.id.call_fragment_container, fragment).commitNow();
     }
 
-    private void showWaitingFragment(boolean isIncoming) {
-        Bundle bundle = getIntent().getParcelableExtra("bundle");
-        CallWaitingFragment fragment = CallWaitingFragment.newInstance(bundle);
+    private void showOutgoingFragment() {
+        RingtoneManager.playRingTone(false);
+        ZegoPrebuiltCallOutGoingFragment fragment = new ZegoPrebuiltCallOutGoingFragment();
+        getSupportFragmentManager().beginTransaction().replace(R.id.call_fragment_container, fragment).commitNow();
+    }
 
-        ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
-        CallInvitationServiceImpl service = CallInvitationServiceImpl.getInstance();
-        if (service.getPrebuiltCallConfigProvider() != null) {
-            ZegoUIKitPrebuiltCallConfig prebuiltCallConfig = service.getPrebuiltCallConfigProvider().requireConfig(invitationData);
-            if (prebuiltCallConfig.audioVideoViewConfig != null && prebuiltCallConfig.avatarViewProvider != null) {
-                fragment.setAvatarViewProvider(prebuiltCallConfig.avatarViewProvider);
+    private void showLockScreenOffLineFragment() {
+        String string = MMKV.defaultMMKV().getString("ringtone", null);
+        if (!TextUtils.isEmpty(string)) {
+            Uri parse = Uri.parse(string);
+            if (parse != null) {
+                RingtoneManager.setIncomingUri(parse);
             }
         }
-        ZegoUIKitPrebuiltCallInvitationConfig invitationConfig = CallInvitationServiceImpl.getInstance()
-            .getCallInvitationConfig();
-        if (isIncoming) {
-            if (invitationConfig.incomingCallBackground != null) {
-                fragment.setBackground(invitationConfig.incomingCallBackground);
-            }
-        } else {
-            if (invitationConfig.outgoingCallBackground != null) {
-                fragment.setBackground(invitationConfig.outgoingCallBackground);
-            }
-        }
+        RingtoneManager.playRingTone(true);
+        ZegoPrebuiltCallOffLineLockScreenFragment fragment = new ZegoPrebuiltCallOffLineLockScreenFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.call_fragment_container, fragment).commitNow();
     }
 }

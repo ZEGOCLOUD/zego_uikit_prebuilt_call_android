@@ -3,8 +3,12 @@ package com.zegocloud.uikit.prebuilt.call.core.invite;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.Context;
+import com.google.gson.Gson;
 import com.zegocloud.uikit.ZegoUIKit;
+import com.zegocloud.uikit.prebuilt.call.core.push.ZIMPushMessage;
+import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,25 +45,6 @@ public class PrebuiltCallUtil {
         return jsonObject.toString();
     }
 
-    //    public static String generateCallInviteJsonString(List<ZegoUIKitUser> invitees, String customData, String callID) {
-    //        JSONObject jsonObject = new JSONObject();
-    //        JSONArray jsonArray = new JSONArray();
-    //        try {
-    //            jsonObject.put("call_id", callID);
-    //            for (ZegoUIKitUser invitee : invitees) {
-    //                JSONObject tmp = new JSONObject();
-    //                tmp.put("user_id", invitee.userID);
-    //                tmp.put("user_name", invitee.userName);
-    //                jsonArray.put(tmp);
-    //            }
-    //            jsonObject.put("invitees", jsonArray);
-    //            jsonObject.put("custom_data", customData);
-    //        } catch (JSONException e) {
-    //            e.printStackTrace();
-    //        }
-    //        return jsonObject.toString();
-    //    }
-
     public static boolean isAppBackground(Context context) {
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
@@ -73,5 +58,23 @@ public class PrebuiltCallUtil {
             }
         }
         return false;
+    }
+
+    public static ZegoCallInvitationData parsePushMessage(Gson gson, ZIMPushMessage zimPushMessage) {
+        PrebuiltCallInviteExtendedData extendedData = gson.fromJson(zimPushMessage.payLoad,
+            PrebuiltCallInviteExtendedData.class);
+        PrebuiltCallInviteExtendedData.Data data = gson.fromJson(extendedData.getData(),
+            PrebuiltCallInviteExtendedData.Data.class);
+        ZegoCallInvitationData invitationData = new ZegoCallInvitationData();
+        invitationData.invitationID = zimPushMessage.invitationID;
+        invitationData.callID = data.getCallId();
+        invitationData.customData = data.getCustomData();
+        invitationData.invitees = data.getInvitees().stream()
+            .map(invitees -> new ZegoUIKitUser(invitees.getUserId(), invitees.getUserName()))
+            .collect(Collectors.toList());
+        invitationData.type = extendedData.getType();
+        invitationData.inviter = new ZegoUIKitUser(extendedData.getInviterName(), extendedData.getInviterName());
+        invitationData.caller = new ZegoUIKitUser(extendedData.getInviterName(), extendedData.getInviterName());
+        return invitationData;
     }
 }

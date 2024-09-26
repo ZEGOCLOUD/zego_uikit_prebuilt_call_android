@@ -1,13 +1,16 @@
-package com.zegocloud.uikit.prebuilt.call.invite.internal;
+package com.zegocloud.uikit.prebuilt.call.core.notification;
 
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.util.Log;
+import java.io.IOException;
 
 public class RingtoneManager {
 
@@ -18,9 +21,15 @@ public class RingtoneManager {
     private static Context context;
     private static MediaPlayer mediaPlayer;
 
+    // not work in mate20 HK version
     public static Uri getUriFromRaw(Context context, String mp3Name) {
         return Uri.parse(
             ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/raw/" + mp3Name);
+    }
+
+    public static Uri getUriFromID(Context context, int resource_id) {
+        return Uri.parse(
+            ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/" + resource_id);
     }
 
     public static void init(Context context) {
@@ -54,12 +63,19 @@ public class RingtoneManager {
                         android.media.RingtoneManager.TYPE_RINGTONE);
                 }
             }
-            //            ringtone = android.media.RingtoneManager.getRingtone(context, uri);
-            //            ringtone.setLooping(true);
-            //            ringtone.play();
             if (uri != null && mediaPlayer == null) {
-                mediaPlayer = MediaPlayer.create(context, uri);
+                mediaPlayer = new MediaPlayer();
+                AudioAttributes attribution = new AudioAttributes.Builder().setContentType(
+                        AudioAttributes.CONTENT_TYPE_SONIFICATION).setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                    .setLegacyStreamType(AudioManager.STREAM_RING).build();
+                mediaPlayer.setAudioAttributes(attribution);
                 mediaPlayer.setLooping(true);
+                try {
+                    mediaPlayer.setDataSource(context, uri);
+                    mediaPlayer.prepare();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
                 mediaPlayer.start();
             }
             if (incoming) {
@@ -77,7 +93,12 @@ public class RingtoneManager {
     private static void vibrateDevice() {
         if (vibrator != null && vibrator.hasVibrator()) {
             vibrator.cancel();
-            vibrator.vibrate(new long[]{800, 800, 800, 800}, 0);
+            long[] vibrationPattern = {0, 1000, 2000, 1000};
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createWaveform(vibrationPattern, 0));
+            } else {
+                vibrator.vibrate(vibrationPattern, 0);
+            }
         }
     }
 
