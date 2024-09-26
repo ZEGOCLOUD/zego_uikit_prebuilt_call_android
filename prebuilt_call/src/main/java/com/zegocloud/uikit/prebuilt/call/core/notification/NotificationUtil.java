@@ -241,7 +241,7 @@ public class NotificationUtil {
                 Notification.Action answerAction = NotificationUtil.makeAnswerAction(context, answerIntent,
                     R.drawable.call_selector_dialog_voice_accept);
                 Notification.Action negativeAction = NotificationUtil.makeNegativeAction(context, declineIntent,
-                    R.drawable.zego_uikit_icon_dialog_voice_decline);
+                    com.zegocloud.uikit.R.drawable.zego_uikit_icon_dialog_voice_decline);
                 builder.addAction(negativeAction);
                 builder.addAction(answerAction);
             }
@@ -275,7 +275,7 @@ public class NotificationUtil {
             NotificationCompat.Action answerAction = NotificationUtil.makeCompatAnswerAction(context, answerIntent,
                 R.drawable.call_selector_dialog_voice_accept);
             NotificationCompat.Action negativeAction = NotificationUtil.makeNegativeCompatAction(context, declineIntent,
-                R.drawable.zego_uikit_icon_dialog_voice_decline);
+                com.zegocloud.uikit.R.drawable.zego_uikit_icon_dialog_voice_decline);
             builder.addAction(negativeAction);
             builder.addAction(answerAction);
             Notification notification = builder.build();

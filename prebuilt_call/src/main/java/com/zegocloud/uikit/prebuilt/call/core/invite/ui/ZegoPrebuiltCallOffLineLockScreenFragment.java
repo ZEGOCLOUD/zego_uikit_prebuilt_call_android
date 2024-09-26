@@ -98,7 +98,7 @@ public class ZegoPrebuiltCallOffLineLockScreenFragment extends Fragment {
     }
 
     private void applyRejectButtonWhenOffLine() {
-        binding.callWaitingRefuse.setBackgroundResource(R.drawable.zego_uikit_icon_dialog_voice_decline);
+        binding.callWaitingRefuse.setBackgroundResource(com.zegocloud.uikit.R.drawable.zego_uikit_icon_dialog_voice_decline);
         binding.callWaitingRefuse.setOnClickListener(v -> {
             CallInvitationServiceImpl.getInstance().dismissCallNotification();
             RingtoneManager.stopRingTone();

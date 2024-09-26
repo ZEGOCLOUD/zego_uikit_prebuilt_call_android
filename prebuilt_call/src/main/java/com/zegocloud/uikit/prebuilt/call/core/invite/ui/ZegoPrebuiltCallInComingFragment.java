@@ -113,7 +113,7 @@ public class ZegoPrebuiltCallInComingFragment extends Fragment {
             binding.callWaitingRefuseText.setVisibility(showDeclineButton ? View.VISIBLE : View.GONE);
         }
 
-        binding.callWaitingRefuse.setBackgroundResource(R.drawable.zego_uikit_icon_dialog_voice_decline);
+        binding.callWaitingRefuse.setBackgroundResource(com.zegocloud.uikit.R.drawable.zego_uikit_icon_dialog_voice_decline);
         binding.callWaitingRefuse.setOnClickListener(v -> {
             IncomingCallButtonListener incomingCallButtonListener = ZegoUIKitPrebuiltCallService.events.invitationEvents.getIncomingCallButtonListener();
             if (incomingCallButtonListener != null) {
