@@ -1132,6 +1132,10 @@ public class PrebuiltCallRepository {
         pushRepository.enableFCMPush();
     }
 
+    public void setAppType(int appType) {
+        pushRepository.setAppType(appType);
+    }
+
     public void setNotificationAction(String action) {
         pushRepository.setNotificationAction(action);
     }

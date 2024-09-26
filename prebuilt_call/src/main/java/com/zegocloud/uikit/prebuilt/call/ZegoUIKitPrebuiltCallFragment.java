@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import timber.log.Timber;
 
 public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
@@ -190,28 +191,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         configurationChangeReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                ZegoOrientation orientation = ZegoOrientation.ORIENTATION_0;
-                ZegoVideoConfig videoConfig = ZegoExpressEngine.getEngine().getVideoConfig();
-                int sEdge = Math.min(videoConfig.encodeWidth, videoConfig.encodeHeight);
-                int lEdge = Math.max(videoConfig.encodeWidth, videoConfig.encodeHeight);
-                if (Surface.ROTATION_0 == requireActivity().getWindowManager().getDefaultDisplay().getRotation()) {
-                    orientation = ZegoOrientation.ORIENTATION_0;
-                    videoConfig.setEncodeResolution(sEdge, lEdge);
-                } else if (Surface.ROTATION_180 == requireActivity().getWindowManager().getDefaultDisplay()
-                    .getRotation()) {
-                    orientation = ZegoOrientation.ORIENTATION_180;
-                    videoConfig.setEncodeResolution(sEdge, lEdge);
-                } else if (Surface.ROTATION_270 == requireActivity().getWindowManager().getDefaultDisplay()
-                    .getRotation()) {
-                    orientation = ZegoOrientation.ORIENTATION_270;
-                    videoConfig.setEncodeResolution(lEdge, sEdge);
-                } else if (Surface.ROTATION_90 == requireActivity().getWindowManager().getDefaultDisplay()
-                    .getRotation()) {
-                    orientation = ZegoOrientation.ORIENTATION_90;
-                    videoConfig.setEncodeResolution(lEdge, sEdge);
-                }
-                ZegoUIKit.setAppOrientation(orientation);
-                ZegoUIKit.setVideoConfig(videoConfig);
+                updateSDKOrientation();
             }
         };
         requireActivity().registerReceiver(configurationChangeReceiver, configurationChangeFilter);
@@ -234,6 +214,31 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             }
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
+    }
+
+    private void updateSDKOrientation() {
+        ZegoOrientation orientation = ZegoOrientation.ORIENTATION_0;
+        ZegoVideoConfig videoConfig = ZegoExpressEngine.getEngine().getVideoConfig();
+        int sEdge = Math.min(videoConfig.encodeWidth, videoConfig.encodeHeight);
+        int lEdge = Math.max(videoConfig.encodeWidth, videoConfig.encodeHeight);
+        int activityOrientation = requireActivity().getWindowManager().getDefaultDisplay().getRotation();
+        if (Surface.ROTATION_0 == activityOrientation) {
+            orientation = ZegoOrientation.ORIENTATION_0;
+            videoConfig.setEncodeResolution(sEdge, lEdge);
+        } else if (Surface.ROTATION_180 == activityOrientation) {
+            orientation = ZegoOrientation.ORIENTATION_180;
+            videoConfig.setEncodeResolution(sEdge, lEdge);
+        } else if (Surface.ROTATION_270 == activityOrientation) {
+            orientation = ZegoOrientation.ORIENTATION_270;
+            videoConfig.setEncodeResolution(lEdge, sEdge);
+        } else if (Surface.ROTATION_90 == activityOrientation) {
+            orientation = ZegoOrientation.ORIENTATION_90;
+            videoConfig.setEncodeResolution(lEdge, sEdge);
+        }
+        ZegoUIKit.setAppOrientation(orientation);
+        ZegoUIKit.setVideoConfig(videoConfig);
+        Timber.d("updateSDKOrientation() called,orientation: " + orientation + ",videoConfig.encodeWidth:"
+            + videoConfig.encodeWidth + "videoConfig.encodeHeight:" + videoConfig.encodeHeight);
     }
 
     @Override
@@ -303,6 +308,11 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
         boolean hasMiniButton = callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON)
             || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.MINIMIZING_BUTTON);
+
+        if (hasMiniButton) {
+            Timber.d("canShowMiniWindow() called,isInRoom: " + isInRoom + ",isCallInvite:" + isCallInvite
+                + ",checkAlertWindowPermission():" + checkAlertWindowPermission());
+        }
         return isInRoom && isCallInvite && checkAlertWindowPermission() && hasMiniButton;
     }
 
@@ -333,6 +343,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
             CallInvitationServiceImpl.getInstance().joinRoom(callID, new ZegoUIKitCallback() {
                 @Override
                 public void onResult(int errorCode) {
+                    Timber.d("joinRoom onResult() called with: errorCode = [" + errorCode + "]");
                     if (errorCode == 0) {
                         onRoomJoinSucceed();
                     } else {
@@ -344,7 +355,6 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     }
 
     private void onRoomJoinFailed() {
-
     }
 
     private void onRoomJoinSucceed() {
@@ -488,6 +498,8 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 config.videoConfig.resolution.value());
             ZegoUIKit.setVideoConfig(new ZegoVideoConfig(zegoVideoConfigPreset));
         }
+
+        updateSDKOrientation();
     }
 
     private void requestPermissionIfNeeded(List<String> permissions, RequestCallback requestCallback) {
@@ -592,8 +604,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         binding.topMenuBar.setScreenShareVideoConfig(config.screenSharingVideoConfig);
         binding.bottomMenuBar.setScreenShareVideoConfig(config.screenSharingVideoConfig);
 
-        if (config.bottomMenuBarConfig.extendButtons != null
-            && !config.bottomMenuBarConfig.extendButtons.isEmpty()) {
+        if (config.bottomMenuBarConfig.extendButtons != null && !config.bottomMenuBarConfig.extendButtons.isEmpty()) {
             bottomMenuBarBtns.addAll(config.bottomMenuBarConfig.extendButtons);
         }
 
@@ -675,6 +686,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
     // endCall --> leaveRoom --> onRoomStateChanged --> endCall --> leaveRoom ,then stopped!!!
     public void endCall() {
+        Timber.d("endCall() called");
         dismissMiniVideoWindow();
         if (getActivity() != null) {
             requireActivity().finish();

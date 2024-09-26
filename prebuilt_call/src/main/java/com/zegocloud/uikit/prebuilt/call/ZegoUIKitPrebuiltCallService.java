@@ -250,4 +250,12 @@ public class ZegoUIKitPrebuiltCallService {
     public static void resetAllBeautiesToDefault() {
         CallInvitationServiceImpl.getInstance().resetAllBeautiesToDefault();
     }
+
+    /**
+     * used for offline calls,
+     * @param appType
+     */
+    public static void setAppType(int appType) {
+        CallInvitationServiceImpl.getInstance().setAppType(appType);
+    }
 }

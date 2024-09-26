@@ -1,6 +1,7 @@
 package com.zegocloud.uikit.prebuilt.call.core.push;
 
 import com.zegocloud.uikit.ZegoUIKit;
+import timber.log.Timber;
 
 public class PrebuiltCallPushRepository {
 
@@ -14,6 +15,7 @@ public class PrebuiltCallPushRepository {
     }
 
     public void setNotificationAction(String notificationAction) {
+        Timber.d("setNotificationAction() called with: notificationAction = [" + notificationAction + "]");
         this.notificationClickAction = notificationAction;
     }
 
@@ -30,10 +32,12 @@ public class PrebuiltCallPushRepository {
     }
 
     public void setPushMessage(ZIMPushMessage pushMessage) {
+        Timber.d("setPushMessage() called with: pushMessage = [" + pushMessage + "]");
         this.pushMessage = pushMessage;
     }
 
     public void clearPushMessage() {
+        Timber.d("clearPushMessage() called");
         setNotificationAction(null);
         setPushMessage(null);
     }
@@ -87,6 +91,10 @@ public class PrebuiltCallPushRepository {
 
     public void unregisterPush() {
         ZegoUIKit.getSignalingPlugin().unregisterPush();
+    }
+
+    public void setAppType(int appType) {
+        ZegoUIKit.getSignalingPlugin().setAppType(appType);
     }
 
     public void onPrebuiltUserLogin() {

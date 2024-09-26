@@ -450,6 +450,10 @@ public class CallInvitationServiceImpl {
         callRepository.enableOppoPush(oppoAppID, oppoAppKey, oppoAppSecret);
     }
 
+    public void setAppType(int appType) {
+        callRepository.setAppType(appType);
+    }
+
     public void sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees,
         ZegoInvitationType invitationType, String customData, int timeout, String callID,
         ZegoSignalingPluginNotificationConfig notificationConfig, PluginCallbackListener callbackListener) {
