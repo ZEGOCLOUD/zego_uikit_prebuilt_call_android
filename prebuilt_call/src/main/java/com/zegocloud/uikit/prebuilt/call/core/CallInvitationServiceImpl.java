@@ -15,6 +15,7 @@ import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.config.DurationUpdateListener;
+import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.core.basic.PrebuiltRoomRepository;
 import com.zegocloud.uikit.prebuilt.call.core.basic.PrebuiltUserRepository;
 import com.zegocloud.uikit.prebuilt.call.core.beauty.PrebuiltBeautyRepository;
@@ -286,10 +287,10 @@ public class CallInvitationServiceImpl {
 
     public void generateCallConfigFromInvite(ZegoCallInvitationData invitationData) {
         if (invitationConfig != null && invitationConfig.provider != null) {
-            callConfig = invitationConfig.provider.requireConfig(invitationData);
+            setCallConfig(invitationConfig.provider.requireConfig(invitationData));
         }
         if (callConfig == null) {
-            callConfig = ZegoUIKitPrebuiltCallInvitationConfig.generateDefaultConfig(invitationData);
+            setCallConfig(ZegoUIKitPrebuiltCallInvitationConfig.generateDefaultConfig(invitationData));
         }
 
         if (invitationConfig != null && invitationConfig.translationText != null
@@ -297,6 +298,12 @@ public class CallInvitationServiceImpl {
             callConfig.zegoCallText = new ZegoCallText(ZegoUIKitLanguage.CHS);
         } else {
             callConfig.zegoCallText = new ZegoCallText(ZegoUIKitLanguage.ENGLISH);
+        }
+
+        boolean hasBeautyButton = callConfig.bottomMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON)
+            || callConfig.topMenuBarConfig.buttons.contains(ZegoMenuBarButtonName.BEAUTY_BUTTON);
+        if (hasBeautyButton) {
+            CallInvitationServiceImpl.getInstance().initBeautyPlugin();
         }
     }
 
@@ -349,7 +356,7 @@ public class CallInvitationServiceImpl {
 
         alreadyInit = false;
         invitationConfig = null;
-        callConfig = null;
+        setCallConfig(null);
 
         // when receive offline calls,no logout ,and just destroy,will keep receive
         // offline calls.
@@ -497,6 +504,13 @@ public class CallInvitationServiceImpl {
     public void onPrebuiltCallRoomLeft(String roomID) {
         Timber.d("onPrebuiltCallRoomLeft() called with: roomID = [" + roomID + "]");
         callRepository.onPrebuiltRoomLeft();
+
+        if (callConfig != null && callConfig.beautyConfig != null) {
+            if (!callConfig.beautyConfig.saveLastBeautyParam) {
+                resetAllBeautiesToDefault();
+            }
+        }
+
     }
 
     public void onPrebuiltCallUserLogin(String userID, String userName) {
