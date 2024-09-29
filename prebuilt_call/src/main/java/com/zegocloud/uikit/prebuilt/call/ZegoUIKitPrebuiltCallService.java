@@ -108,7 +108,7 @@ public class ZegoUIKitPrebuiltCallService {
      * 4.Use ZEGO call invite service.
      */
     public static void minimizeCall() {
-        ZegoUIKitPrebuiltCallFragment callFragment = ZegoUIKitPrebuiltCallInvitationService.getPrebuiltCallFragment();
+        ZegoUIKitPrebuiltCallFragment callFragment = getPrebuiltCallFragment();
         if (callFragment != null) {
             callFragment.minimizeCall();
         }

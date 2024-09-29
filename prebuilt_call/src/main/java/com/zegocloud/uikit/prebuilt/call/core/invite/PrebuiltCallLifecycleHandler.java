@@ -50,7 +50,8 @@ public class PrebuiltCallLifecycleHandler {
                 ZegoUIKitPrebuiltCallFragment callFragment = CallInvitationServiceImpl.getInstance()
                     .getZegoUIKitPrebuiltCallFragment();
                 // no need to moveToFront when show miniView
-                if (callFragment == null || !callFragment.isMiniVideoShown()) {
+                if (callFragment == null || !(callFragment.isMiniVideoShown()
+                    || callFragment.isPendingShowMiniWindow())) {
                     callInviteActivityTask.moveToFront();
                 }
             } else {

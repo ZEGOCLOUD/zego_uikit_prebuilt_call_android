@@ -71,6 +71,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     private MiniVideoWindow miniVideoWindow;
     private MiniVideoView contentView;
     private boolean finishedInOnPauseLifeCycle;
+    private boolean isPendingShowMiniWindow;
 
     /**
      * start by call-invite，is already init first,only need callID to join room.
@@ -333,7 +334,10 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
     public void minimizeCall() {
         if (canShowMiniWindow()) {
+            isPendingShowMiniWindow = true;
             requireActivity().moveTaskToBack(true);
+            Intent intent = getContext().getPackageManager().getLaunchIntentForPackage(getContext().getPackageName());
+            startActivity(intent);
         }
     }
 
@@ -422,6 +426,10 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         }
     }
 
+    public boolean isPendingShowMiniWindow() {
+        return isPendingShowMiniWindow;
+    }
+
     public boolean isMiniVideoShown() {
         return miniVideoWindow != null && miniVideoWindow.isShown();
     }
@@ -443,6 +451,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
                 contentView.setText(getElapsedTimeString(seconds));
             }
         });
+        isPendingShowMiniWindow = false;
         if (!isMiniVideoShown()) {
             miniVideoWindow.showMinimalWindow(contentView);
         }

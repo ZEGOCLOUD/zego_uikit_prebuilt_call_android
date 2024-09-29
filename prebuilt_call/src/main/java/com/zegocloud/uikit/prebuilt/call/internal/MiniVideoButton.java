@@ -17,6 +17,7 @@ import com.permissionx.guolindev.request.ExplainScope;
 import com.zegocloud.uikit.components.common.ZEGOImageButton;
 import com.zegocloud.uikit.prebuilt.call.R;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallFragment;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.utils.Utils;
 import java.util.List;
@@ -59,42 +60,48 @@ public class MiniVideoButton extends ZEGOImageButton {
     @Override
     protected void afterClick() {
         super.afterClick();
-        boolean activityContext = getContext() instanceof FragmentActivity;
-        if (activityContext) {
-            FragmentActivity activity = (FragmentActivity) getContext();
-            if (checkAlertWindowPermission()) {
-                activity.moveTaskToBack(true);
-            } else {
-                PermissionX.init(activity).permissions(permission.SYSTEM_ALERT_WINDOW)
-                    .onExplainRequestReason(new ExplainReasonCallback() {
-                        @Override
-                        public void onExplainReason(@NonNull ExplainScope scope, @NonNull List<String> deniedList) {
-                            String message = "";
-                            String agree = "";
-                            String disagree = "";
-                            ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance()
-                                .getCallConfig();
-                            if (callConfig != null && callConfig.miniVideoConfig != null && !TextUtils.isEmpty(
-                                callConfig.miniVideoConfig.permissionText)) {
-                                message = callConfig.miniVideoConfig.permissionText;
-                            }
-                            if (callConfig != null && callConfig.zegoCallText != null) {
-                                message = callConfig.zegoCallText.permissionFloatWindow;
-                                agree = callConfig.zegoCallText.agree;
-                                disagree = callConfig.zegoCallText.disagree;
-                            }
-                            scope.showRequestReasonDialog(deniedList, message, agree, disagree);
+        ZegoUIKitPrebuiltCallFragment callFragment = CallInvitationServiceImpl.getInstance()
+            .getZegoUIKitPrebuiltCallFragment();
+        if (callFragment == null) {
+            return;
+        }
+        if (checkAlertWindowPermission()) {
+            callFragment.minimizeCall();
+        } else {
+            PermissionX.init(callFragment).permissions(permission.SYSTEM_ALERT_WINDOW)
+                .onExplainRequestReason(new ExplainReasonCallback() {
+                    @Override
+                    public void onExplainReason(@NonNull ExplainScope scope, @NonNull List<String> deniedList) {
+                        String message = "";
+                        String agree = "";
+                        String disagree = "";
+                        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance()
+                            .getCallConfig();
+                        if (callConfig != null && callConfig.miniVideoConfig != null && !TextUtils.isEmpty(
+                            callConfig.miniVideoConfig.permissionText)) {
+                            message = callConfig.miniVideoConfig.permissionText;
                         }
-                    }).request(new RequestCallback() {
-                        @Override
-                        public void onResult(boolean allGranted, @NonNull List<String> grantedList,
-                            @NonNull List<String> deniedList) {
-                            if (allGranted) {
-                                activity.moveTaskToBack(true);
-                            }
+                        if (callConfig != null && callConfig.zegoCallText != null) {
+                            message = callConfig.zegoCallText.permissionFloatWindow;
+                            agree = callConfig.zegoCallText.agree;
+                            disagree = callConfig.zegoCallText.disagree;
                         }
-                    });
-            }
+                        scope.showRequestReasonDialog(deniedList, message, agree, disagree);
+                    }
+                }).request(new RequestCallback() {
+                    @Override
+                    public void onResult(boolean allGranted, @NonNull List<String> grantedList,
+                        @NonNull List<String> deniedList) {
+                        if (allGranted) {
+                            ZegoUIKitPrebuiltCallFragment callFragment = CallInvitationServiceImpl.getInstance()
+                                .getZegoUIKitPrebuiltCallFragment();
+                            if (callFragment == null) {
+                                return;
+                            }
+                            callFragment.minimizeCall();
+                        }
+                    }
+                });
         }
 
     }
