@@ -9,6 +9,8 @@ import android.text.TextUtils;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.core.push.ZIMPushMessage;
+import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
+import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import im.zego.zpns.ZPNsMessageReceiver;
 import im.zego.zpns.entity.ZPNsMessage;
 import im.zego.zpns.entity.ZPNsRegisterMessage;
@@ -39,21 +41,26 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
                     context.sendBroadcast(intent);
                 }
             } else {
-                // if app have background activity,we assume that app has already login in.In this
-                // case,offline message is ignored.
-                if (topActivity != null) {
-                    return;
-                }
                 // else we assume that app is not started,offline message is effective
                 if (TextUtils.isEmpty(pushMessage.payLoad)) {    //Empty payLoad means cancel call
                     ZIMPushMessage zimPushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
                     // cancel call
+                    ZegoUIKitUser localUser = CallInvitationServiceImpl.getInstance().getLocalUser();
+                    if (topActivity instanceof CallInviteActivity && localUser == null) {
+                        // show offline full on lockscreen
+                        topActivity.finishAndRemoveTask();
+                    }
                     if (zimPushMessage != null && Objects.equals(pushMessage.invitationID,
                         zimPushMessage.invitationID)) {
                         CallInvitationServiceImpl.getInstance().dismissCallNotification();
                         CallInvitationServiceImpl.getInstance().clearPushMessage();
                     }
                 } else {
+                    // if app have background activity,we assume that app has already login in.In this
+                    // case,offline message is ignored.
+                    if (topActivity != null) {
+                        return;
+                    }
                     ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance()
                         .getCallInvitationData();
                     if (callInvitationData == null) {
