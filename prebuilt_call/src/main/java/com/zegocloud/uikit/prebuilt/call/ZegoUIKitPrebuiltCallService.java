@@ -39,7 +39,7 @@ public class ZegoUIKitPrebuiltCallService {
      */
     public static void init(Application application, long appID, String appSign, String userID, String userName,
         ZegoUIKitPrebuiltCallInvitationConfig config) {
-        CallInvitationServiceImpl.getInstance().init(application, appID, appSign, null, userID, userName, config);
+        CallInvitationServiceImpl.getInstance().api_init(application, appID, appSign, null, userID, userName, config);
     }
 
     /**
@@ -59,7 +59,7 @@ public class ZegoUIKitPrebuiltCallService {
      */
     public static void initWithToken(Application application, long appID, String token, String userID, String userName,
         ZegoUIKitPrebuiltCallInvitationConfig config) {
-        CallInvitationServiceImpl.getInstance().init(application, appID, null, token, userID, userName, config);
+        CallInvitationServiceImpl.getInstance().api_init(application, appID, null, token, userID, userName, config);
     }
 
     /**
@@ -67,21 +67,21 @@ public class ZegoUIKitPrebuiltCallService {
      * use this method.
      */
     public static void unInit() {
-        CallInvitationServiceImpl.getInstance().unInit();
+        CallInvitationServiceImpl.getInstance().api_unInit();
     }
 
     /**
      * used with zim_kit,not for usual use.
      */
     public static void logoutUser() {
-        CallInvitationServiceImpl.getInstance().logoutUser();
+        CallInvitationServiceImpl.getInstance().api_logoutUser();
     }
 
     /**
      * End and leave current call.Current activity will be finished.
      */
     public static void endCall() {
-        CallInvitationServiceImpl.getInstance().endCall();
+        CallInvitationServiceImpl.getInstance().api_endCall();
     }
 
     /**
@@ -91,7 +91,7 @@ public class ZegoUIKitPrebuiltCallService {
      * @return ZegoUIKitPrebuiltCallFragment or null.
      */
     public static ZegoUIKitPrebuiltCallFragment getPrebuiltCallFragment() {
-        return CallInvitationServiceImpl.getInstance().getZegoUIKitPrebuiltCallFragment();
+        return CallInvitationServiceImpl.getInstance().api_getZegoUIKitPrebuiltCallFragment();
     }
 
     /**
@@ -110,7 +110,7 @@ public class ZegoUIKitPrebuiltCallService {
     public static void minimizeCall() {
         ZegoUIKitPrebuiltCallFragment callFragment = getPrebuiltCallFragment();
         if (callFragment != null) {
-            callFragment.minimizeCall();
+            callFragment.api_minimizeCall();
         }
     }
 
@@ -125,7 +125,7 @@ public class ZegoUIKitPrebuiltCallService {
     public static void sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees,
         ZegoInvitationType type, PluginCallbackListener callbackListener) {
         CallInvitationServiceImpl.getInstance()
-            .sendInvitationWithUIChange(activity, invitees, type, "", 60, null, null, callbackListener);
+            .api_sendInvitationWithUIChange(activity, invitees, type, "", 60, null, null, callbackListener);
     }
 
     /**
@@ -142,14 +142,16 @@ public class ZegoUIKitPrebuiltCallService {
         ZegoSignalingPluginNotificationConfig notificationConfig = new ZegoSignalingPluginNotificationConfig();
         notificationConfig.setResourceID(resourceID);
         CallInvitationServiceImpl.getInstance()
-            .sendInvitationWithUIChange(activity, invitees, type, "", 60, null, notificationConfig, callbackListener);
+            .api_sendInvitationWithUIChange(activity, invitees, type, "", 60, null, notificationConfig,
+                callbackListener);
     }
 
     public static void sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees,
         ZegoInvitationType type, String customData, ZegoSignalingPluginNotificationConfig notificationConfig,
         PluginCallbackListener callbackListener) {
         CallInvitationServiceImpl.getInstance()
-            .sendInvitationWithUIChange(activity, invitees, type, "", 60, null, notificationConfig, callbackListener);
+            .api_sendInvitationWithUIChange(activity, invitees, type, "", 60, null, notificationConfig,
+                callbackListener);
     }
 
     /**
@@ -167,7 +169,7 @@ public class ZegoUIKitPrebuiltCallService {
         ZegoInvitationType type, String customData, String callID,
         ZegoSignalingPluginNotificationConfig notificationConfig, PluginCallbackListener callbackListener) {
         CallInvitationServiceImpl.getInstance()
-            .sendInvitationWithUIChange(activity, invitees, type, customData, 60, callID, notificationConfig,
+            .api_sendInvitationWithUIChange(activity, invitees, type, customData, 60, callID, notificationConfig,
                 callbackListener);
     }
 
@@ -175,44 +177,44 @@ public class ZegoUIKitPrebuiltCallService {
         String customData, int timeout, String callID, ZegoSignalingPluginNotificationConfig notificationConfig,
         PluginCallbackListener callbackListener) {
         CallInvitationServiceImpl.getInstance()
-            .sendInvitation(invitees, invitationType, customData, timeout, callID, notificationConfig,
+            .api_sendInvitation(invitees, invitationType, customData, timeout, callID, notificationConfig,
                 callbackListener);
     }
 
     public static void openCamera(boolean enable) {
-        CallInvitationServiceImpl.getInstance().openCamera(enable);
+        CallInvitationServiceImpl.getInstance().api_openCamera(enable);
     }
 
     public static void openMicrophone(boolean enable) {
-        CallInvitationServiceImpl.getInstance().openMicrophone(enable);
+        CallInvitationServiceImpl.getInstance().api_openMicrophone(enable);
     }
 
     public static boolean isMicrophoneOn() {
-        return CallInvitationServiceImpl.getInstance().isMicrophoneOn();
+        return CallInvitationServiceImpl.getInstance().api_isMicrophoneOn();
     }
 
     public static boolean isCameraOn() {
-        return CallInvitationServiceImpl.getInstance().isCameraOn();
+        return CallInvitationServiceImpl.getInstance().api_isCameraOn();
     }
 
     public static void enableFCMPush() {
-        CallInvitationServiceImpl.getInstance().enableFCMPush();
+        CallInvitationServiceImpl.getInstance().api_enableFCMPush();
     }
 
     public static void enableHWPush(String hwAppID) {
-        CallInvitationServiceImpl.getInstance().enableHWPush(hwAppID);
+        CallInvitationServiceImpl.getInstance().api_enableHWPush(hwAppID);
     }
 
     public static void enableMiPush(String miAppID, String miAppKey) {
-        CallInvitationServiceImpl.getInstance().enableMiPush(miAppID, miAppKey);
+        CallInvitationServiceImpl.getInstance().api_enableMiPush(miAppID, miAppKey);
     }
 
     public static void enableVivoPush(String vivoAppID, String vivoAppKey) {
-        CallInvitationServiceImpl.getInstance().enableVivoPush(vivoAppID, vivoAppKey);
+        CallInvitationServiceImpl.getInstance().api_enableVivoPush(vivoAppID, vivoAppKey);
     }
 
     public static void enableOppoPush(String oppoAppID, String oppoAppKey, String oppoAppSecret) {
-        CallInvitationServiceImpl.getInstance().enableOppoPush(oppoAppID, oppoAppKey, oppoAppSecret);
+        CallInvitationServiceImpl.getInstance().api_enableOppoPush(oppoAppID, oppoAppKey, oppoAppSecret);
     }
 
     /**
@@ -228,7 +230,7 @@ public class ZegoUIKitPrebuiltCallService {
      * @param outputToSpeaker Whether to use the speaker to play audio
      */
     public static void setAudioOutputToSpeaker(boolean outputToSpeaker) {
-        CallInvitationServiceImpl.getInstance().setAudioOutputToSpeaker(outputToSpeaker);
+        CallInvitationServiceImpl.getInstance().api_setAudioOutputToSpeaker(outputToSpeaker);
     }
 
     /**
@@ -241,21 +243,22 @@ public class ZegoUIKitPrebuiltCallService {
      * @return current audio routing
      */
     public static ZegoAudioOutputDevice getAudioRouteType() {
-        return CallInvitationServiceImpl.getInstance().getAudioRouteType();
+        return CallInvitationServiceImpl.getInstance().api_getAudioRouteType();
     }
 
     /**
      * reset all beauty values to default.
      */
     public static void resetAllBeautiesToDefault() {
-        CallInvitationServiceImpl.getInstance().resetAllBeautiesToDefault();
+        CallInvitationServiceImpl.getInstance().api_resetAllBeautiesToDefault();
     }
 
     /**
      * used for offline calls,
+     *
      * @param appType
      */
     public static void setAppType(int appType) {
-        CallInvitationServiceImpl.getInstance().setAppType(appType);
+        CallInvitationServiceImpl.getInstance().api_setAppType(appType);
     }
 }

@@ -749,4 +749,10 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
 
         void onLeaveCall();
     }
+
+
+    public void api_minimizeCall() {
+        Timber.d("api_minimizeCall() called");
+        minimizeCall();
+    }
 }

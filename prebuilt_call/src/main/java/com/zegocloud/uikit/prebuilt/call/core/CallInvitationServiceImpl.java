@@ -209,7 +209,7 @@ public class CallInvitationServiceImpl {
     }
 
     public boolean initSDK(Application application, long appID, String appSign, String token) {
-        Timber.d("Call initSDK() called with: application = [" + application + "], appID = [" + appID
+        Timber.d("Call initSDK() called with: version = [" + version() + "], appID = [" + appID
             + "], appSign.isEmpty() = [" + TextUtils.isEmpty(appSign) + "], token.isEmpty() = [" + TextUtils.isEmpty(
             token) + "],alreadyInit: " + alreadyInit);
         if (alreadyInit) {
@@ -328,7 +328,6 @@ public class CallInvitationServiceImpl {
     public void resetAllBeautiesToDefault() {
         beautyRepository.resetBeautyValueToDefault(null);
     }
-
 
     public void logoutUser() {
         Timber.d("logoutUser() called");
@@ -532,5 +531,117 @@ public class CallInvitationServiceImpl {
 
     public String getPrebuiltCallRoom() {
         return roomRepository.getPrebuiltRoomID();
+    }
+
+    public void api_openMicrophone(boolean enable) {
+        Timber.d("api_openMicrophone: ");
+        openMicrophone(enable);
+    }
+
+    public boolean api_isMicrophoneOn() {
+        Timber.d("api_isMicrophoneOn: ");
+        return isMicrophoneOn();
+    }
+
+    public boolean api_isCameraOn() {
+        Timber.d("api_isCameraOn: ");
+        return isCameraOn();
+    }
+
+    public void api_enableFCMPush() {
+        Timber.d("api_enableFCMPush: ");
+        enableFCMPush();
+    }
+
+    public void api_enableHWPush(String hwAppID) {
+        Timber.d("api_enableHWPush: ");
+        enableHWPush(hwAppID);
+    }
+
+    public void api_enableMiPush(String miAppID, String miAppKey) {
+        Timber.d("api_enableMiPush: ");
+        enableMiPush(miAppID, miAppKey);
+    }
+
+    public void api_enableVivoPush(String vivoAppID, String vivoAppKey) {
+        Timber.d("api_enableVivoPush: ");
+        enableVivoPush(vivoAppID, vivoAppKey);
+    }
+
+    public void api_enableOppoPush(String oppoAppID, String oppoAppKey, String oppoAppSecret) {
+        Timber.d("api_enableOppoPush: ");
+        enableOppoPush(oppoAppID, oppoAppKey, oppoAppSecret);
+    }
+
+    public void api_setAudioOutputToSpeaker(boolean outputToSpeaker) {
+        Timber.d("api_setAudioOutputToSpeaker: ");
+        setAudioOutputToSpeaker(outputToSpeaker);
+    }
+
+    public ZegoAudioOutputDevice api_getAudioRouteType() {
+        Timber.d("api_getAudioRouteType: ");
+        return getAudioRouteType();
+    }
+
+    public void api_resetAllBeautiesToDefault() {
+        Timber.d("api_resetAllBeautiesToDefault: ");
+        resetAllBeautiesToDefault();
+    }
+
+    public void api_setAppType(int appType) {
+        Timber.d("api_setAppType: ");
+        setAppType(appType);
+    }
+
+    public void api_openCamera(boolean open) {
+        Timber.d("api_openCamera: ");
+        openCamera(open);
+    }
+
+    public void api_endCall() {
+        Timber.d("api_endCall: ");
+        endCall();
+    }
+
+
+    public boolean api_init(Application application, long appID, String appSign, String token, String userID,
+        String userName, ZegoUIKitPrebuiltCallInvitationConfig config) {
+        Timber.d("api_init: ");
+        return init(application, appID, appSign, token, userID, userName, config);
+    }
+
+
+    public void api_logoutUser() {
+        Timber.d("api_logoutUser: ");
+        logoutUser();
+    }
+
+    public void api_unInit() {
+        Timber.d("api_unInit: ");
+        unInit();
+    }
+
+    public void api_sendInvitationWithUIChange(Activity activity, List<ZegoUIKitUser> invitees,
+        ZegoInvitationType invitationType, String customData, int timeout, String callID,
+        ZegoSignalingPluginNotificationConfig notificationConfig, PluginCallbackListener callbackListener) {
+        Timber.d("api_sendInvitationWithUIChange: ");
+        sendInvitationWithUIChange(activity, invitees, invitationType, customData, timeout, callID, notificationConfig,
+            callbackListener);
+    }
+
+    public void api_sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType invitationType, String customData,
+        int timeout, String callID, ZegoSignalingPluginNotificationConfig notificationConfig,
+        PluginCallbackListener callbackListener) {
+        Timber.d("api_sendInvitation: ");
+        sendInvitation(invitees, invitationType, customData, timeout, callID, notificationConfig, callbackListener);
+    }
+
+    public ZegoUIKitPrebuiltCallFragment api_getZegoUIKitPrebuiltCallFragment() {
+        Timber.d("api_getZegoUIKitPrebuiltCallFragment: ");
+        return getZegoUIKitPrebuiltCallFragment();
+    }
+
+    String version() {
+        return "Prebuilt_" + "Call:" + "3.7.4," + ZegoUIKit.getVersion();
     }
 }
