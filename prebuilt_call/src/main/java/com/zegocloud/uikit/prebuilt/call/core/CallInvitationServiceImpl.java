@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
@@ -201,6 +202,7 @@ public class CallInvitationServiceImpl {
         String userName, ZegoUIKitPrebuiltCallInvitationConfig config) {
 
         boolean result = initSDK(application, appID, appSign, token);
+        Timber.d("initSDK result : " + result);
         if (result) {
             loginUser(userID, userName);
             setCallInvitationConfig(config);
@@ -209,9 +211,10 @@ public class CallInvitationServiceImpl {
     }
 
     public boolean initSDK(Application application, long appID, String appSign, String token) {
-        Timber.d("Call initSDK() called with: version = [" + version() + "], appID = [" + appID
-            + "], appSign.isEmpty() = [" + TextUtils.isEmpty(appSign) + "], token.isEmpty() = [" + TextUtils.isEmpty(
-            token) + "],alreadyInit: " + alreadyInit);
+        Timber.d(
+            "Call initSDK() called with: version = [" + version() + "], appID = [" + appID + "], appSign.isEmpty() = ["
+                + TextUtils.isEmpty(appSign) + "], token.isEmpty() = [" + TextUtils.isEmpty(token) + "],alreadyInit: "
+                + alreadyInit);
         if (alreadyInit) {
             // we assume that user not changed his appID and appSign
             ErrorEventsListener errorEvents = ZegoUIKitPrebuiltCallService.events.getErrorEventsListener();
@@ -289,9 +292,7 @@ public class CallInvitationServiceImpl {
         if (invitationConfig != null && invitationConfig.provider != null) {
             setCallConfig(invitationConfig.provider.requireConfig(invitationData));
         }
-        if (callConfig == null) {
-            setCallConfig(ZegoUIKitPrebuiltCallInvitationConfig.generateDefaultConfig(invitationData));
-        }
+        setCallConfig(ZegoUIKitPrebuiltCallInvitationConfig.generateDefaultConfig(invitationData));
 
         if (invitationConfig != null && invitationConfig.translationText != null
             && invitationConfig.translationText.getInvitationBaseText() instanceof InvitationTextCHS) {
