@@ -154,11 +154,14 @@ public class CallInviteActivity extends AppCompatActivity {
                 showCallFragment();
             } else if (PAGE_INCOMING.equals(page)) {
                 showInComingFragment();
-            } else if (PAGE_OUTGOING.equals(page) && oneOnOneCall) {
-                showOutgoingFragment();
+            } else if (PAGE_OUTGOING.equals(page)) {
+                if (oneOnOneCall) {
+                    showOutgoingFragment();
+                } else {
+                    showCallFragment();
+                }
             } else if (Objects.equals(PAGE_LOCKSCREEN, page)) {
                 // cannot happen
-
             } else {
 
             }

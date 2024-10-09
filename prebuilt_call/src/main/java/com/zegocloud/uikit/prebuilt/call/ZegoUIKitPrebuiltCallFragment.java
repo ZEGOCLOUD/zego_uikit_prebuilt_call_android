@@ -717,7 +717,12 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         Timber.d("endCall() called");
         dismissMiniVideoWindow();
         if (getActivity() != null) {
-            ((CallInviteActivity) requireActivity()).finishCallActivityAndMoveToFront();
+            FragmentActivity requiredActivity = requireActivity();
+            if (requiredActivity instanceof CallInviteActivity) {
+                ((CallInviteActivity) requiredActivity).finishCallActivityAndMoveToFront();
+            } else {
+                requiredActivity.finish();
+            }
         }
         CallInvitationServiceImpl.getInstance().leaveRoom();
     }
