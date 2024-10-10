@@ -26,6 +26,7 @@ public class InvitationTextCHS extends InvitationBaseText {
         outgoingVideoCallPageMessage = "正在呼叫...";
         outgoingVoiceCallPageTitle = "%s";
         outgoingVoiceCallPageMessage = "正在呼叫...";
+        outgoingCallPageBusyMessage = "对方正忙，请稍后再呼叫";
 
         outgoingGroupVideoCallPageTitle = "%s";
         outgoingGroupVideoCallPageMessage = "正在呼叫...";

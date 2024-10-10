@@ -114,7 +114,7 @@ public class ZegoPrebuiltCallOutGoingFragment extends Fragment {
             if (outgoingCallButtonListener != null) {
                 outgoingCallButtonListener.onOutgoingCallCancelButtonPressed();
             }
-            ((CallInviteActivity)requireActivity()).finishCallActivityAndMoveToFront();
+            ((CallInviteActivity) requireActivity()).finishCallActivityAndMoveToFront();
         });
     }
 
@@ -368,6 +368,16 @@ public class ZegoPrebuiltCallOutGoingFragment extends Fragment {
                 setTextIfNotEmpty(binding.callStateText, translationText.outgoingVoiceCallPageMessage);
                 setTextIfNotEmpty(binding.callStateText2, translationText.outgoingVoiceCallPageSmallMessage);
             }
+        }
+    }
+
+    public void setBusy() {
+        CallInvitationServiceImpl.getInstance().openCamera(false);
+        ZegoUIKitPrebuiltCallInvitationConfig invitationConfig = CallInvitationServiceImpl.getInstance()
+            .getCallInvitationConfig();
+        if (invitationConfig != null && invitationConfig.translationText != null
+            && invitationConfig.translationText.outgoingCallPageBusyMessage != null) {
+            binding.callStateText.setText(invitationConfig.translationText.outgoingCallPageBusyMessage);
         }
     }
 

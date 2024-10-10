@@ -31,6 +31,7 @@ public class ZegoTranslationText {
     public String outgoingVoiceCallPageTitle;
     public String outgoingVoiceCallPageMessage;
     public String outgoingVoiceCallPageSmallMessage;
+    public String outgoingCallPageBusyMessage ;
 
     public String outgoingGroupVideoCallPageTitle;
     public String outgoingGroupVideoCallPageMessage;
@@ -74,6 +75,7 @@ public class ZegoTranslationText {
         outgoingVoiceCallPageTitle = invatationBaseText.outgoingVoiceCallPageTitle;
         outgoingVoiceCallPageMessage = invatationBaseText.outgoingVoiceCallPageMessage;
         outgoingVoiceCallPageSmallMessage = invatationBaseText.outgoingVoiceCallPageSmallMessage;
+        outgoingCallPageBusyMessage = invatationBaseText.outgoingCallPageBusyMessage;
         outgoingGroupVideoCallPageTitle = invatationBaseText.outgoingGroupVideoCallPageTitle;
         outgoingGroupVideoCallPageMessage = invatationBaseText.outgoingGroupVideoCallPageMessage;
         outgoingGroupVoiceCallPageTitle = invatationBaseText.outgoingGroupVoiceCallPageTitle;

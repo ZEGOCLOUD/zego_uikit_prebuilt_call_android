@@ -3,6 +3,7 @@ package com.zegocloud.uikit.prebuilt.call.core.invite;
 import android.app.Activity;
 import android.app.Application;
 import android.text.TextUtils;
+import androidx.annotation.NonNull;
 import com.google.gson.Gson;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginNotificationConfig;
@@ -81,6 +82,7 @@ public class PrebuiltCallRepository {
     public static final int NONE_CALL_NO_REPLY = -5;
     public static final int NONE_RECEIVE_MISSED = -4;
     public static final int NONE_REJECTED = -3;
+    public static final int NONE_REJECTED_BUSY = -4;
     public static final int NONE_CANCELED = -2;
     public static final int NONE_HANG_UP = -1;
     public static final int NONE = 0;
@@ -225,9 +227,7 @@ public class PrebuiltCallRepository {
                 + "], pushMessage = [" + pushMessage + "], notificationAction = [" + notificationAction
                 + "],callState: " + callState);
 
-        ZIMUserFullInfo zimCaller = zimBridge.getMemoryUserInfo(zimCallInfo.caller);
-        ZegoUIKitUser caller = new ZegoUIKitUser(zimCaller.baseInfo.userID, zimCaller.baseInfo.userName);
-
+        ZegoUIKitUser caller = getUiKitUserFromUserID(zimCallInfo.caller);
         callInvitationData = new ZegoCallInvitationData();
         callInvitationData.caller = caller;
         callInvitationData.inviter = caller;
@@ -242,10 +242,7 @@ public class PrebuiltCallRepository {
         callInvitationData.customData = data.getCustomData();
         callInvitationData.invitees = zimCallInfo.callUserList.stream()
             .filter(zimCallUserInfo -> !Objects.equals(zimCallInfo.caller, zimCallUserInfo.userID))
-            .map(zimCallUserInfo -> {
-                ZIMUserFullInfo memoryUserInfo = zimBridge.getMemoryUserInfo(zimCallUserInfo.userID);
-                return new ZegoUIKitUser(memoryUserInfo.baseInfo.userID, memoryUserInfo.baseInfo.userName);
-            }).collect(Collectors.toList());
+            .map(zimCallUserInfo -> getUiKitUserFromUserID(zimCallUserInfo.userID)).collect(Collectors.toList());
 
         CallInvitationServiceImpl.getInstance().generateCallConfigFromInvite(callInvitationData);
         setCallState(INCOMING);
@@ -317,8 +314,7 @@ public class PrebuiltCallRepository {
         ZegoSignalingPlugin.getInstance()
             .queryUserInfo(userIDList, queryConfig, (userList, errorUserList, errorInfo) -> {
                 if (errorInfo.code == ZIMErrorCode.SUCCESS) {
-                    ZIMUserFullInfo zimInviter = zimBridge.getMemoryUserInfo(info.inviter);
-                    ZegoUIKitUser inviter = new ZegoUIKitUser(zimInviter.baseInfo.userID, zimInviter.baseInfo.userName);
+                    ZegoUIKitUser inviter = getUiKitUserFromUserID(info.inviter);
 
                     hideIncomingCallDialog();
                     dismissIncomingCallNotification();
@@ -340,8 +336,7 @@ public class PrebuiltCallRepository {
         if (zimCallInfo == null) {
             return;
         }
-        ZIMUserFullInfo fullUseInfo = zimBridge.getMemoryUserInfo(zimCallInfo.caller);
-        ZegoUIKitUser uiKitUser = new ZegoUIKitUser(fullUseInfo.baseInfo.userID, fullUseInfo.baseInfo.userName);
+        ZegoUIKitUser uiKitUser = getUiKitUserFromUserID(zimCallInfo.caller);
 
         hideIncomingCallDialog();
         dismissIncomingCallNotification();
@@ -371,12 +366,8 @@ public class PrebuiltCallRepository {
                     if (callInvitationData != null) {
                         callInvitationData.invitees = zimCallInfo.callUserList.stream()
                             .filter(zimCallUserInfo -> !Objects.equals(zimCallInfo.caller, zimCallUserInfo.userID))
-                            .map(zimCallUserInfo -> {
-                                ZIMUserFullInfo memoryUserInfo = ZegoSignalingPlugin.getInstance()
-                                    .getMemoryUserInfo(zimCallUserInfo.userID);
-                                return new ZegoUIKitUser(memoryUserInfo.baseInfo.userID,
-                                    memoryUserInfo.baseInfo.userName);
-                            }).collect(Collectors.toList());
+                            .map(zimCallUserInfo -> getUiKitUserFromUserID(zimCallUserInfo.userID))
+                            .collect(Collectors.toList());
 
                     }
                     Timber.d("zimCallUserStateChanged() called with: callInvitationData : [" + callInvitationData);
@@ -387,6 +378,15 @@ public class PrebuiltCallRepository {
             });
     }
 
+    private static @NonNull ZegoUIKitUser getUiKitUserFromUserID(String userID) {
+        ZIMUserFullInfo memoryUserInfo = ZegoSignalingPlugin.getInstance().getMemoryUserInfo(userID);
+        if (memoryUserInfo == null) {
+            return new ZegoUIKitUser(userID, userID);
+        } else {
+            return new ZegoUIKitUser(memoryUserInfo.baseInfo.userID, memoryUserInfo.baseInfo.userName);
+        }
+    }
+
     private void processTimeoutUser(ZIMCallUserStateChangeInfo info, String zimCallID) {
         ZIMUserInfo selfUserInfo = ZegoSignalingPlugin.getInstance().getUserInfo();
         List<ZIMCallUserInfo> timeoutZIMUsers = info.callUserList.stream().filter(zimCallUserInfo -> {
@@ -395,10 +395,8 @@ public class PrebuiltCallRepository {
             return notSelf && isTimeout;
         }).collect(Collectors.toList());
 
-        List<ZegoUIKitUser> timeoutUIKitUsers = timeoutZIMUsers.stream().map(zimCallUserInfo -> {
-            ZIMUserFullInfo fullUseInfo = zimBridge.getMemoryUserInfo(zimCallUserInfo.userID);
-            return new ZegoUIKitUser(fullUseInfo.baseInfo.userID, fullUseInfo.baseInfo.userName);
-        }).collect(Collectors.toList());
+        List<ZegoUIKitUser> timeoutUIKitUsers = timeoutZIMUsers.stream()
+            .map(zimCallUserInfo -> getUiKitUserFromUserID(zimCallUserInfo.userID)).collect(Collectors.toList());
 
         if (!timeoutUIKitUsers.isEmpty()) {
             onPrebuiltReceiveCallNoResponse(zimCallID, timeoutUIKitUsers);
@@ -415,9 +413,7 @@ public class PrebuiltCallRepository {
         }).collect(Collectors.toList());
 
         acceptZIMUsers.forEach(zimCallUserInfo -> {
-            ZIMUserFullInfo fullUseInfo = zimBridge.getMemoryUserInfo(zimCallUserInfo.userID);
-            ZegoUIKitUser uiKitUser = new ZegoUIKitUser(fullUseInfo.baseInfo.userID, fullUseInfo.baseInfo.userName);
-
+            ZegoUIKitUser uiKitUser = getUiKitUserFromUserID(zimCallUserInfo.userID);
             onPrebuiltReceiveCallAccepted(zimCallID, uiKitUser, zimCallUserInfo.extendedData);
         });
     }
@@ -432,8 +428,7 @@ public class PrebuiltCallRepository {
         }).collect(Collectors.toList());
 
         rejectZIMUsers.forEach(zimCallUserInfo -> {
-            ZIMUserFullInfo fullUseInfo = zimBridge.getMemoryUserInfo(zimCallUserInfo.userID);
-            ZegoUIKitUser rejectUser = new ZegoUIKitUser(fullUseInfo.baseInfo.userID, fullUseInfo.baseInfo.userName);
+            ZegoUIKitUser rejectUser = getUiKitUserFromUserID(zimCallUserInfo.userID);
             onPrebuiltReceiveCallRejected(zimCallID, rejectUser, zimCallUserInfo.extendedData);
         });
     }
@@ -496,7 +491,14 @@ public class PrebuiltCallRepository {
                 if (zimCallInfo.callUserList.size() > 2) {
                     setCallState(NONE);
                 } else {
-                    setCallState(NONE_REJECTED);
+                    JSONObject jsonObject = JsonUtil.getJsonObjectFromString(data);
+                    String reason = JsonUtil.getStringValueFromJson(jsonObject, "reason", null);
+                    if ("busy".equals(reason)) {
+                        setCallState(NONE_REJECTED_BUSY);
+                    } else {
+                        setCallState(NONE_REJECTED);
+                    }
+
                 }
             }
 
@@ -520,7 +522,11 @@ public class PrebuiltCallRepository {
                 .map(zimCallUserInfo -> {
                     ZIMUserFullInfo memoryUserInfo = ZegoSignalingPlugin.getInstance()
                         .getMemoryUserInfo(zimCallUserInfo.userID);
-                    return new ZegoCallUser(memoryUserInfo.baseInfo.userID, memoryUserInfo.baseInfo.userName);
+                    if (memoryUserInfo == null) {
+                        return new ZegoCallUser(zimCallUserInfo.userID, zimCallUserInfo.userID);
+                    } else {
+                        return new ZegoCallUser(memoryUserInfo.baseInfo.userID, memoryUserInfo.baseInfo.userName);
+                    }
                 }).collect(Collectors.toList());
 
             ZegoCallType callType =
@@ -629,6 +635,8 @@ public class PrebuiltCallRepository {
                 }
                 return;
             }
+            // pre set to reject other call when sending call
+            setCallState(PrebuiltCallRepository.OUTGOING);
             ZegoUIKit.getSignalingPlugin()
                 .sendInvitation(idList, timeout, invitationType.getValue(), gson.toJson(data), pushConfig, result -> {
                     int code = (int) result.get("code");
@@ -655,6 +663,8 @@ public class PrebuiltCallRepository {
             String extendedData = gson.toJson(extendedDataObj);
 
             if (callInvitationData == null) {
+                // pre set to reject other call when sending call
+                setCallState(PrebuiltCallRepository.OUTGOING);
                 callInviteAdvanced(idList, extendedData, timeout, pushConfig, new ZIMCallInvitationSentCallback() {
                     @Override
                     public void onCallInvitationSent(String zimCallID, ZIMCallInvitationSentInfo info,
@@ -663,6 +673,8 @@ public class PrebuiltCallRepository {
                             if (info.errorUserList.size() < idList.size()) {
                                 onCallInvitationSentSucceed(invitees, invitationType, customData, zimCallID, data);
                             }
+                        } else {
+                            setCallState(PrebuiltCallRepository.NONE);
                         }
 
                         Map<String, Object> result = new HashMap<>();
@@ -736,7 +748,6 @@ public class PrebuiltCallRepository {
 
         CallInvitationServiceImpl.getInstance().generateCallConfigFromInvite(callInvitationData);
 
-        setCallState(PrebuiltCallRepository.OUTGOING);
         playOutgoingRingTone();
     }
 

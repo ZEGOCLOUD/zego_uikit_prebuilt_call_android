@@ -5,7 +5,6 @@ import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
@@ -77,10 +76,11 @@ public class CallInvitationServiceImpl {
     private ZegoUIKitPrebuiltCallConfig callConfig;
 
     public void showIncomingCallDialog(ZegoCallInvitationData callInvitationData) {
-        Timber.d("showIncomingCallDialog() called with: callInvitationData = [" + callInvitationData + "]");
+        Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
+        Timber.d(
+            "showIncomingCallDialog() called with: callInvitationData = [" + callInvitationData + "],topActivity = " + topActivity);
         if (!isIncomingCallDialogShown()) {
             playIncomingRingTone();
-            Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
             invitationDialog = new CallInvitationDialog(topActivity, callInvitationData);
             invitationDialog.show();
         }
@@ -91,7 +91,8 @@ public class CallInvitationServiceImpl {
     }
 
     public void hideIncomingCallDialog() {
-        if (invitationDialog != null) {
+        Timber.d("hideIncomingCallDialog() called");
+        if (invitationDialog != null && invitationDialog.isShowing()) {
             invitationDialog.hide();
         }
         invitationDialog = null;

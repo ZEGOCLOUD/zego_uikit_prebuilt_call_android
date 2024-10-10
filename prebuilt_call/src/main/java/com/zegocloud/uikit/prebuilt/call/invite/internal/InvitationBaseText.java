@@ -27,6 +27,7 @@ public abstract class InvitationBaseText {
     public String outgoingVoiceCallPageTitle = "%s";
     public String outgoingVoiceCallPageMessage = "Calling...";
     public String outgoingVoiceCallPageSmallMessage = "";
+    public String outgoingCallPageBusyMessage = "The person you are calling is busy now, please try again later";
 
     public String outgoingGroupVideoCallPageTitle = "%s";
     public String outgoingGroupVideoCallPageMessage = "Calling...";

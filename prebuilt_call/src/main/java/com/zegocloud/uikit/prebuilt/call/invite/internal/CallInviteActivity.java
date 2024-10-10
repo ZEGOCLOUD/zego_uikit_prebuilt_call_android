@@ -10,6 +10,8 @@ import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.Window;
@@ -104,19 +106,26 @@ public class CallInviteActivity extends AppCompatActivity {
             if (after == PrebuiltCallRepository.CONNECTED) {
                 showCallFragment();
             } else {
-                if (ZegoUIKit.getLocalUser() != null) {
-                    String userID = ZegoUIKit.getLocalUser().userID;
-                    if (!TextUtils.isEmpty(userID)) {
-                        if (ZegoUIKit.isCameraOn(userID)) {
-                            ZegoUIKit.turnCameraOn(userID, false);
-                        }
-                    }
-                }
+                CallInvitationServiceImpl.getInstance().openCamera(false);
                 CallInvitationServiceImpl.getInstance().removeCallStateListener(callStateListener);
-                finishCallActivityAndMoveToFront();
+                if (after == PrebuiltCallRepository.NONE_REJECTED_BUSY) {
+                    Fragment fragmentById = getSupportFragmentManager().findFragmentById(R.id.call_fragment_container);
+                    if (fragmentById instanceof ZegoPrebuiltCallOutGoingFragment) {
+                        ((ZegoPrebuiltCallOutGoingFragment) fragmentById).setBusy();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                finishCallActivityAndMoveToFront();
+                            }
+                        }, 3000);
+                    }
+                } else {
+                    finishCallActivityAndMoveToFront();
+                }
             }
         }
     };
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
