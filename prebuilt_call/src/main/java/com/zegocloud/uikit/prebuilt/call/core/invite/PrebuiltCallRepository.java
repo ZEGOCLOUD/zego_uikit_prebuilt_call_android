@@ -646,6 +646,8 @@ public class PrebuiltCallRepository {
                         if (errorInvitees == null || errorInvitees.size() < invitees.size()) {
                             onCallInvitationSentSucceed(invitees, invitationType, customData, invitationID, data);
                         }
+                    } else {
+                        setCallState(PrebuiltCallRepository.NONE);
                     }
                     if (callbackListener != null) {
                         callbackListener.callback(result);
