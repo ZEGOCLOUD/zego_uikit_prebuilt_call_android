@@ -290,10 +290,10 @@ public class CallInvitationServiceImpl {
     }
 
     public void generateCallConfigFromInvite(ZegoCallInvitationData invitationData) {
+        setCallConfig(ZegoUIKitPrebuiltCallInvitationConfig.generateDefaultConfig(invitationData));
         if (invitationConfig != null && invitationConfig.provider != null) {
             setCallConfig(invitationConfig.provider.requireConfig(invitationData));
         }
-        setCallConfig(ZegoUIKitPrebuiltCallInvitationConfig.generateDefaultConfig(invitationData));
 
         if (invitationConfig != null && invitationConfig.translationText != null
             && invitationConfig.translationText.getInvitationBaseText() instanceof InvitationTextCHS) {
