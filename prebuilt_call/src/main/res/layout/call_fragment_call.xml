@@ -9,6 +9,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
 
+  <FrameLayout
+    android:id="@+id/call_room_foreground_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+  </FrameLayout>
+
   <com.zegocloud.uikit.prebuilt.call.internal.TopMenuBar
     android:id="@+id/top_menu_bar"
     android:layout_width="match_parent"

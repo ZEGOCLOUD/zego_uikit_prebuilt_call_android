@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.components.audiovideo.ZegoSwitchAudioOutputButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoSwitchCameraButton;
 import com.zegocloud.uikit.components.audiovideo.ZegoToggleCameraButton;
@@ -30,8 +29,9 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarStyle;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoPrebuiltVideoConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig;
-import com.zegocloud.uikit.prebuilt.call.event.ZegoMenuBarButtonClickListener;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.core.beauty.BeautyButton;
+import com.zegocloud.uikit.prebuilt.call.event.ZegoMenuBarButtonClickListener;
 import com.zegocloud.uikit.utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -319,7 +319,7 @@ public class TopMenuBar extends FrameLayout {
                 }
                 view.setOnClickListener(v -> {
                     if (beautyDialog == null) {
-                        beautyDialog = ZegoUIKit.getBeautyPlugin().getBeautyDialog(getContext());
+                        beautyDialog = CallInvitationServiceImpl.getInstance().getBeautyDialog(getContext());
                     }
                     if (beautyDialog != null) {
                         beautyDialog.show();
@@ -329,7 +329,7 @@ public class TopMenuBar extends FrameLayout {
                         clickListener.onClick(ZegoMenuBarButtonName.BEAUTY_BUTTON, v);
                     }
                 });
-                if (ZegoUIKit.getBeautyPlugin().isPluginExited()) {
+                if (CallInvitationServiceImpl.getInstance().isPluginExited()) {
                     view.setVisibility(VISIBLE);
                 } else {
                     view.setVisibility(GONE);

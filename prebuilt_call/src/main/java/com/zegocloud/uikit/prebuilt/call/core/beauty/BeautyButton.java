@@ -1,4 +1,4 @@
-package com.zegocloud.uikit.prebuilt.call.internal;
+package com.zegocloud.uikit.prebuilt.call.core.beauty;
 
 import android.content.Context;
 import android.util.AttributeSet;

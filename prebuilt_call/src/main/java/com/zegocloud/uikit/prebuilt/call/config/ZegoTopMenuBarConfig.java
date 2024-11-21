@@ -15,7 +15,7 @@ public class ZegoTopMenuBarConfig implements Serializable {
 
     public int maxCount = 5;
 
-    public List<View> extendedButtons;
+    public List<View> extendedButtons = new ArrayList<>();
 
     public ZegoMenuBarStyle style = ZegoMenuBarStyle.DARK;
 

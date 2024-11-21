@@ -16,7 +16,7 @@ public class ZegoBottomMenuBarConfig implements Serializable {
     public int maxCount = 5;
     public boolean hideAutomatically = true;
     public boolean hideByClick = true;
-    public List<View> extendButtons = new ArrayList<>();
+    public List<View> extendedButtons = new ArrayList<>();
 
     public ZegoMenuBarStyle style = ZegoMenuBarStyle.DARK;
 

@@ -2,6 +2,7 @@ package com.zegocloud.uikit.prebuilt.call.core;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.Dialog;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -34,9 +35,13 @@ import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallText;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoTranslationText;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoUIKitPrebuiltCallConfigProvider;
 import com.zegocloud.uikit.service.defines.ZegoAudioOutputDevice;
+import com.zegocloud.uikit.service.defines.ZegoAudioOutputDeviceChangedListener;
+import com.zegocloud.uikit.service.defines.ZegoInRoomCommandListener;
 import com.zegocloud.uikit.service.defines.ZegoScenario;
+import com.zegocloud.uikit.service.defines.ZegoSendInRoomCommandCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
+import com.zegocloud.uikit.service.express.IExpressEngineEventHandler;
 import im.zego.zegoexpress.entity.ZegoUser;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +83,8 @@ public class CallInvitationServiceImpl {
     public void showIncomingCallDialog(ZegoCallInvitationData callInvitationData) {
         Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
         Timber.d(
-            "showIncomingCallDialog() called with: callInvitationData = [" + callInvitationData + "],topActivity = " + topActivity);
+            "showIncomingCallDialog() called with: callInvitationData = [" + callInvitationData + "],topActivity = "
+                + topActivity);
         if (!isIncomingCallDialogShown()) {
             playIncomingRingTone();
             invitationDialog = new CallInvitationDialog(topActivity, callInvitationData);
@@ -329,6 +335,14 @@ public class CallInvitationServiceImpl {
 
     public void resetAllBeautiesToDefault() {
         beautyRepository.resetBeautyValueToDefault(null);
+    }
+
+    public Dialog getBeautyDialog(Context context) {
+        return beautyRepository.getBeautyDialog(context);
+    }
+
+    public boolean isPluginExited() {
+        return beautyRepository.isPluginExited();
     }
 
     public void logoutUser() {
@@ -605,6 +619,12 @@ public class CallInvitationServiceImpl {
         endCall();
     }
 
+    public void api_sendInRoomCommand(String command, ArrayList<String> toUserList,
+        ZegoSendInRoomCommandCallback callback) {
+        Timber.d("api_sendInRoomCommand: ");
+        expressBridge.sendInRoomCommand(command, toUserList, callback);
+    }
+
 
     public boolean api_init(Application application, long appID, String appSign, String token, String userID,
         String userName, ZegoUIKitPrebuiltCallInvitationConfig config) {
@@ -643,7 +663,38 @@ public class CallInvitationServiceImpl {
         return getZegoUIKitPrebuiltCallFragment();
     }
 
+    public void api_removeEventHandler(IExpressEngineEventHandler expressEngineEventHandler) {
+        Timber.d("api_removeEventHandler: ");
+        expressBridge.removeEventHandler(expressEngineEventHandler);
+    }
+
+    public void api_addEventHandler(IExpressEngineEventHandler eventHandler) {
+        Timber.d("api_addEventHandler: ");
+        expressBridge.addEventHandler(eventHandler);
+    }
+
+    public void api_addAudioOutputDeviceChangedListener(ZegoAudioOutputDeviceChangedListener listener) {
+        Timber.d("api_addAudioOutputDeviceChangedListener: ");
+        expressBridge.addAudioOutputDeviceChangedListener(listener);
+    }
+
+    public void api_removeAudioOutputDeviceChangedListener(ZegoAudioOutputDeviceChangedListener listener) {
+        Timber.d("api_removeAudioOutputDeviceChangedListener: ");
+        expressBridge.removeAudioOutputDeviceChangedListener(listener);
+    }
+
+    public void api_addInRoomCommandListener(ZegoInRoomCommandListener listener) {
+        Timber.d("api_addInRoomCommandListener: ");
+        expressBridge.addInRoomCommandListener(listener);
+    }
+
+    public void api_removeInRoomCommandListener(ZegoInRoomCommandListener listener) {
+        Timber.d("api_removeInRoomCommandListener: ");
+        expressBridge.removeInRoomCommandListener(listener);
+    }
+
+
     String version() {
-        return "Prebuilt_" + "Call:" + "3.7.4," + ZegoUIKit.getVersion();
+        return "Prebuilt_" + "Call:" + "3.7.5," + ZegoUIKit.getVersion();
     }
 }

@@ -13,9 +13,10 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.event.Events;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
-import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService;
 import com.zegocloud.uikit.service.defines.ZegoAudioOutputDevice;
+import com.zegocloud.uikit.service.defines.ZegoSendInRoomCommandCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ZegoUIKitPrebuiltCallService {
@@ -260,5 +261,15 @@ public class ZegoUIKitPrebuiltCallService {
      */
     public static void setAppType(int appType) {
         CallInvitationServiceImpl.getInstance().api_setAppType(appType);
+    }
+
+    /**
+     * Other user in the room will receive callback in
+     * @param command
+     * @param toUserList
+     * @param callback
+     */
+    public static void sendInRoomCommand(String command, ArrayList<String> toUserList, ZegoSendInRoomCommandCallback callback) {
+        CallInvitationServiceImpl.getInstance().api_sendInRoomCommand(command, toUserList, callback);
     }
 }

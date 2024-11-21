@@ -1,6 +1,8 @@
 package com.zegocloud.uikit.prebuilt.call.core.beauty;
 
 import android.app.Application;
+import android.app.Dialog;
+import android.content.Context;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
 import com.zegocloud.uikit.plugin.adapter.plugins.beauty.ZegoBeautyPluginEffectsType;
@@ -28,5 +30,13 @@ public class PrebuiltBeautyRepository {
 
     public void resetBeautyValueToDefault(ZegoBeautyPluginEffectsType beautyType) {
         ZegoUIKit.getBeautyPlugin().resetBeautyValueToDefault(beautyType);
+    }
+
+    public Dialog getBeautyDialog(Context context) {
+        return ZegoUIKit.getBeautyPlugin().getBeautyDialog(context);
+    }
+
+    public boolean isPluginExited() {
+        return ZegoUIKit.getBeautyPlugin().isPluginExited();
     }
 }

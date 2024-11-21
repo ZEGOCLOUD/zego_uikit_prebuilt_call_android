@@ -60,7 +60,8 @@ public class CallInvitationDialog {
             hide();
             CallInviteActivity.startCallPage(context);
         });
-        ZegoTranslationText translationText = CallInvitationServiceImpl.getInstance().getCallInvitationConfig().translationText;
+        ZegoTranslationText translationText = CallInvitationServiceImpl.getInstance()
+            .getCallInvitationConfig().translationText;
         if (invitationData.type == ZegoInvitationType.VOICE_CALL.getValue()) {
             binding.dialogCallAccept.setBackgroundResource(R.drawable.call_selector_dialog_voice_accept);
             if (translationText != null) {
@@ -93,16 +94,11 @@ public class CallInvitationDialog {
             CallInviteActivity.startIncomingPage(context);
         });
 
-        ZegoUIKitPrebuiltCallConfigProvider provider = CallInvitationServiceImpl.getInstance().getPrebuiltCallConfigProvider();
-        if (provider != null) {
-            ZegoUIKitPrebuiltCallConfig prebuiltCallConfig = provider.requireConfig(invitationData);
-            if (prebuiltCallConfig.audioVideoViewConfig != null
-                && prebuiltCallConfig.avatarViewProvider != null) {
-                View view = prebuiltCallConfig.avatarViewProvider.onUserIDUpdated(
-                    binding.dialogCallCustomIcon, invitationData.inviter);
-                binding.dialogCallCustomIcon.removeAllViews();
-                binding.dialogCallCustomIcon.addView(view);
-            }
+        ZegoUIKitPrebuiltCallConfig prebuiltCallConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
+        if (prebuiltCallConfig.audioVideoViewConfig != null && prebuiltCallConfig.avatarViewProvider != null) {
+            View view = prebuiltCallConfig.avatarViewProvider.onUserIDUpdated(binding.dialogCallCustomIcon, invitationData.inviter);
+            binding.dialogCallCustomIcon.removeAllViews();
+            binding.dialogCallCustomIcon.addView(view);
         }
     }
 

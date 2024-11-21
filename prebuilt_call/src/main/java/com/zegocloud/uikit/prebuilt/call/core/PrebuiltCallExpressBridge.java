@@ -2,10 +2,14 @@ package com.zegocloud.uikit.prebuilt.call.core;
 
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.service.defines.ZegoAudioOutputDevice;
+import com.zegocloud.uikit.service.defines.ZegoAudioOutputDeviceChangedListener;
+import com.zegocloud.uikit.service.defines.ZegoInRoomCommandListener;
+import com.zegocloud.uikit.service.defines.ZegoSendInRoomCommandCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import com.zegocloud.uikit.service.express.IExpressEngineEventHandler;
 import im.zego.zegoexpress.constants.ZegoAudioRoute;
+import java.util.ArrayList;
 
 /**
  * wrapper prebuilt business logic to express SDK and add business logic when receive express callbacks
@@ -79,5 +83,26 @@ public class PrebuiltCallExpressBridge {
 
     public void renewToken(String token) {
         ZegoUIKit.renewToken(token);
+    }
+
+    public void sendInRoomCommand(String command, ArrayList<String> toUserList,
+        ZegoSendInRoomCommandCallback callback) {
+        ZegoUIKit.sendInRoomCommand(command, toUserList, callback);
+    }
+
+    public void addInRoomCommandListener(ZegoInRoomCommandListener listener) {
+        ZegoUIKit.addInRoomCommandListener(listener);
+    }
+
+    public void removeInRoomCommandListener(ZegoInRoomCommandListener listener) {
+        ZegoUIKit.removeInRoomCommandListener(listener);
+    }
+
+    public void addAudioOutputDeviceChangedListener(ZegoAudioOutputDeviceChangedListener listener) {
+        ZegoUIKit.addAudioOutputDeviceChangedListener(listener);
+    }
+
+    public void removeAudioOutputDeviceChangedListener(ZegoAudioOutputDeviceChangedListener listener) {
+        ZegoUIKit.removeAudioOutputDeviceChangedListener(listener);
     }
 }

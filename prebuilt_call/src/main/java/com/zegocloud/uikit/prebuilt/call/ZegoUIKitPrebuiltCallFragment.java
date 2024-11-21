@@ -358,6 +358,16 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         String callID = getArguments().getString("callID");
+
+        ZegoUIKitPrebuiltCallConfig callConfig = CallInvitationServiceImpl.getInstance().getCallConfig();
+        if (callConfig.roomForegroundProvider != null) {
+            View custom = callConfig.roomForegroundProvider.requireRoomForegroundView(getContext());
+            if (custom != null) {
+                binding.callRoomForegroundParent.removeAllViews();
+                binding.callRoomForegroundParent.addView(custom);
+            }
+        }
+
         if (!TextUtils.isEmpty(callID)) {
             CallInvitationServiceImpl.getInstance().joinRoom(callID, new ZegoUIKitCallback() {
                 @Override
@@ -632,8 +642,9 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         binding.topMenuBar.setScreenShareVideoConfig(config.screenSharingVideoConfig);
         binding.bottomMenuBar.setScreenShareVideoConfig(config.screenSharingVideoConfig);
 
-        if (config.bottomMenuBarConfig.extendButtons != null && !config.bottomMenuBarConfig.extendButtons.isEmpty()) {
-            bottomMenuBarBtns.addAll(config.bottomMenuBarConfig.extendButtons);
+        if (config.bottomMenuBarConfig.extendedButtons != null
+            && !config.bottomMenuBarConfig.extendedButtons.isEmpty()) {
+            bottomMenuBarBtns.addAll(config.bottomMenuBarConfig.extendedButtons);
         }
 
         if (config.topMenuBarConfig.extendedButtons != null && !config.topMenuBarConfig.extendedButtons.isEmpty()) {
@@ -712,7 +723,7 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         builder.show();
     }
 
-    // endCall --> leaveRoom --> onRoomStateChanged --> endCall --> leaveRoom ,then stopped!!!
+    // this.endCall --> CallInvitationServiceImpl.leaveRoom --> PrebuiltRoomRepository.onRoomStateChanged --> this.endCall --> CallInvitationServiceImpl.leaveRoom ,then stopped!!!
     public void endCall() {
         Timber.d("endCall() called");
         dismissMiniVideoWindow();
@@ -727,6 +738,10 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         CallInvitationServiceImpl.getInstance().leaveRoom();
     }
 
+    /**
+     * @Deprecated use {@link com.zegocloud.uikit.prebuilt.call.config.ZegoBottomMenuBarConfig#extendedButtons}
+     * instead.
+     */
     public void addButtonToBottomMenuBar(List<View> viewList) {
         bottomMenuBarBtns.addAll(viewList);
         if (binding != null) {
@@ -734,6 +749,9 @@ public class ZegoUIKitPrebuiltCallFragment extends Fragment {
         }
     }
 
+    /**
+     * @Deprecated use {@link com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig#extendedButtons} instead.
+     */
     public void addButtonToTopMenuBar(List<View> viewList) {
         topMenuBarBtns.addAll(viewList);
         if (binding != null) {
