@@ -30,7 +30,6 @@ public class ZegoInRoomChatDialog extends Dialog {
 
     public ZegoInRoomChatDialog(@NonNull Context context) {
         super(context, R.style.Call_TransparentDialog);
-        //        super(context);
         Window window = getWindow();
         window.requestFeature(Window.FEATURE_NO_TITLE);
     }

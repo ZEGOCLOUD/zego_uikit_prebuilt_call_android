@@ -293,12 +293,10 @@ public class PrebuiltCallRepository {
                 clearPushMessage();
             }
         } else {
-            if (topActivity != null) {
-                if (PrebuiltCallUtil.isAppBackground(topActivity)) {
-                    notificationManager.showCallNotification(topActivity);
-                } else {
-                    showIncomingCallDialog(callInvitationData);
-                }
+            if (topActivity != null && !PrebuiltCallUtil.isAppBackground(topActivity)) {
+                showIncomingCallDialog(callInvitationData);
+            } else {
+                CallInvitationServiceImpl.getInstance().showCallNotification();
             }
             clearPushMessage();
             notifyIncomingCallReceived(zimCallInfo.callID, caller, extendedData.getType());

@@ -73,24 +73,28 @@ public class ZegoPrebuiltCallOffLineLockScreenFragment extends Fragment {
 
         ZIMPushMessage pushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
         String inviterId = pushMessage.zimExtendedData.getInviterId();
-
-        ZegoSignalingPlugin.getInstance()
-            .queryUserInfo(Collections.singletonList(inviterId), new ZIMUsersInfoQueryConfig(),
-                new ZIMUsersInfoQueriedCallback() {
-                    @Override
-                    public void onUsersInfoQueried(ArrayList<ZIMUserFullInfo> userList,
-                        ArrayList<ZIMErrorUserInfo> errorUserList, ZIMError errorInfo) {
-                        if (errorInfo.code == ZIMErrorCode.SUCCESS && !userList.isEmpty()) {
-                            ZIMUserFullInfo userFullInfo = userList.get(0);
-                            applyUserWhenOffLine(userFullInfo.baseInfo.userName);
-                            applyTranslationTextWhenOffLine(userFullInfo.baseInfo.userName);
+        String inviterName = pushMessage.zimExtendedData.getInviterName();
+        if (TextUtils.isEmpty(inviterName)) {
+            inviterName = inviterId;
+            // todo zim 没有初始化，会失败？
+            ZegoSignalingPlugin.getInstance()
+                .queryUserInfo(Collections.singletonList(inviterId), new ZIMUsersInfoQueryConfig(),
+                    new ZIMUsersInfoQueriedCallback() {
+                        @Override
+                        public void onUsersInfoQueried(ArrayList<ZIMUserFullInfo> userList,
+                            ArrayList<ZIMErrorUserInfo> errorUserList, ZIMError errorInfo) {
+                            if (errorInfo.code == ZIMErrorCode.SUCCESS && !userList.isEmpty()) {
+                                ZIMUserFullInfo userFullInfo = userList.get(0);
+                                applyUserWhenOffLine(userFullInfo.baseInfo.userName);
+                                applyTranslationTextWhenOffLine(userFullInfo.baseInfo.userName);
+                            }
                         }
-                    }
-                });
+                    });
+        }
 
-        applyUserWhenOffLine(inviterId);
+        applyUserWhenOffLine(inviterName);
 
-        applyTranslationTextWhenOffLine(inviterId);
+        applyTranslationTextWhenOffLine(inviterName);
     }
 
     private void applyBackgroundWhenOffLine() {
@@ -98,7 +102,8 @@ public class ZegoPrebuiltCallOffLineLockScreenFragment extends Fragment {
     }
 
     private void applyRejectButtonWhenOffLine() {
-        binding.callWaitingRefuse.setBackgroundResource(com.zegocloud.uikit.R.drawable.zego_uikit_icon_dialog_voice_decline);
+        binding.callWaitingRefuse.setBackgroundResource(
+            com.zegocloud.uikit.R.drawable.zego_uikit_icon_dialog_voice_decline);
         binding.callWaitingRefuse.setOnClickListener(v -> {
             CallInvitationServiceImpl.getInstance().dismissCallNotification();
             RingtoneManager.stopRingTone();

@@ -167,7 +167,7 @@ public class PrebuiltCallNotificationManager {
     }
 
     public void dismissCallNotification(Context context) {
-        Timber.d("dismissCallNotification() called with: context = [" + context + "]");
+        Timber.d("dismissCallNotification() called with: isNotificationShowed = [" + isNotificationShowed + "]");
         if (isNotificationShowed) {
             isNotificationShowed = false;
             NotificationManagerCompat.from(context).cancel(incoming_call_notification_id);

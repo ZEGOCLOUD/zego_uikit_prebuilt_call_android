@@ -12,14 +12,16 @@ import com.zegocloud.uikit.plugin.adapter.plugins.common.ZegoPluginCallback;
 import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginNotificationConfig;
 import com.zegocloud.uikit.plugin.common.PluginCallbackListener;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
-import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
-import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * for adapter module to reflect,do not delete
+ */
 public class ZegoUIKitCallPluginImpl implements ZegoCallPluginProtocol {
 
     private static ZegoUIKitCallPluginImpl sInstance;
@@ -57,7 +59,8 @@ public class ZegoUIKitCallPluginImpl implements ZegoCallPluginProtocol {
         } else {
             invitationConfig = new ZegoUIKitPrebuiltCallInvitationConfig();
         }
-        ZegoUIKitPrebuiltCallService.init(application, appID, appSign, userID, userName, invitationConfig);
+        CallInvitationServiceImpl.getInstance()
+            .init(application, appID, appSign, null, userID, userName, invitationConfig);
     }
 
     @Override
@@ -69,17 +72,18 @@ public class ZegoUIKitCallPluginImpl implements ZegoCallPluginProtocol {
         } else {
             invitationConfig = new ZegoUIKitPrebuiltCallInvitationConfig();
         }
-        ZegoUIKitPrebuiltCallService.initWithToken(application, appID, token, userID, userName, invitationConfig);
+        CallInvitationServiceImpl.getInstance()
+            .init(application, appID, null, token, userID, userName, invitationConfig);
     }
 
     @Override
     public void unInit() {
-        ZegoUIKitPrebuiltCallService.unInit();
+        CallInvitationServiceImpl.getInstance().unInit();
     }
 
     @Override
     public void logoutUser() {
-        ZegoUIKitPrebuiltCallService.logoutUser();
+        CallInvitationServiceImpl.getInstance().logoutUser();
     }
 
     @Override

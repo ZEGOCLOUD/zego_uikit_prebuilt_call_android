@@ -97,8 +97,8 @@ public class CallInvitationServiceImpl {
     }
 
     public void hideIncomingCallDialog() {
-        Timber.d("hideIncomingCallDialog() called");
         if (invitationDialog != null && invitationDialog.isShowing()) {
+            Timber.d("hideIncomingCallDialog() called");
             invitationDialog.hide();
         }
         invitationDialog = null;
@@ -362,7 +362,7 @@ public class CallInvitationServiceImpl {
         onPrebuiltCallRoomLeft(null);
 
         // when receive offline calls,no logout ,and just destroy,will keep receive
-        // offline calls. and should clear userRep data.
+        // offline calls. and should clear userRepo data.
         if (userRepository.getUserInfo() != null) {
             userRepository.onUserLogoutSuccess();
         } else {
@@ -376,6 +376,7 @@ public class CallInvitationServiceImpl {
         // when receive offline calls,no logout ,and just destroy,will keep receive
         // offline calls.
         zimBridge.destroy();
+        ZegoUIKit.unInitExpressEngine();
     }
 
     public ZegoUIKitPrebuiltCallConfigProvider getPrebuiltCallConfigProvider() {

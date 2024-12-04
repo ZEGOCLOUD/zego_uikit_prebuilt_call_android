@@ -11,9 +11,11 @@ import com.zegocloud.uikit.prebuilt.call.config.ZegoBottomMenuBarConfig;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoMenuBarButtonName;
 import com.zegocloud.uikit.prebuilt.call.config.ZegoTopMenuBarConfig;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
+import com.zegocloud.uikit.prebuilt.call.event.CallEvents;
 import com.zegocloud.uikit.prebuilt.call.event.Events;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.service.defines.ZegoAudioOutputDevice;
+import com.zegocloud.uikit.service.defines.ZegoInRoomCommandListener;
 import com.zegocloud.uikit.service.defines.ZegoSendInRoomCommandCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import java.util.ArrayList;
@@ -264,10 +266,11 @@ public class ZegoUIKitPrebuiltCallService {
     }
 
     /**
-     * Other user in the room will receive callback in
-     * @param command
-     * @param toUserList
-     * @param callback
+     * interface to send custom command in room.
+     * Other users in the room can listen to this by {@link  CallEvents#addInRoomCommandListener(ZegoInRoomCommandListener)}
+     * @param command command content, max 1024 bytes.To protect privacy, please do not include any sensitive user information in this interface, including but not limited to phone numbers, ID card numbers, passport numbers, real names, etc.
+     * @param toUserList  command recipient list. Note: When it is [null], the SDK will send custom command to all users in the room.
+     * @param callback send command result.
      */
     public static void sendInRoomCommand(String command, ArrayList<String> toUserList, ZegoSendInRoomCommandCallback callback) {
         CallInvitationServiceImpl.getInstance().api_sendInRoomCommand(command, toUserList, callback);

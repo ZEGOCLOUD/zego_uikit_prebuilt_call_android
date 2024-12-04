@@ -41,7 +41,7 @@
     android:layout_width="37dp"
     android:layout_height="37dp"
     android:layout_centerVertical="true"
-    android:layout_marginEnd="20dp"
+    android:layout_marginEnd="12dp"
     android:layout_toStartOf="@+id/dialog_call_accept"
     android:src="@drawable/zego_uikit_icon_dialog_voice_decline" />
 
