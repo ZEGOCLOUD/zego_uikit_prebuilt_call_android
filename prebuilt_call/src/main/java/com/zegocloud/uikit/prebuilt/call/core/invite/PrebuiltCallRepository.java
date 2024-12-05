@@ -433,6 +433,9 @@ public class PrebuiltCallRepository {
 
     private void onPrebuiltReceiveCallNoResponse(String zimCallID, List<ZegoUIKitUser> invitees) {
         if (callInvitationData != null && Objects.equals(zimCallID, callInvitationData.invitationID)) {
+            if (!invitees.contains(ZegoUIKit.getLocalUser())) {
+                return;
+            }
             ZIMUserInfo selfUserInfo = ZegoSignalingPlugin.getInstance().getUserInfo();
             ZIMCallInfo zimCallInfo = ZegoSignalingPlugin.getInstance().getZIMCallInfo(zimCallID);
 
@@ -462,6 +465,9 @@ public class PrebuiltCallRepository {
 
     private void onPrebuiltReceiveCallAccepted(String zimCallID, ZegoUIKitUser invitee, String data) {
         if (callInvitationData != null && Objects.equals(zimCallID, callInvitationData.invitationID)) {
+            if (invitee != ZegoUIKit.getLocalUser()) {
+                return;
+            }
             setCallState(CONNECTED);
             stopRingTone();
             notifyOutgoingCallAccepted(invitee, zimCallID);
@@ -470,6 +476,9 @@ public class PrebuiltCallRepository {
 
     private void onPrebuiltReceiveCallRejected(String zimCallID, ZegoUIKitUser invitee, String data) {
         if (callInvitationData != null && Objects.equals(zimCallID, callInvitationData.invitationID)) {
+            if (invitee != ZegoUIKit.getLocalUser()) {
+                return;
+            }
             ZIMUserInfo selfUserInfo = ZegoSignalingPlugin.getInstance().getUserInfo();
             ZIMCallInfo zimCallInfo = ZegoSignalingPlugin.getInstance().getZIMCallInfo(zimCallID);
 
