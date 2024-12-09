@@ -16,7 +16,12 @@ public class PrebuiltCallUtil {
 
     public static String generatePrebuiltCallRoomID() {
         String callID = null;
-        String userID = ZegoUIKit.getLocalUser().userID;
+        String userID;
+        if (ZegoUIKit.getLocalUser() == null) {
+            userID = "";
+        } else {
+            userID = ZegoUIKit.getLocalUser().userID;
+        }
         if (userID != null) {
             callID = "call_" + userID + "_" + System.currentTimeMillis();
         }

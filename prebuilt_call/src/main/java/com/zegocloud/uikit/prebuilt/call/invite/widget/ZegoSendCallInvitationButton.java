@@ -154,8 +154,12 @@ public class ZegoSendCallInvitationButton extends ZegoStartInvitationButton {
             invitees.size() > 1);
 
         ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
+        String userName = "" ;
+        if(uiKitUser != null){
+            userName = uiKitUser.userName;
+        }
         String offlineTitle = PrebuiltCallNotificationManager.getBackgroundNotificationTitle(isVideoCall,
-            invitees.size() > 1, uiKitUser.userName);
+            invitees.size() > 1, userName);
 
         if (TextUtils.isEmpty(resourceID)) {
             offlineResourceID = "zegouikit_call";

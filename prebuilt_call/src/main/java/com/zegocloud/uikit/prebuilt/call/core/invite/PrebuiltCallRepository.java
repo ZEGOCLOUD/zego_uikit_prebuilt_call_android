@@ -787,8 +787,13 @@ public class PrebuiltCallRepository {
         boolean isGroup = invitees.size() > 1;
 
         if (TextUtils.isEmpty(pushNotificationConfig.getTitle())) {
+            ZegoUIKitUser uiKitUser = ZegoUIKit.getLocalUser();
+            String userName = "";
+            if (uiKitUser != null) {
+                userName = uiKitUser.userName;
+            }
             String offlineTitle = PrebuiltCallNotificationManager.getBackgroundNotificationTitle(isVideoCall, isGroup,
-                localUser.userName);
+                userName);
             pushNotificationConfig.setTitle(offlineTitle);
         }
         if (TextUtils.isEmpty(pushNotificationConfig.getMessage())) {
