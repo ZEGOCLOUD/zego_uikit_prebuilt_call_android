@@ -22,7 +22,6 @@ public class PrebuiltUserRepository {
     private PrebuiltCallZIMBridge zimBridge;
     private boolean isLoginIng = false;
     private ZIMUserInfo zimUserInfo;
-    private boolean hasNotified;
 
     private ZIMEventHandler zimEventHandler = new ZIMEventHandler() {
         @Override
@@ -118,6 +117,7 @@ public class PrebuiltUserRepository {
         }
         zimUserInfo = null;
         removeCallbacks();
+        isLoginIng = false;
     }
 
 
