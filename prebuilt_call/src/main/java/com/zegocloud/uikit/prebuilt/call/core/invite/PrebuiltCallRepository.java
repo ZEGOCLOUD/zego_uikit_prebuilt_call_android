@@ -1125,25 +1125,27 @@ public class PrebuiltCallRepository {
             String callResourceID = pushRepository.getCallResourceID();
             ZIMCallInfo zimCallInfo = zimBridge.getZIMCallInfo(zimCallID);
             ZIMUserInfo localUser = zimBridge.getLocalUser();
-            if (zimCallInfo.mode == ZIMCallInvitationMode.GENERAL) {
-                if (Objects.equals(localUser.userID, zimCallInfo.inviter)) {
-                    List<String> collect = zimCallInfo.callUserList.stream().filter(zimCallUserInfo -> {
-                        boolean notSelf = !Objects.equals(localUser.userID, zimCallUserInfo.userID);
-                        boolean received = zimCallUserInfo.state == ZIMCallUserState.RECEIVED;
-                        return notSelf && received;
-                    }).map(zimCallUserInfo -> zimCallUserInfo.userID).collect(Collectors.toList());
-                    if (!collect.isEmpty()) {
-                        callCancel(collect, zimCallInfo.callID, callResourceID, null);
+            if (localUser != null) { // if zim has logged out.
+                if (zimCallInfo.mode == ZIMCallInvitationMode.GENERAL) {
+                    if (Objects.equals(localUser.userID, zimCallInfo.inviter)) {
+                        List<String> collect = zimCallInfo.callUserList.stream().filter(zimCallUserInfo -> {
+                            boolean notSelf = !Objects.equals(localUser.userID, zimCallUserInfo.userID);
+                            boolean received = zimCallUserInfo.state == ZIMCallUserState.RECEIVED;
+                            return notSelf && received;
+                        }).map(zimCallUserInfo -> zimCallUserInfo.userID).collect(Collectors.toList());
+                        if (!collect.isEmpty()) {
+                            callCancel(collect, zimCallInfo.callID, callResourceID, null);
+                        }
                     }
+                } else {
+                    //                if (invitationConfig.endCallWhenInitiatorLeave && Objects.equals(localUser.userID, zimCallInfo.inviter)) {
+                    //                    callEnd(zimCallInfo.callID, callResourceID, null);
+                    //                } else {
+                    //                    callQuit(zimCallID, callResourceID, null);
+                    //                }
+                    // endCallWhenInitiatorLeave was processed in onPrebuiltCallRoomUserLeft.
+                    callQuit(zimCallID, callResourceID, null);
                 }
-            } else {
-                //                if (invitationConfig.endCallWhenInitiatorLeave && Objects.equals(localUser.userID, zimCallInfo.inviter)) {
-                //                    callEnd(zimCallInfo.callID, callResourceID, null);
-                //                } else {
-                //                    callQuit(zimCallID, callResourceID, null);
-                //                }
-                // endCallWhenInitiatorLeave was processed in onPrebuiltCallRoomUserLeft.
-                callQuit(zimCallID, callResourceID, null);
             }
         }
 
