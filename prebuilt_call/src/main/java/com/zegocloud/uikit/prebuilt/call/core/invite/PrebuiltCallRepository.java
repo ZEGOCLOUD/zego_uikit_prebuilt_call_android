@@ -630,7 +630,7 @@ public class PrebuiltCallRepository {
 
         ZegoUIKitPrebuiltCallInvitationConfig invitationConfig = CallInvitationServiceImpl.getInstance()
             .getCallInvitationConfig();
-        if (invitationConfig != null) {
+        if (invitationConfig == null) {
             return;
         }
         if (invitationConfig.callingConfig == null || !invitationConfig.callingConfig.canInvitingInCalling) {
