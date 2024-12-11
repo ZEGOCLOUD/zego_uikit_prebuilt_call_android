@@ -11,10 +11,12 @@ import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.core.push.ZIMPushMessage;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
+import im.zego.uikit.libuikitreport.ReportUtil;
 import im.zego.zpns.ZPNsMessageReceiver;
 import im.zego.zpns.entity.ZPNsMessage;
 import im.zego.zpns.entity.ZPNsRegisterMessage;
 import im.zego.zpns.enums.ZPNsConstants.PushSource;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import timber.log.Timber;
@@ -44,6 +46,7 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
                 // else we assume that app is not started,offline message is effective
                 if (TextUtils.isEmpty(pushMessage.payLoad)) {    //Empty payLoad means cancel call
                     ZIMPushMessage zimPushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
+
                     // cancel call
                     ZegoUIKitUser localUser = CallInvitationServiceImpl.getInstance().getLocalUser();
                     if (topActivity instanceof CallInviteActivity && localUser == null) {
@@ -54,6 +57,13 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
                         zimPushMessage.invitationID)) {
                         CallInvitationServiceImpl.getInstance().dismissCallNotification();
                         CallInvitationServiceImpl.getInstance().clearPushMessage();
+
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("call_id", pushMessage.invitationID);
+                        hashMap.put("app_state", "restarted");
+                        hashMap.put("action", "inviterCancel");
+                        ReportUtil.reportEvent("call/respondInvitation", hashMap);
+
                     }
                 } else {
                     // if app have background activity,we assume that app has already login in.In this
@@ -65,6 +75,11 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
                         .getCallInvitationData();
                     if (callInvitationData == null) {
                         CallInvitationServiceImpl.getInstance().setZIMPushMessage(pushMessage);
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("call_id", pushMessage.invitationID);
+                        hashMap.put("app_state", "restarted");
+                        hashMap.put("extended_data", pushMessage.payLoad);
+                        ReportUtil.reportEvent("call/invitationReceived", hashMap);
                         CallInvitationServiceImpl.getInstance().showCallNotification();
                     }
                 }

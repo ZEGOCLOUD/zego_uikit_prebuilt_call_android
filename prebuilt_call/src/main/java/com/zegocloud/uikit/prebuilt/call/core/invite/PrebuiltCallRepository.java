@@ -28,6 +28,7 @@ import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallType;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallUser;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoInvitationCallListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
+import im.zego.uikit.libuikitreport.ReportUtil;
 import im.zego.zim.ZIM;
 import im.zego.zim.callback.ZIMCallAcceptanceSentCallback;
 import im.zego.zim.callback.ZIMCallCancelSentCallback;
@@ -191,28 +192,57 @@ public class PrebuiltCallRepository {
         if (zimCallInfo == null) {
             return;
         }
+        PrebuiltCallInviteExtendedData extendedData = gson.fromJson(info.extendedData,
+            PrebuiltCallInviteExtendedData.class);
+        if (extendedData != null && extendedData.getType() != ZegoCallType.VOICE_CALL.value()
+            && extendedData.getType() != ZegoCallType.VIDEO_CALL.value()) {
+            Timber.d("zimCallInvitationReceived() called with: extendedData = [" + extendedData + "],not call,return");
+            return;
+        }
+
+        String notificationAction = pushRepository.getNotificationAction();
+        Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
+        String app_state;
+        if (notificationAction == null) {
+            if (PrebuiltCallUtil.isAppBackground(topActivity)) {
+                app_state = "background";
+            } else {
+                app_state = "active";
+            }
+            HashMap<String, Object> hashMap = new HashMap<>();
+            hashMap.put("call_id", callID);
+            hashMap.put("inviter", info.inviter);
+            hashMap.put("app_state", app_state);
+            hashMap.put("extended_data", info.extendedData);
+            ReportUtil.reportEvent("call/invitationReceived", hashMap);
+        }
+
+        String currentRoomID = CallInvitationServiceImpl.getInstance().getPrebuiltCallRoom();
+        if (callState > 0 || !TextUtils.isEmpty(currentRoomID)) {
+            Timber.d("zimCallInvitationReceived() called with: callState = [" + callState + "], currentRoomID = ["
+                + currentRoomID + "], auto reject,return");
+            String autoRejectJsonString = PrebuiltCallUtil.getAutoRejectJsonString(callID);
+            ZegoUIKit.getSignalingPlugin()
+                .refuseInvitation(extendedData.getInviterId(), autoRejectJsonString, new PluginCallbackListener() {
+                    @Override
+                    public void callback(Map<String, Object> result) {
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("call_id", zimCallInfo.callID);
+                        hashMap.put("app_state", "active");
+                        hashMap.put("action", "busy");
+                        ReportUtil.reportEvent("call/respondInvitation", hashMap);
+
+                    }
+                });
+            return;
+        }
+        PrebuiltCallInviteExtendedData.Data data = gson.fromJson(extendedData.getData(),
+            PrebuiltCallInviteExtendedData.Data.class);
         List<String> callUserList = zimCallInfo.callUserList.stream().map(zimCallUserInfo -> zimCallUserInfo.userID)
             .collect(Collectors.toList());
         ZegoSignalingPlugin.getInstance()
             .queryUserInfo(callUserList, new ZIMUsersInfoQueryConfig(), (userList, errorUserList, errorInfo) -> {
-                if (errorInfo.code == ZIMErrorCode.SUCCESS) {
-                    PrebuiltCallInviteExtendedData extendedData = gson.fromJson(info.extendedData,
-                        PrebuiltCallInviteExtendedData.class);
-                    if (extendedData.getType() != ZegoCallType.VOICE_CALL.value()
-                        && extendedData.getType() != ZegoCallType.VIDEO_CALL.value()) {
-                        return;
-                    }
-                    String currentRoomID = ZegoUIKit.getRoom().roomID;
-                    if (callState > 0 || !TextUtils.isEmpty(currentRoomID)) {
-                        String autoRejectJsonString = PrebuiltCallUtil.getAutoRejectJsonString(callID);
-                        ZegoUIKit.getSignalingPlugin()
-                            .refuseInvitation(extendedData.getInviterId(), autoRejectJsonString, null);
-                        return;
-                    }
-                    PrebuiltCallInviteExtendedData.Data data = gson.fromJson(extendedData.getData(),
-                        PrebuiltCallInviteExtendedData.Data.class);
-                    onPrebuiltReceiveCallComing(zimCallInfo, extendedData, data);
-                }
+                onPrebuiltReceiveCallComing(zimCallInfo, extendedData, data);
             });
     }
 
@@ -222,10 +252,9 @@ public class PrebuiltCallRepository {
         ZIMPushMessage pushMessage = pushRepository.getPushMessage();
         String notificationAction = pushRepository.getNotificationAction();
 
-        Timber.d(
-            "onInvitationReceived() called with: zimCallInfo = [" + zimCallInfo + "], topActivity = [" + topActivity
-                + "], pushMessage = [" + pushMessage + "], notificationAction = [" + notificationAction
-                + "],callState: " + callState);
+        Timber.d("onPrebuiltReceiveCallComing() called with: zimCallInfo = [" + zimCallInfo + "], topActivity = ["
+            + topActivity + "], pushMessage = [" + pushMessage + "], notificationAction = [" + notificationAction
+            + "]");
 
         ZegoUIKitUser caller = getUiKitUserFromUserID(zimCallInfo.caller);
         callInvitationData = new ZegoCallInvitationData();
@@ -266,6 +295,11 @@ public class PrebuiltCallRepository {
                             if (topActivity != null) {
                                 CallInviteActivity.startCallPage(topActivity);
                             }
+                            HashMap<String, Object> hashMap = new HashMap<>();
+                            hashMap.put("call_id", zimCallInfo.callID);
+                            hashMap.put("app_state", "restarted");
+                            hashMap.put("action", "accept");
+                            ReportUtil.reportEvent("call/respondInvitation", hashMap);
                         }
                     });
                     clearPushMessage();
@@ -281,6 +315,11 @@ public class PrebuiltCallRepository {
                 ZegoUIKit.getSignalingPlugin().refuseInvitation(caller.userID, "", new PluginCallbackListener() {
                     @Override
                     public void callback(Map<String, Object> result) {
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("call_id", zimCallInfo.callID);
+                        hashMap.put("app_state", "restarted");
+                        hashMap.put("action", "refuse");
+                        ReportUtil.reportEvent("call/respondInvitation", hashMap);
                         CallInvitationServiceImpl.getInstance().unInitSDK();
                     }
                 });
@@ -307,6 +346,19 @@ public class PrebuiltCallRepository {
         if (callInvitationData == null || !Objects.equals(callID, callInvitationData.invitationID)) {
             return;
         }
+        Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
+        String app_state;
+        if (PrebuiltCallUtil.isAppBackground(topActivity)) {
+            app_state = "background";
+        } else {
+            app_state = "active";
+        }
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("call_id", callID);
+        hashMap.put("app_state", app_state);
+        hashMap.put("action", "inviterCancel");
+        ReportUtil.reportEvent("call/respondInvitation", hashMap);
+
         List<String> userIDList = Collections.singletonList(info.inviter);
         ZIMUsersInfoQueryConfig queryConfig = new ZIMUsersInfoQueryConfig();
         ZegoSignalingPlugin.getInstance()
@@ -335,6 +387,18 @@ public class PrebuiltCallRepository {
             return;
         }
         ZegoUIKitUser uiKitUser = getUiKitUserFromUserID(zimCallInfo.caller);
+
+        Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
+        String app_state;
+        if (PrebuiltCallUtil.isAppBackground(topActivity)) {
+            app_state = "background";
+        } else {
+            app_state = "active";
+        }
+        Map<String, Object> hashMap = new HashMap<>();
+        hashMap.put("app_state", app_state);
+        hashMap.put("action", "timeout");
+        ReportUtil.reportEvent("call/respondInvitation", hashMap);
 
         hideIncomingCallDialog();
         dismissIncomingCallNotification();
@@ -645,6 +709,7 @@ public class PrebuiltCallRepository {
                 }
                 return;
             }
+
             // pre set to reject other call when sending call
             setCallState(PrebuiltCallRepository.OUTGOING);
             ZegoUIKit.getSignalingPlugin()
@@ -659,6 +724,11 @@ public class PrebuiltCallRepository {
                     } else {
                         setCallState(PrebuiltCallRepository.NONE);
                     }
+                    HashMap<String, Object> hashMap = new HashMap<>();
+                    hashMap.put("call_id", invitationID);
+                    hashMap.put("room_id", callID);
+                    hashMap.put("source", "");
+                    ReportUtil.reportEvent("call/invite", hashMap);
                     if (callbackListener != null) {
                         callbackListener.callback(result);
                     }
@@ -681,6 +751,13 @@ public class PrebuiltCallRepository {
                     @Override
                     public void onCallInvitationSent(String zimCallID, ZIMCallInvitationSentInfo info,
                         ZIMError errorInfo) {
+
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("call_id", zimCallID);
+                        hashMap.put("room_id", callID);
+                        hashMap.put("source", "");
+                        ReportUtil.reportEvent("call/invite", hashMap);
+
                         if (errorInfo.code == ZIMErrorCode.SUCCESS) {
                             if (info.errorUserList.size() < idList.size()) {
                                 onCallInvitationSentSucceed(invitees, invitationType, customData, zimCallID, data);
@@ -852,6 +929,8 @@ public class PrebuiltCallRepository {
         ZegoUIKit.getSignalingPlugin().callReject(invitationID, data, new PluginCallbackListener() {
             @Override
             public void callback(Map<String, Object> result) {
+
+
                 if (callbackListener != null) {
                     callbackListener.callback(result);
                 }

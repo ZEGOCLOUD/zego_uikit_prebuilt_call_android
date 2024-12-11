@@ -25,6 +25,8 @@ import com.zegocloud.uikit.prebuilt.call.core.push.ZIMPushMessage;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoTranslationText;
+import im.zego.uikit.libuikitreport.ReportUtil;
+import java.util.HashMap;
 import timber.log.Timber;
 
 public class PrebuiltCallNotificationManager {
@@ -58,6 +60,7 @@ public class PrebuiltCallNotificationManager {
 
             hasNotificationPermission, notificationsEnabled);
         if (hasNotificationPermission && notificationsEnabled) {
+
             isNotificationShowed = true;
             Notification callNotification = createCallNotification(context);
 
@@ -139,8 +142,7 @@ public class PrebuiltCallNotificationManager {
             channelDesc = invitationConfig.notificationConfig.channelDesc;
             String soundName = invitationConfig.notificationConfig.sound;
             String rawSoundName = getSoundName(soundName);
-            int identifier = context.getResources()
-                .getIdentifier(rawSoundName, "raw", context.getPackageName());
+            int identifier = context.getResources().getIdentifier(rawSoundName, "raw", context.getPackageName());
             soundUri = RingtoneManager.getUriFromID(context, identifier);
         }
 
@@ -178,6 +180,10 @@ public class PrebuiltCallNotificationManager {
         String title;
         String body;
         boolean isVideoCall;
+
+        String app_state;
+        String call_id;
+
         ZIMPushMessage zimPushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
         if (zimPushMessage == null) {
             ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
@@ -185,6 +191,9 @@ public class PrebuiltCallNotificationManager {
             boolean isGroup = invitationData.invitees.size() > 1;
             title = getBackgroundNotificationTitle(isVideoCall, isGroup, invitationData.inviter.userName);
             body = getBackgroundNotificationMessage(isVideoCall, isGroup);
+
+            app_state = "background";
+            call_id = invitationData.invitationID;
         } else {
             Gson gson = new Gson();
             PrebuiltCallInviteExtendedData extendedData = gson.fromJson(zimPushMessage.payLoad,
@@ -192,7 +201,14 @@ public class PrebuiltCallNotificationManager {
             isVideoCall = extendedData.getType() == ZegoInvitationType.VIDEO_CALL.getValue();
             title = zimPushMessage.title;
             body = zimPushMessage.body;
+
+            app_state = "restarted";
+            call_id = zimPushMessage.invitationID;
         }
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("call_id", call_id);
+        hashMap.put("app_state", app_state);
+        ReportUtil.reportEvent("call/displayNotification", hashMap);
 
         ZegoUIKitPrebuiltCallInvitationConfig invitationConfig = CallInvitationServiceImpl.getInstance()
             .getCallInvitationConfig();

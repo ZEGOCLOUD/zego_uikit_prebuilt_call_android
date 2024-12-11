@@ -275,4 +275,8 @@ public class ZegoUIKitPrebuiltCallService {
     public static void sendInRoomCommand(String command, ArrayList<String> toUserList, ZegoSendInRoomCommandCallback callback) {
         CallInvitationServiceImpl.getInstance().api_sendInRoomCommand(command, toUserList, callback);
     }
+
+    public String getVersion() {
+        return CallInvitationServiceImpl.getInstance().getVersion();
+    }
 }

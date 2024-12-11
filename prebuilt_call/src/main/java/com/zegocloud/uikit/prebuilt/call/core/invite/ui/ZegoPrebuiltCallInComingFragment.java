@@ -36,7 +36,9 @@ import com.zegocloud.uikit.prebuilt.call.invite.internal.IncomingCallButtonListe
 import com.zegocloud.uikit.prebuilt.call.invite.internal.InvitationTextEnglish;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoCallText;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoTranslationText;
+import im.zego.uikit.libuikitreport.ReportUtil;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -122,7 +124,16 @@ public class ZegoPrebuiltCallInComingFragment extends Fragment {
             CallInvitationServiceImpl.getInstance().rejectInvitation(new PluginCallbackListener() {
                 @Override
                 public void callback(Map<String, Object> result) {
-
+                    HashMap<String, Object> hashMap = new HashMap<>();
+                    ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
+                    if (invitationData != null) {
+                        hashMap.put("call_id", invitationData.invitationID);
+                    } else {
+                        hashMap.put("call_id", "");
+                    }
+                    hashMap.put("app_state", "active");
+                    hashMap.put("action", "refuse");
+                    ReportUtil.reportEvent("call/respondInvitation", hashMap);
                 }
             });
             ((CallInviteActivity)requireActivity()).finishCallActivityAndMoveToFront();
@@ -147,6 +158,17 @@ public class ZegoPrebuiltCallInComingFragment extends Fragment {
             CallInvitationServiceImpl.getInstance().acceptInvitation(new PluginCallbackListener() {
                 @Override
                 public void callback(Map<String, Object> result) {
+                    HashMap<String, Object> hashMap = new HashMap<>();
+                    ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
+                    if (invitationData != null ) {
+                        hashMap.put("call_id", invitationData.invitationID);
+                    }else {
+                        hashMap.put("call_id", "");
+                    }
+                    hashMap.put("app_state", "active");
+                    hashMap.put("action", "accept");
+                    ReportUtil.reportEvent("call/respondInvitation", hashMap);
+
                     CallInvitationServiceImpl.getInstance().dismissCallNotification();
                     CallInvitationServiceImpl.getInstance().clearPushMessage();
                 }

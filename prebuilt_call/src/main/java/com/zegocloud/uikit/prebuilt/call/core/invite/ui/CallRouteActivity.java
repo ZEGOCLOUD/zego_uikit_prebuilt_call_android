@@ -10,6 +10,8 @@ import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.core.notification.PrebuiltCallNotificationManager;
 import com.zegocloud.uikit.prebuilt.call.core.push.ZIMPushMessage;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
+import im.zego.uikit.libuikitreport.ReportUtil;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import timber.log.Timber;
@@ -38,6 +40,12 @@ public class CallRouteActivity extends AppCompatActivity {
                 CallInvitationServiceImpl.getInstance().acceptInvitation(new PluginCallbackListener() {
                     @Override
                     public void callback(Map<String, Object> result) {
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("call_id", invitationData.invitationID);
+                        hashMap.put("app_state", "background");
+                        hashMap.put("action", "accept");
+                        ReportUtil.reportEvent("call/respondInvitation", hashMap);
+
                         CallInviteActivity.startCallPage(context);
                     }
                 });
@@ -62,7 +70,16 @@ public class CallRouteActivity extends AppCompatActivity {
             }
         } else if (Objects.equals(action, actionDecline)) {
             if (invitationData != null) {
-                CallInvitationServiceImpl.getInstance().rejectInvitation(null);
+                CallInvitationServiceImpl.getInstance().rejectInvitation(new PluginCallbackListener() {
+                    @Override
+                    public void callback(Map<String, Object> result) {
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("call_id", invitationData.invitationID);
+                        hashMap.put("app_state", "background");
+                        hashMap.put("action", "refuse");
+                        ReportUtil.reportEvent("call/respondInvitation", hashMap);
+                    }
+                });
             } else {
                 if (zimPushMessage != null) {
                     CallInvitationServiceImpl.getInstance().setNotificationClickAction(action);

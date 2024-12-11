@@ -42,8 +42,10 @@ import com.zegocloud.uikit.service.defines.ZegoSendInRoomCommandCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import com.zegocloud.uikit.service.express.IExpressEngineEventHandler;
+import im.zego.uikit.libuikitreport.ReportUtil;
 import im.zego.zegoexpress.entity.ZegoUser;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import timber.log.Timber;
@@ -86,6 +88,12 @@ public class CallInvitationServiceImpl {
             "showIncomingCallDialog() called with: callInvitationData = [" + callInvitationData + "],topActivity = "
                 + topActivity);
         if (!isIncomingCallDialogShown()) {
+
+            HashMap<String, Object> hashMap = new HashMap<>();
+            hashMap.put("call_id", callInvitationData.invitationID);
+            hashMap.put("app_state", "active");
+            ReportUtil.reportEvent("call/displayNotification", hashMap);
+
             playIncomingRingTone();
             invitationDialog = new CallInvitationDialog(topActivity, callInvitationData);
             invitationDialog.show();
@@ -208,6 +216,22 @@ public class CallInvitationServiceImpl {
     public boolean init(Application application, long appID, String appSign, String token, String userID,
         String userName, ZegoUIKitPrebuiltCallInvitationConfig config) {
 
+        HashMap<String, Object> commonParams = new HashMap<>();
+        commonParams.put(ReportUtil.PLATFORM, "android");
+        commonParams.put(ReportUtil.PLATFORM_VERSION, android.os.Build.VERSION.SDK_INT + "");
+        commonParams.put(ReportUtil.UIKIT_VERSION, ZegoUIKit.getVersion());
+        commonParams.put(ReportUtil.USER_ID, userID);
+        commonParams.put("call_version", getVersion());
+        String verify = "";
+        if (!TextUtils.isEmpty(appSign)) {
+            verify = appSign;
+        } else {
+            if (!TextUtils.isEmpty(token)) {
+                verify = token;
+            }
+        }
+        ReportUtil.create(appID, verify, commonParams);
+
         boolean result = initSDK(application, appID, appSign, token);
         Timber.d("initSDK result : " + result);
         if (result) {
@@ -218,10 +242,9 @@ public class CallInvitationServiceImpl {
     }
 
     public boolean initSDK(Application application, long appID, String appSign, String token) {
-        Timber.d(
-            "Call initSDK() called with: version = [" + version() + "], appID = [" + appID + "], appSign.isEmpty() = ["
-                + TextUtils.isEmpty(appSign) + "], token.isEmpty() = [" + TextUtils.isEmpty(token) + "],alreadyInit: "
-                + alreadyInit);
+        Timber.d("Call initSDK() called with: version = [" + getVersion() + "], appID = [" + appID
+            + "], appSign.isEmpty() = [" + TextUtils.isEmpty(appSign) + "], token.isEmpty() = [" + TextUtils.isEmpty(
+            token) + "],alreadyInit: " + alreadyInit);
         if (alreadyInit) {
             // we assume that user not changed his appID and appSign
             ErrorEventsListener errorEvents = ZegoUIKitPrebuiltCallService.events.getErrorEventsListener();
@@ -232,8 +255,23 @@ public class CallInvitationServiceImpl {
             return true;
         }
 
-        boolean result = ZegoUIKit.init(application, appID, appSign, ZegoScenario.STANDARD_VIDEO_CALL);
-        if (result) {
+        long startTime = System.currentTimeMillis();
+
+        ZegoUIKit.init(application, appID, appSign, ZegoScenario.STANDARD_VIDEO_CALL);
+
+        boolean initExpress = ZegoUIKit.isExpressEngineInitSucceed();
+        boolean initZIM = ZegoUIKit.getSignalingPlugin().isPluginInitSucceed();
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        if (initExpress && initZIM) {
+            hashMap.put("error", 0);
+        } else {
+            hashMap.put("error", -1);
+        }
+        hashMap.put("start_time", startTime);
+        ReportUtil.reportEvent("call/init", hashMap);
+
+        if (initExpress && initZIM) {
             alreadyInit = true;
             this.application = application;
 
@@ -245,16 +283,15 @@ public class CallInvitationServiceImpl {
             if (!TextUtils.isEmpty(token)) {
                 expressBridge.renewToken(token);
             }
-        }
-        if (!result) {
-            String errorMessage = "Create engine error,please check if your AppID and AppSign is correct";
+        } else {
+            String errorMessage = "Create engine error,please check if your AppID|AppSign|Token is correct";
             Timber.e(errorMessage);
             ErrorEventsListener errorEvents = ZegoUIKitPrebuiltCallService.events.getErrorEventsListener();
             if (errorEvents != null) {
                 errorEvents.onError(ErrorEventsListener.INIT_PARAM_ERROR, errorMessage);
             }
         }
-        return result;
+        return initExpress && initZIM;
     }
 
     public void setCallResourceID(String resourceID) {
@@ -355,6 +392,9 @@ public class CallInvitationServiceImpl {
         endCall();
         logoutUser();
         unInitSDK();
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        ReportUtil.reportEvent("call/unInit", hashMap);
     }
 
     public void unInitSDK() {
@@ -695,7 +735,7 @@ public class CallInvitationServiceImpl {
     }
 
 
-    String version() {
-        return "Prebuilt_" + "Call:" + "3.7.5," + ZegoUIKit.getVersion();
+    public String getVersion() {
+        return "Prebuilt_Call:" + "3.8.8";
     }
 }
