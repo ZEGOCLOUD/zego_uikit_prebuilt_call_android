@@ -100,12 +100,12 @@ public class CallInvitationServiceImpl {
         }
     }
 
-    public boolean isIncomingCallDialogShown() {
+    private boolean isIncomingCallDialogShown() {
         return invitationDialog != null && invitationDialog.isShowing();
     }
 
     public void hideIncomingCallDialog() {
-        if (invitationDialog != null && invitationDialog.isShowing()) {
+        if (isIncomingCallDialogShown()) {
             Timber.d("hideIncomingCallDialog() called");
             invitationDialog.hide();
         }
@@ -400,7 +400,7 @@ public class CallInvitationServiceImpl {
     public void unInitSDK() {
         Timber.d("unInitSDK() called");
         onPrebuiltCallRoomLeft(null);
-
+        invitationDialog = null;
         // when receive offline calls,no logout ,and just destroy,will keep receive
         // offline calls. and should clear userRepo data.
         if (userRepository.getUserInfo() != null) {
