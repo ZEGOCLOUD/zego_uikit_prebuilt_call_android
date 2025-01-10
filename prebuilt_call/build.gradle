@@ -40,6 +40,6 @@ dependencies {
     api "androidx.activity:activity:1.6.1"
     api 'com.google.firebase:firebase-messaging:23.2.1'
     api 'im.zego:zpns-fcm:2.7.0'
-
+    api 'com.iqiyi.xcrash:xcrash-android-lib:3.0.0'
 
 }
