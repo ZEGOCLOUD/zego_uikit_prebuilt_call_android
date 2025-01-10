@@ -40,11 +40,15 @@ public class CallRouteActivity extends AppCompatActivity {
                 CallInvitationServiceImpl.getInstance().acceptInvitation(new PluginCallbackListener() {
                     @Override
                     public void callback(Map<String, Object> result) {
-                        HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("call_id", invitationData.invitationID);
-                        hashMap.put("app_state", "background");
-                        hashMap.put("action", "accept");
-                        ReportUtil.reportEvent("call/respondInvitation", hashMap);
+                        int code = (int) result.get("code");
+                        String message = (String) result.get("message");
+                        if (code == 0) {
+                            HashMap<String, Object> hashMap = new HashMap<>();
+                            hashMap.put("call_id", invitationData.invitationID);
+                            hashMap.put("app_state", "background");
+                            hashMap.put("action", "accept");
+                            ReportUtil.reportEvent("call/respondInvitation", hashMap);
+                        }
 
                         CallInviteActivity.startCallPage(context);
                     }

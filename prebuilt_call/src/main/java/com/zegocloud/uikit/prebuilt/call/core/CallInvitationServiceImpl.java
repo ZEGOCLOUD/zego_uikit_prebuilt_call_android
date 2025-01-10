@@ -204,7 +204,9 @@ public class CallInvitationServiceImpl {
 
     public void initAndLoginUserByLastRecord(Application application) {
         MMKV mmkv = MMKV.defaultMMKV(MMKV.SINGLE_PROCESS_MODE, getClass().getName());
-        if (mmkv.contains("appID")) {
+        boolean containsAppID = mmkv.contains("appID");
+        Timber.d("initAndLoginUserByLastRecord() called with: containsAppID = [" + containsAppID + "]");
+        if (containsAppID) {
             long preAppID = mmkv.getLong("appID", 0);
             String preAppSign = mmkv.getString("appSign", "");
             String token = mmkv.getString("appToken", "");
@@ -279,6 +281,7 @@ public class CallInvitationServiceImpl {
             mmkv.putLong("appID", appID);
             mmkv.putString("appSign", appSign);
             mmkv.putString("appToken", token);
+            Timber.d("MMKV.put : appID = [" + appID + "]");
 
             if (!TextUtils.isEmpty(token)) {
                 expressBridge.renewToken(token);

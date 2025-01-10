@@ -85,6 +85,7 @@ public class PrebuiltCallLifecycleHandler {
 
         @Override
         public void onActivityDestroyed(@NonNull Activity activity) {
+            Timber.d("onActivityDestroyed() called with: activity = [" + activity + "]");
             if (activity == topActivity) {
                 clearTopActivity();
             }

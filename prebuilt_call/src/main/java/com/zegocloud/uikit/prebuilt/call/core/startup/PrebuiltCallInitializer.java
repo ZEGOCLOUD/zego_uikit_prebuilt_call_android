@@ -3,6 +3,7 @@ package com.zegocloud.uikit.prebuilt.call.core.startup;
 import android.app.Application;
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import androidx.annotation.NonNull;
@@ -11,7 +12,13 @@ import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.core.notification.RingtoneManager;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import timber.log.Timber;
+import xcrash.ICrashCallback;
+import xcrash.XCrash;
+import xcrash.XCrash.InitParameters;
 
 /**
  * invoked when app start,before Application.onCreate
@@ -20,6 +27,7 @@ public class PrebuiltCallInitializer extends ContentProvider {
 
     @Override
     public boolean onCreate() {
+        Timber.d("------------------PrebuiltCallInitializer onCreate() called,App start------------------");
 
         MMKV.initialize(getContext());
         Application application = (Application) getContext();
@@ -27,8 +35,11 @@ public class PrebuiltCallInitializer extends ContentProvider {
             ZegoUIKit.debugMode(application);
             CallInvitationServiceImpl.getInstance().setUpCallbacksOnAppStart(application);
             RingtoneManager.init(application);
+
+            String baseDir = getContext().getExternalFilesDir(null).getAbsolutePath();
+            String crashFilesDir = baseDir + File.separator + "callkit_crash";
+            initCrashDirs(getContext(), crashFilesDir);
         }
-        Timber.d("------------------PrebuiltCallInitializer onCreate() called,App start------------------");
         return true;
     }
 
@@ -60,5 +71,26 @@ public class PrebuiltCallInitializer extends ContentProvider {
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection,
         @Nullable String[] selectionArgs) {
         return 0;
+    }
+
+    private static void initCrashDirs(Context context, String crashFilesDir) {
+        ICrashCallback callback = new ICrashCallback() {
+            @Override
+            public void onCrash(String logPath, String emergency) throws Exception {
+                File file = new File(logPath);
+                String originalName = file.getName();
+
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm");
+                String formattedDate = dateFormat.format(new Date());
+                File newFile = new File(crashFilesDir, formattedDate + "_" + originalName);
+                boolean renameTo = file.renameTo(newFile);
+
+                Timber.d(
+                    "onCrash() called ,logPath:" + logPath + ",renameTo = [" + newFile.getName() + "], successed = ["
+                        + renameTo + "]");
+            }
+        };
+        XCrash.init(context, new InitParameters().setLogDir(crashFilesDir).setJavaRethrow(true).setJavaLogCountMax(10)
+            .setJavaCallback(callback).setAnrCallback(callback).setNativeCallback(callback).setAnrLogCountMax(10));
     }
 }

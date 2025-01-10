@@ -27,16 +27,21 @@ public class ZegoAcceptCallInvitationButton extends ZegoAcceptInvitationButton {
         CallInvitationServiceImpl.getInstance().acceptInvitation(new PluginCallbackListener() {
             @Override
             public void callback(Map<String, Object> result) {
-                HashMap<String, Object> hashMap = new HashMap<>();
-                ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance().getCallInvitationData();
-                if (invitationData != null) {
-                    hashMap.put("call_id", invitationData.invitationID);
-                } else {
-                    hashMap.put("call_id", "");
+                int code = (int) result.get("code");
+                String message = (String) result.get("message");
+                if (code == 0) {
+                    HashMap<String, Object> hashMap = new HashMap<>();
+                    ZegoCallInvitationData invitationData = CallInvitationServiceImpl.getInstance()
+                        .getCallInvitationData();
+                    if (invitationData != null) {
+                        hashMap.put("call_id", invitationData.invitationID);
+                    } else {
+                        hashMap.put("call_id", "");
+                    }
+                    hashMap.put("app_state", "active");
+                    hashMap.put("action", "accept");
+                    ReportUtil.reportEvent("call/respondInvitation", hashMap);
                 }
-                hashMap.put("app_state", "active");
-                hashMap.put("action", "accept");
-                ReportUtil.reportEvent("call/respondInvitation", hashMap);
 
             }
         });

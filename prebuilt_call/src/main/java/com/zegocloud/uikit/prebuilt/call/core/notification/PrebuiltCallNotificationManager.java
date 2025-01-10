@@ -56,7 +56,7 @@ public class PrebuiltCallNotificationManager {
         }
 
         boolean notificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled();
-        Timber.d("checkNotification : hasNotificationPermission = %b,notificationsEnabled = %b",
+        Timber.d("showCallNotification, hasNotificationPermission = %b,notificationsEnabled = %b",
 
             hasNotificationPermission, notificationsEnabled);
         if (hasNotificationPermission && notificationsEnabled) {

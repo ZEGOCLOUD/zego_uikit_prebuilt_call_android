@@ -29,10 +29,12 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
         Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
 
         Timber.d(
-            "onThroughMessageReceived() called with: topActivity = [" + topActivity + "], pushMessage = [" + pushMessage
+            "onThroughMessageReceived() called with: topActivity = [" + topActivity + "], ZPNsMessage = [" + message
                 + "]");
         if (message.getPushSource() == PushSource.FCM) {
             if (TextUtils.isEmpty(pushMessage.invitationID)) { // not zim push message.
+                Timber.d(
+                    "pushMessage.invitationID = [" + pushMessage.invitationID + "],messages from other push.");
                 String action = "com.zegocloud.zegouikit.call.fcm";
                 String receiver = findReceiver(context, action, context.getPackageName());
                 if (!TextUtils.isEmpty(receiver)) {
@@ -43,6 +45,8 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
                     context.sendBroadcast(intent);
                 }
             } else {
+                Timber.d(
+                    "pushMessage.payLoad = [" + pushMessage.payLoad + "],receive Cancel Call Offline");
                 // else we assume that app is not started,offline message is effective
                 if (TextUtils.isEmpty(pushMessage.payLoad)) {    //Empty payLoad means cancel call
                     ZIMPushMessage zimPushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
@@ -69,6 +73,8 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
                     // if app have background activity,we assume that app has already login in.In this
                     // case,offline message is ignored.
                     if (topActivity != null) {
+                        Timber.d(
+                            "receive offline call but topActivity is not null,ignore this time" );
                         return;
                     }
                     ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance()
