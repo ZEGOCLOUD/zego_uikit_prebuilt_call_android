@@ -27,12 +27,12 @@ public class PrebuiltCallInitializer extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        Timber.d("------------------PrebuiltCallInitializer onCreate() called,App start------------------");
 
         MMKV.initialize(getContext());
         Application application = (Application) getContext();
         if (application != null) {
             ZegoUIKit.debugMode(application);
+            Timber.d("------------------PrebuiltCallInitializer onCreate() called,App start------------------");
             CallInvitationServiceImpl.getInstance().setUpCallbacksOnAppStart(application);
             RingtoneManager.init(application);
 

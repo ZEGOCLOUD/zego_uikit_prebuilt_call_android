@@ -51,6 +51,9 @@ public class PrebuiltCallUtil {
     }
 
     public static boolean isAppBackground(Context context) {
+        if (context == null) {
+            return true;
+        }
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
         for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
