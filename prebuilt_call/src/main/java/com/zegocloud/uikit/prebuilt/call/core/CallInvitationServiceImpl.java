@@ -45,6 +45,7 @@ import com.zegocloud.uikit.service.express.IExpressEngineEventHandler;
 import im.zego.uikit.libuikitreport.ReportUtil;
 import im.zego.zegoexpress.entity.ZegoUser;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -207,11 +208,13 @@ public class CallInvitationServiceImpl {
         boolean containsAppID = mmkv.contains("appID");
         Timber.d("initAndLoginUserByLastRecord() called with: containsAppID = [" + containsAppID + "]");
         if (containsAppID) {
-            long preAppID = mmkv.getLong("appID", 0);
-            String preAppSign = mmkv.getString("appSign", "");
-            String token = mmkv.getString("appToken", "");
+            long preAppID = mmkv.decodeLong("appID", 0);
+            String preAppSign = mmkv.decodeString("appSign", "");
+            String token = mmkv.decodeString("appToken", "");
             initSDK(application, preAppID, preAppSign, token);
             userRepository.initAndLoginUserByLastRecord(null);
+        } else {
+            Timber.d("initAndLoginUserByLastRecord,no AppID found,allKeys: %s",Arrays.asList(mmkv.allKeys()).toString());
         }
     }
 
@@ -278,10 +281,10 @@ public class CallInvitationServiceImpl {
             this.application = application;
 
             MMKV mmkv = MMKV.defaultMMKV(MMKV.SINGLE_PROCESS_MODE, getClass().getName());
-            mmkv.putLong("appID", appID);
-            mmkv.putString("appSign", appSign);
-            mmkv.putString("appToken", token);
-            Timber.d("MMKV.put : appID = [" + appID + "]");
+            boolean encode = mmkv.encode("appID", appID);
+            mmkv.encode("appSign", appSign);
+            mmkv.encode("appToken", token);
+            Timber.d("MMKV.encode : appID = [" + appID + "],result:" + encode);
 
             if (!TextUtils.isEmpty(token)) {
                 expressBridge.renewToken(token);
@@ -367,9 +370,14 @@ public class CallInvitationServiceImpl {
         if (callConfig != null) {
             beautyRepository.updateLanguageSettingsAndApply(callConfig);
             MMKV mmkv = MMKV.defaultMMKV(MMKV.SINGLE_PROCESS_MODE, getClass().getName());
-            long appID = mmkv.getLong("appID", 0);
-            String appSign = mmkv.getString("appSign", "");
-            beautyRepository.init(application, appID, appSign);
+            boolean containsAppID = mmkv.contains("appID");
+            if (containsAppID) {
+                long appID = mmkv.decodeInt("appID", 0);
+                String appSign = mmkv.decodeString("appSign", "");
+                beautyRepository.init(application, appID, appSign);
+            } else {
+                Timber.d("initBeautyPlugin,no AppID found,allKeys: %s", Arrays.asList(mmkv.allKeys()).toString());
+            }
         }
     }
 

@@ -85,9 +85,9 @@ public class PrebuiltUserRepository {
             }
         });
         MMKV mmkv = MMKV.defaultMMKV(MMKV.SINGLE_PROCESS_MODE, getClass().getName());
-        mmkv.putString("userID", userID);
-        mmkv.putString("userName", userName);
-        Timber.d("MMKV.put : userID = [" + userID + "]");
+        boolean result = mmkv.encode("userID", userID);
+        mmkv.encode("userName", userName);
+        Timber.d("MMKV.put : userID = [" + userID + "],result:" + result);
     }
 
     /**
