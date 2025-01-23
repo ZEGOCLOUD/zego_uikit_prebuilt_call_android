@@ -5,8 +5,8 @@ import android.app.Application;
 import android.app.Dialog;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
-import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.internal.ZegoUIKitLanguage;
 import com.zegocloud.uikit.plugin.adapter.plugins.signaling.ZegoSignalingPluginNotificationConfig;
@@ -26,6 +26,7 @@ import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.core.notification.PrebuiltCallNotificationManager;
 import com.zegocloud.uikit.prebuilt.call.core.notification.RingtoneManager;
 import com.zegocloud.uikit.prebuilt.call.core.push.ZIMPushMessage;
+import com.zegocloud.uikit.prebuilt.call.core.utils.Storage;
 import com.zegocloud.uikit.prebuilt.call.event.ErrorEventsListener;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInvitationDialog;
@@ -43,9 +44,10 @@ import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import com.zegocloud.uikit.service.express.IExpressEngineEventHandler;
 import im.zego.uikit.libuikitreport.ReportUtil;
+import im.zego.zegoexpress.ZegoExpressEngine;
 import im.zego.zegoexpress.entity.ZegoUser;
+import im.zego.zim.ZIM;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -204,17 +206,17 @@ public class CallInvitationServiceImpl {
     }
 
     public void initAndLoginUserByLastRecord(Application application) {
-        MMKV mmkv = MMKV.defaultMMKV(MMKV.SINGLE_PROCESS_MODE, getClass().getName());
-        boolean containsAppID = mmkv.contains("appID");
+        boolean containsAppID = Storage.contains("appID");
         Timber.d("initAndLoginUserByLastRecord() called with: containsAppID = [" + containsAppID + "]");
         if (containsAppID) {
-            long preAppID = mmkv.decodeLong("appID", 0);
-            String preAppSign = mmkv.decodeString("appSign", "");
-            String token = mmkv.decodeString("appToken", "");
+            long preAppID = Storage.appID();
+            String preAppSign = Storage.appSign();
+            String token = Storage.appToken();
+
             initSDK(application, preAppID, preAppSign, token);
             userRepository.initAndLoginUserByLastRecord(null);
         } else {
-            Timber.d("initAndLoginUserByLastRecord,no AppID found,allKeys: %s",Arrays.asList(mmkv.allKeys()).toString());
+            Timber.d("initAndLoginUserByLastRecord,no AppID found");
         }
     }
 
@@ -247,6 +249,9 @@ public class CallInvitationServiceImpl {
     }
 
     public boolean initSDK(Application application, long appID, String appSign, String token) {
+        Timber.d("init() called with: Build.MANUFACTURER = [" + Build.MANUFACTURER + "], Build.VERSION.SDK_INT = ["
+            + Build.VERSION.SDK_INT + "],targetSdkVersion:" + application.getApplicationInfo().targetSdkVersion);
+
         Timber.d("Call initSDK() called with: version = [" + getVersion() + "], appID = [" + appID
             + "], appSign.isEmpty() = [" + TextUtils.isEmpty(appSign) + "], token.isEmpty() = [" + TextUtils.isEmpty(
             token) + "],alreadyInit: " + alreadyInit);
@@ -280,11 +285,10 @@ public class CallInvitationServiceImpl {
             alreadyInit = true;
             this.application = application;
 
-            MMKV mmkv = MMKV.defaultMMKV(MMKV.SINGLE_PROCESS_MODE, getClass().getName());
-            boolean encode = mmkv.encode("appID", appID);
-            mmkv.encode("appSign", appSign);
-            mmkv.encode("appToken", token);
-            Timber.d("MMKV.encode : appID = [" + appID + "],result:" + encode);
+            boolean encode = Storage.set_appID(appID);
+            Storage.set_appSign(appSign);
+            Storage.set_appToken(token);
+            Timber.d("save_appID : appID = [" + appID + "],result:" + encode);
 
             if (!TextUtils.isEmpty(token)) {
                 expressBridge.renewToken(token);
@@ -369,14 +373,13 @@ public class CallInvitationServiceImpl {
     public void initBeautyPlugin() {
         if (callConfig != null) {
             beautyRepository.updateLanguageSettingsAndApply(callConfig);
-            MMKV mmkv = MMKV.defaultMMKV(MMKV.SINGLE_PROCESS_MODE, getClass().getName());
-            boolean containsAppID = mmkv.contains("appID");
+            boolean containsAppID = Storage.contains("appID");
             if (containsAppID) {
-                long appID = mmkv.decodeInt("appID", 0);
-                String appSign = mmkv.decodeString("appSign", "");
+                long appID = Storage.appID();
+                String appSign = Storage.appSign();
                 beautyRepository.init(application, appID, appSign);
             } else {
-                Timber.d("initBeautyPlugin,no AppID found,allKeys: %s", Arrays.asList(mmkv.allKeys()).toString());
+                Timber.d("initBeautyPlugin,no AppID found");
             }
         }
     }

@@ -12,6 +12,7 @@ import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.ZegoUIKit;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.core.notification.RingtoneManager;
+import com.zegocloud.uikit.prebuilt.call.core.utils.Storage;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,6 +30,7 @@ public class PrebuiltCallInitializer extends ContentProvider {
     public boolean onCreate() {
 
         MMKV.initialize(getContext());
+        Storage.context = getContext();
         Application application = (Application) getContext();
         if (application != null) {
             ZegoUIKit.debugMode(application);

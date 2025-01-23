@@ -1,10 +1,10 @@
 package com.zegocloud.uikit.prebuilt.call.core.basic;
 
-import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.core.PrebuiltCallExpressBridge;
 import com.zegocloud.uikit.prebuilt.call.core.PrebuiltCallZIMBridge;
+import com.zegocloud.uikit.prebuilt.call.core.utils.Storage;
 import com.zegocloud.uikit.prebuilt.call.event.SignalPluginConnectListener;
 import com.zegocloud.uikit.service.defines.ZegoUIKitPluginCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
@@ -53,9 +53,8 @@ public class PrebuiltUserRepository {
     }
 
     public void initAndLoginUserByLastRecord(ZegoUIKitPluginCallback callback) {
-        MMKV mmkv = MMKV.defaultMMKV(MMKV.SINGLE_PROCESS_MODE, getClass().getName());
-        String preUserID = mmkv.getString("userID", "");
-        String preUserName = mmkv.getString("userName", "");
+        String preUserID = Storage.userID();
+        String preUserName = Storage.userName();
         loginUser(preUserID, preUserName, callback);
     }
 
@@ -84,10 +83,9 @@ public class PrebuiltUserRepository {
                 }
             }
         });
-        MMKV mmkv = MMKV.defaultMMKV(MMKV.SINGLE_PROCESS_MODE, getClass().getName());
-        boolean result = mmkv.encode("userID", userID);
-        mmkv.encode("userName", userName);
-        Timber.d("MMKV.put : userID = [" + userID + "],result:" + result);
+        boolean result = Storage.set_userID(userID);
+        Storage.set_userName(userName);
+        Timber.d("save UserID: userID = [" + userID + "],result:" + result);
     }
 
     /**

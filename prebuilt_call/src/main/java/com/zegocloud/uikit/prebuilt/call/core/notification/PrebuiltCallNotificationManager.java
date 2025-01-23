@@ -15,13 +15,13 @@ import android.text.TextUtils;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import com.google.gson.Gson;
-import com.tencent.mmkv.MMKV;
 import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType;
 import com.zegocloud.uikit.prebuilt.call.core.CallInvitationServiceImpl;
 import com.zegocloud.uikit.prebuilt.call.core.invite.PrebuiltCallInviteExtendedData;
 import com.zegocloud.uikit.prebuilt.call.core.invite.ZegoCallInvitationData;
 import com.zegocloud.uikit.prebuilt.call.core.invite.ui.CallRouteActivity;
 import com.zegocloud.uikit.prebuilt.call.core.push.ZIMPushMessage;
+import com.zegocloud.uikit.prebuilt.call.core.utils.Storage;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.CallInviteActivity;
 import com.zegocloud.uikit.prebuilt.call.invite.internal.ZegoTranslationText;
@@ -150,8 +150,8 @@ public class PrebuiltCallNotificationManager {
             soundUri);
         NotificationManagerCompat.from(context).createNotificationChannel(channel);
 
-        MMKV.defaultMMKV().putString("channelID", channelID);
-        MMKV.defaultMMKV().putString("ringtone", soundUri.toString());
+        Storage.set_channelID(channelID);
+        Storage.set_ringtone(soundUri.toString());
     }
 
     public static String getSoundName(String sound) {
@@ -212,7 +212,7 @@ public class PrebuiltCallNotificationManager {
 
         ZegoUIKitPrebuiltCallInvitationConfig invitationConfig = CallInvitationServiceImpl.getInstance()
             .getCallInvitationConfig();
-        String channelID = MMKV.defaultMMKV().getString("channelID", null);
+        String channelID = Storage.channelID();
         if (channelID == null) {
             if (invitationConfig != null && invitationConfig.notificationConfig != null) {
                 channelID = invitationConfig.notificationConfig.channelID;
