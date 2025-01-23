@@ -2,7 +2,6 @@ package com.zegocloud.uikit.prebuilt.call.core.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.tencent.mmkv.MMKV;
 import timber.log.Timber;
 
 public class Storage {
@@ -69,16 +68,15 @@ public class Storage {
 
     public static boolean putLong(String key, long value) {
         Timber.d("putLong() called with: key = [" + key + "], value = [" + value + "]");
-        //        SharedPreferences sharedPreferences = context.getSharedPreferences(PREBUILT_CALL, Context.MODE_PRIVATE);
-        //        return sharedPreferences.edit().putLong(key, value).commit();
-        return MMKV.mmkvWithID(PREBUILT_CALL).encode(key, value);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREBUILT_CALL, Context.MODE_PRIVATE);
+        return sharedPreferences.edit().putLong(key, value).commit();
+        //        return MMKV.mmkvWithID(PREBUILT_CALL).encode(key, value);
     }
 
     public static long getLong(String key, long defValue) {
-        //        SharedPreferences sharedPreferences = context.getSharedPreferences("prebuilt_call", Context.MODE_PRIVATE);
-        //        return sharedPreferences.getLong(key, defValue);
-
-        return MMKV.mmkvWithID(PREBUILT_CALL).decodeLong(key, defValue);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("prebuilt_call", Context.MODE_PRIVATE);
+        return sharedPreferences.getLong(key, defValue);
+        //        return MMKV.mmkvWithID(PREBUILT_CALL).decodeLong(key, defValue);
     }
 
     private static int getInt(String key, int defValue) {
@@ -103,26 +101,26 @@ public class Storage {
 
     private static boolean putString(String key, String value) {
         Timber.d("putString() called with: key = [" + key + "], value = [" + value + "]");
-        //        SharedPreferences sharedPreferences = context.getSharedPreferences("prebuilt_call", Context.MODE_PRIVATE);
-        //        return sharedPreferences.edit().putString(key, value).commit();
-        return MMKV.mmkvWithID(PREBUILT_CALL).encode(key, value);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("prebuilt_call", Context.MODE_PRIVATE);
+        return sharedPreferences.edit().putString(key, value).commit();
+        //        return MMKV.mmkvWithID(PREBUILT_CALL).encode(key, value);
     }
 
     private static String getString(String key, String defValue) {
-        //        SharedPreferences sharedPreferences = context.getSharedPreferences("prebuilt_call", Context.MODE_PRIVATE);
-        //        return sharedPreferences.getString(key, defValue);
-        return MMKV.mmkvWithID(PREBUILT_CALL).decodeString(key, defValue);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("prebuilt_call", Context.MODE_PRIVATE);
+        return sharedPreferences.getString(key, defValue);
+        //        return MMKV.mmkvWithID(PREBUILT_CALL).decodeString(key, defValue);
     }
 
     public static void remove(String key) {
-        //        SharedPreferences sharedPreferences = context.getSharedPreferences("prebuilt_call", Context.MODE_PRIVATE);
-        //         sharedPreferences.edit().remove(key).commit();
-        MMKV.mmkvWithID(PREBUILT_CALL).remove(key);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("prebuilt_call", Context.MODE_PRIVATE);
+        sharedPreferences.edit().remove(key).commit();
+        //        MMKV.mmkvWithID(PREBUILT_CALL).remove(key);
     }
 
     public static boolean contains(String key) {
-        //        SharedPreferences sharedPreferences = context.getSharedPreferences("prebuilt_call", Context.MODE_PRIVATE);
-        //        return sharedPreferences.contains(key);
-        return MMKV.mmkvWithID(PREBUILT_CALL).contains(key);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("prebuilt_call", Context.MODE_PRIVATE);
+        return sharedPreferences.contains(key);
+        //        return MMKV.mmkvWithID(PREBUILT_CALL).contains(key);
     }
 }
