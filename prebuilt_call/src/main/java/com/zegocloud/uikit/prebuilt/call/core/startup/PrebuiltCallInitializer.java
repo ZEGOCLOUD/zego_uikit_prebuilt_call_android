@@ -30,7 +30,7 @@ public class PrebuiltCallInitializer extends ContentProvider {
     public boolean onCreate() {
 
         MMKV.initialize(getContext());
-        Storage.context = getContext();
+        Storage.init(getContext());
         Application application = (Application) getContext();
         if (application != null) {
             ZegoUIKit.debugMode(application);
