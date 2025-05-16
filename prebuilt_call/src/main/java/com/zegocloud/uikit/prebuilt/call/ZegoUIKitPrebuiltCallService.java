@@ -153,7 +153,7 @@ public class ZegoUIKitPrebuiltCallService {
         ZegoInvitationType type, String customData, ZegoSignalingPluginNotificationConfig notificationConfig,
         PluginCallbackListener callbackListener) {
         CallInvitationServiceImpl.getInstance()
-            .api_sendInvitationWithUIChange(activity, invitees, type, "", 60, null, notificationConfig,
+            .api_sendInvitationWithUIChange(activity, invitees, type, customData, 60, null, notificationConfig,
                 callbackListener);
     }
 
