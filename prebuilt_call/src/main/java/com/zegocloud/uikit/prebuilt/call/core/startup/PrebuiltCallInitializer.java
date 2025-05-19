@@ -38,9 +38,15 @@ public class PrebuiltCallInitializer extends ContentProvider {
             CallInvitationServiceImpl.getInstance().setUpCallbacksOnAppStart(application);
             RingtoneManager.init(application);
 
-            String baseDir = getContext().getExternalFilesDir(null).getAbsolutePath();
-            String crashFilesDir = baseDir + File.separator + "callkit_crash";
-            initCrashDirs(getContext(), crashFilesDir);
+            File dir = getContext().getExternalFilesDir(null);
+            if (dir == null || (!dir.exists() && !dir.mkdirs())) {
+                dir = getContext().getFilesDir();
+            }
+            if (dir != null) {
+                String baseDir = dir.getAbsolutePath();
+                String crashFilesDir = baseDir + File.separator + "callkit_crash";
+                initCrashDirs(getContext(), crashFilesDir);
+            }
         }
         return true;
     }
