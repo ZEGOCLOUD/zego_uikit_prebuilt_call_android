@@ -72,6 +72,8 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 import timber.log.Timber;
 
@@ -268,7 +270,14 @@ public class PrebuiltCallRepository {
         callInvitationData.invitationID = zimCallInfo.callID;
         callInvitationData.type = extendedData.getType();
         callInvitationData.callID = data.getCallId();
-        callInvitationData.customData = data.getCustomData();
+
+        // Fix: Extract custom data directly from raw JSON to support cross-platform compatibility
+        // The PrebuiltCallInviteExtendedData.Data.getCustomData() method returns null due to
+        // JSON parsing issues with nested custom data structure. This fix extracts the custom data
+        // directly from the raw JSON and handles both iOS (camelCase) and Android (snake_case) formats.
+        String rawCustomData = extractCustomDataFromRawJson(extendedData.getData());
+        callInvitationData.customData = rawCustomData;
+
         callInvitationData.invitees = zimCallInfo.callUserList.stream()
             .filter(zimCallUserInfo -> !Objects.equals(zimCallInfo.caller, zimCallUserInfo.userID))
             .map(zimCallUserInfo -> getUiKitUserFromUserID(zimCallUserInfo.userID)).collect(Collectors.toList());
@@ -340,6 +349,41 @@ public class PrebuiltCallRepository {
             clearPushMessage();
             notifyIncomingCallReceived(zimCallInfo.callID, caller, extendedData.getType());
         }
+    }
+
+    /**
+     * Extracts custom data from raw JSON string to support cross-platform compatibility.
+     *
+     * This method handles the parsing of custom data from call invitation extended data,
+     * supporting both iOS and Android naming conventions:
+     * - iOS format uses "customData" (camelCase)
+     * - Android format uses "custom_data" (snake_case)
+     *
+     * Background: The PrebuiltCallInviteExtendedData.Data.getCustomData() method returns null
+     * due to Gson parsing issues with the nested JSON structure. This method directly parses
+     * the raw JSON to extract the custom data field.
+     *
+     * @param rawJsonData The raw JSON string from extendedData.getData()
+     * @return The extracted custom data string, or null if not found or parsing fails
+     */
+    private String extractCustomDataFromRawJson(String rawJsonData) {
+        if (rawJsonData != null) {
+            try {
+                JSONObject json = new JSONObject(rawJsonData);
+
+                // Try both naming conventions for cross-platform compatibility
+                if (json.has("customData")) {
+                    // iOS format (camelCase)
+                    return json.getString("customData");
+                } else if (json.has("custom_data")) {
+                    // Android format (snake_case)
+                    return json.getString("custom_data");
+                }
+            } catch (JSONException e) {
+                Timber.e("extractCustomDataFromRawJson JSON parsing error: " + e.getMessage());
+            }
+        }
+        return null;
     }
 
     public void zimCallInvitationCancelled(ZIM zim, ZIMCallInvitationCancelledInfo info, String callID) {
