@@ -131,8 +131,7 @@ public class PrebuiltCallRepository {
     }
 
     private void dismissIncomingCallNotification() {
-        Activity topActivity = CallInvitationServiceImpl.getInstance().getTopActivity();
-        notificationManager.dismissCallNotification(topActivity);
+        CallInvitationServiceImpl.getInstance().dismissCallNotification();
     }
 
     private static void stopRingTone() {
@@ -929,7 +928,6 @@ public class PrebuiltCallRepository {
         ZegoUIKit.getSignalingPlugin().callReject(invitationID, data, new PluginCallbackListener() {
             @Override
             public void callback(Map<String, Object> result) {
-
 
                 if (callbackListener != null) {
                     callbackListener.callback(result);

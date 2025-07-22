@@ -44,9 +44,7 @@ import com.zegocloud.uikit.service.defines.ZegoUIKitCallback;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 import com.zegocloud.uikit.service.express.IExpressEngineEventHandler;
 import im.zego.uikit.libuikitreport.ReportUtil;
-import im.zego.zegoexpress.ZegoExpressEngine;
 import im.zego.zegoexpress.entity.ZegoUser;
-import im.zego.zim.ZIM;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -463,10 +461,6 @@ public class CallInvitationServiceImpl {
         if (application != null) {
             notificationManager.dismissCallNotification(application);
         }
-    }
-
-    public void dismissCallNotification(Context context) {
-        notificationManager.dismissCallNotification(context);
     }
 
     public boolean isInCallRoom() {

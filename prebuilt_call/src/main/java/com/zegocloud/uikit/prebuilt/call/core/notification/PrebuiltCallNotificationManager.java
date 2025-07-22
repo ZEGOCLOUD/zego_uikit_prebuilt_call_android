@@ -1,5 +1,6 @@
 package com.zegocloud.uikit.prebuilt.call.core.notification;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
@@ -56,9 +57,7 @@ public class PrebuiltCallNotificationManager {
         }
 
         boolean notificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled();
-        Timber.d("showCallNotification, hasNotificationPermission = %b,notificationsEnabled = %b",
-
-            hasNotificationPermission, notificationsEnabled);
+        Timber.d("showCallNotification, hasNotificationPermission = %b,notificationsEnabled = %b", hasNotificationPermission, notificationsEnabled);
         if (hasNotificationPermission && notificationsEnabled) {
 
             isNotificationShowed = true;
@@ -71,18 +70,20 @@ public class PrebuiltCallNotificationManager {
     }
 
     public void wakeLockScreen(Context context) {
-        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
-            PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "MyApp::MyWakeLockTag");
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WAKE_LOCK) == PackageManager.PERMISSION_GRANTED) {
+            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "MyApp::MyWakeLockTag");
 
-        wakeLock.acquire(3000);
+            wakeLock.acquire(3000);
 
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                wakeLock.release();
-            }
-        }, 5000);
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    wakeLock.release();
+                }
+            }, 5000);
+        }
     }
 
     public static String getBackgroundNotificationMessage(boolean isVideoCall, boolean isGroup) {
