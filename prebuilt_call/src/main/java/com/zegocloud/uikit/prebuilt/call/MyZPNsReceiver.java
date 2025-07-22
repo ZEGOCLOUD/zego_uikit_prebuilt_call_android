@@ -45,8 +45,7 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
                     context.sendBroadcast(intent);
                 }
             } else {
-                Timber.d(
-                    "pushMessage.payLoad = [" + pushMessage.payLoad + "],receive Cancel Call Offline");
+                Timber.d("pushMessage.payLoad = [" + pushMessage.payLoad + "]");
                 // else we assume that app is not started,offline message is effective
                 if (TextUtils.isEmpty(pushMessage.payLoad)) {    //Empty payLoad means cancel call
                     ZIMPushMessage zimPushMessage = CallInvitationServiceImpl.getInstance().getZIMPushMessage();
@@ -74,7 +73,7 @@ public class MyZPNsReceiver extends ZPNsMessageReceiver {
                     // case,offline message is ignored.
                     if (topActivity != null) {
                         Timber.d(
-                            "receive offline call but topActivity is not null,ignore this time" );
+                            "receive offline call but topActivity is not null,ignore this time");
                         return;
                     }
                     ZegoCallInvitationData callInvitationData = CallInvitationServiceImpl.getInstance()
