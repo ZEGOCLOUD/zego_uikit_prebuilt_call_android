@@ -45,6 +45,7 @@ public class ZegoTranslationText {
     public String sendCallButtonError;
 
 
+    // 根据 language ，把数据从 invatationBaseText 复制过来。
     private InvitationBaseText invatationBaseText = new InvitationTextEnglish();
 
     public ZegoTranslationText() {

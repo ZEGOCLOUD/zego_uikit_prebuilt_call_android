@@ -37,6 +37,7 @@ import im.zego.zim.callback.ZIMCallInvitationSentCallback;
 import im.zego.zim.callback.ZIMCallQuitSentCallback;
 import im.zego.zim.callback.ZIMCallingInvitationSentCallback;
 import im.zego.zim.callback.ZIMEventHandler;
+import im.zego.zim.callback.ZIMUsersInfoQueriedCallback;
 import im.zego.zim.entity.ZIMCallAcceptConfig;
 import im.zego.zim.entity.ZIMCallCancelConfig;
 import im.zego.zim.entity.ZIMCallEndConfig;
@@ -680,147 +681,197 @@ public class PrebuiltCallRepository {
             });
     }
 
+    private void queryBeforeSendInvitation(List<ZegoUIKitUser> invitees, ZIMUsersInfoQueriedCallback callback) {
+
+    }
 
     public void sendInvitation(List<ZegoUIKitUser> invitees, ZegoInvitationType invitationType, String customData,
         int timeout, String callID, ZegoSignalingPluginNotificationConfig notificationConfig,
         PluginCallbackListener callbackListener) {
 
-        List<String> idList = invitees.stream().map(zegoUIKitUser -> zegoUIKitUser.userID).collect(Collectors.toList());
-        PrebuiltCallInviteExtendedData.Data data = generateCallExtData(invitees, callID, customData);
-        ZegoSignalingPluginNotificationConfig pushConfig = generatePushConfig(invitees, invitationType,
-            notificationConfig);
-        pushRepository.setCallResourceID(pushConfig.getResourceID());
-
         ZegoUIKitPrebuiltCallInvitationConfig invitationConfig = CallInvitationServiceImpl.getInstance()
             .getCallInvitationConfig();
         if (invitationConfig == null) {
+            if (callbackListener != null) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("code", -4);
+                map.put("message", "No invitationConfig found,cannot send invitation now");
+                map.put("invitationID", "");
+                callbackListener.callback(map);
+            }
             return;
         }
-        if (invitationConfig.callingConfig == null || !invitationConfig.callingConfig.canInvitingInCalling) {
-            // normal mode
-            if (getCallState() > 0) {
-                if (callbackListener != null) {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("code", -3);
-                    map.put("message", "You are not idle,cannot send invitation now");
-                    map.put("invitationID", "");
-                    callbackListener.callback(map);
-                }
-                return;
-            }
+        
+        List<String> userIDList = invitees.stream().map(zegoUIKitUser -> zegoUIKitUser.userID)
+            .collect(Collectors.toList());
+        ZegoSignalingPlugin.getInstance()
+            .queryUserInfo(userIDList, new ZIMUsersInfoQueryConfig(), (userList, errorUserList, errorInfo) -> {
+                if (errorInfo.code == ZIMErrorCode.SUCCESS) {
 
-            // pre set to reject other call when sending call
-            setCallState(PrebuiltCallRepository.OUTGOING);
-            ZegoUIKit.getSignalingPlugin()
-                .sendInvitation(idList, timeout, invitationType.getValue(), gson.toJson(data), pushConfig, result -> {
-                    int code = (int) result.get("code");
-                    List<ZegoUIKitUser> errorInvitees = (List<ZegoUIKitUser>) result.get("errorInvitees");
-                    String invitationID = (String) result.get("invitationID");
-                    if (code == 0) {
-                        if (errorInvitees == null || errorInvitees.size() < invitees.size()) {
-                            onCallInvitationSentSucceed(invitees, invitationType, customData, invitationID, data);
-                        }
+                    List<String> idList = invitees.stream().map(zegoUIKitUser -> zegoUIKitUser.userID)
+                        .collect(Collectors.toList());
+                    PrebuiltCallInviteExtendedData.Data data = generateCallExtData(invitees, callID, customData);
+                    ZegoSignalingPluginNotificationConfig pushConfig = generatePushConfig(invitees, invitationType,
+                        notificationConfig);
+                    pushRepository.setCallResourceID(pushConfig.getResourceID());
+
+                    if (invitationConfig.callingConfig == null
+                        || !invitationConfig.callingConfig.canInvitingInCalling) {
+                        createAndSendNormalInvitation(idList, data, pushConfig, callbackListener, timeout,
+                            invitationType, invitees, customData, callID);
                     } else {
-                        setCallState(PrebuiltCallRepository.NONE);
-                    }
-                    HashMap<String, Object> hashMap = new HashMap<>();
-                    hashMap.put("call_id", invitationID);
-                    hashMap.put("room_id", callID);
-                    hashMap.put("source", "");
-                    ReportUtil.reportEvent("call/invite", hashMap);
-                    if (callbackListener != null) {
-                        callbackListener.callback(result);
-                    }
-                });
-        } else {
-            // advanced mode
+                        // advanced mode
+                        ZIMUserInfo localUser = zimBridge.getLocalUser();
+                        PrebuiltCallInviteExtendedData extendedDataObj = new PrebuiltCallInviteExtendedData();
+                        extendedDataObj.setType(invitationType.getValue());
+                        extendedDataObj.setInviterId(localUser.userID);
+                        extendedDataObj.setInviterName(localUser.userName);
+                        extendedDataObj.setData(gson.toJson(data));
+                        String extendedData = gson.toJson(extendedDataObj);
 
-            ZIMUserInfo localUser = zimBridge.getLocalUser();
-            PrebuiltCallInviteExtendedData extendedDataObj = new PrebuiltCallInviteExtendedData();
-            extendedDataObj.setType(invitationType.getValue());
-            extendedDataObj.setInviterId(localUser.userID);
-            extendedDataObj.setInviterName(localUser.userName);
-            extendedDataObj.setData(gson.toJson(data));
-            String extendedData = gson.toJson(extendedDataObj);
-
-            if (callInvitationData == null) {
-                // pre set to reject other call when sending call
-                setCallState(PrebuiltCallRepository.OUTGOING);
-                callInviteAdvanced(idList, extendedData, timeout, pushConfig, new ZIMCallInvitationSentCallback() {
-                    @Override
-                    public void onCallInvitationSent(String zimCallID, ZIMCallInvitationSentInfo info,
-                        ZIMError errorInfo) {
-
-                        HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("call_id", zimCallID);
-                        hashMap.put("room_id", callID);
-                        hashMap.put("source", "");
-                        ReportUtil.reportEvent("call/invite", hashMap);
-
-                        if (errorInfo.code == ZIMErrorCode.SUCCESS) {
-                            if (info.errorUserList.size() < idList.size()) {
-                                onCallInvitationSentSucceed(invitees, invitationType, customData, zimCallID, data);
-                            }
+                        if (callInvitationData == null) {
+                            // pre set to reject other call when sending call
+                            sendCreateAdvancedInvivation(idList, extendedData, pushConfig, data, timeout, callID,
+                                invitees, invitationType, customData, callbackListener);
                         } else {
-                            setCallState(PrebuiltCallRepository.NONE);
+                            sendJoinAdvancedInvitation(invitationConfig, localUser, idList, extendedData, pushConfig,
+                                callbackListener, invitees);
                         }
+                    }
+                } else {
+                    if (callbackListener != null) {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("code", errorInfo.code.value());
+                        map.put("message", errorInfo.message);
+                        map.put("invitationID", "");
+                        callbackListener.callback(map);
+                    }
+                }
+            });
+    }
 
-                        Map<String, Object> result = new HashMap<>();
-                        result.put("code", errorInfo.code.value());
-                        result.put("message", errorInfo.message);
-                        result.put("invitationID", zimCallID);
+    private void sendJoinAdvancedInvitation(ZegoUIKitPrebuiltCallInvitationConfig invitationConfig,
+        ZIMUserInfo localUser, List<String> idList, String extendedData,
+        ZegoSignalingPluginNotificationConfig pushConfig, PluginCallbackListener callbackListener,
+        List<ZegoUIKitUser> invitees) {
+        boolean onlyInitiatorCanInvite = invitationConfig.callingConfig.onlyInitiatorCanInvite;
+        String zimCallID = callInvitationData.invitationID;
+        boolean selfIsNotCaller = !Objects.equals(callInvitationData.inviter.userID, localUser.userID);
+        if (onlyInitiatorCanInvite && selfIsNotCaller) {
+            // not initiator,cannot calling invite
+            Map<String, Object> result = new HashMap<>();
+            result.put("code", ZIMErrorCode.CALL_ERROR);
+            result.put("invitationID", zimCallID);
+            result.put("message", "Only Initiator Can Invite");
+            if (callbackListener != null) {
+                callbackListener.callback(result);
+            }
+        } else {
+            callingInviteAdvanced(idList, extendedData, zimCallID, pushConfig, new ZIMCallingInvitationSentCallback() {
+                @Override
+                public void onCallingInvitationSent(String zimCallID, ZIMCallingInvitationSentInfo info,
+                    ZIMError errorInfo) {
+
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("code", errorInfo.code.value());
+                    result.put("message", errorInfo.message);
+                    result.put("invitationID", zimCallID);
+                    if (info != null) {
                         List<String> errorUserIDList = info.errorUserList.stream()
                             .map(zimErrorUserInfo -> zimErrorUserInfo.userID).collect(Collectors.toList());
                         List<ZegoUIKitUser> errorUserList = invitees.stream()
                             .filter(zegoUIKitUser -> errorUserIDList.contains(zegoUIKitUser.userID))
                             .collect(Collectors.toList());
                         result.put("errorInvitees", errorUserList);
-
-                        if (callbackListener != null) {
-                            callbackListener.callback(result);
-                        }
                     }
-                });
-            } else {
-                boolean onlyInitiatorCanInvite = invitationConfig.callingConfig.onlyInitiatorCanInvite;
-                String zimCallID = callInvitationData.invitationID;
-                boolean selfIsNotCaller = !Objects.equals(callInvitationData.inviter.userID, localUser.userID);
-                if (onlyInitiatorCanInvite && selfIsNotCaller) {
-                    // not initiator,cannot calling invite
-                    Map<String, Object> result = new HashMap<>();
-                    result.put("code", ZIMErrorCode.CALL_ERROR);
-                    result.put("invitationID", zimCallID);
-                    result.put("message", "Only Initiator Can Invite");
+
                     if (callbackListener != null) {
                         callbackListener.callback(result);
                     }
+                }
+            });
+        }
+    }
+
+    private void sendCreateAdvancedInvivation(List<String> idList, String extendedData,
+        ZegoSignalingPluginNotificationConfig pushConfig, Data data, int timeout, String callID,
+        List<ZegoUIKitUser> invitees, ZegoInvitationType invitationType, String customData,
+        PluginCallbackListener callbackListener) {
+        setCallState(PrebuiltCallRepository.OUTGOING);
+        callInviteAdvanced(idList, extendedData, timeout, pushConfig, new ZIMCallInvitationSentCallback() {
+            @Override
+            public void onCallInvitationSent(String zimCallID, ZIMCallInvitationSentInfo info, ZIMError errorInfo) {
+
+                HashMap<String, Object> hashMap = new HashMap<>();
+                hashMap.put("call_id", zimCallID);
+                hashMap.put("room_id", callID);
+                hashMap.put("source", "");
+                ReportUtil.reportEvent("call/invite", hashMap);
+
+                if (errorInfo.code == ZIMErrorCode.SUCCESS) {
+                    if (info.errorUserList.size() < idList.size()) {
+                        onCallInvitationSentSucceed(invitees, invitationType, customData, zimCallID, data);
+                    }
                 } else {
-                    callingInvite(idList, extendedData, zimCallID, pushConfig, new ZIMCallingInvitationSentCallback() {
-                        @Override
-                        public void onCallingInvitationSent(String zimCallID, ZIMCallingInvitationSentInfo info,
-                            ZIMError errorInfo) {
+                    setCallState(PrebuiltCallRepository.NONE);
+                }
 
-                            Map<String, Object> result = new HashMap<>();
-                            result.put("code", errorInfo.code.value());
-                            result.put("message", errorInfo.message);
-                            result.put("invitationID", zimCallID);
-                            if (info != null) {
-                                List<String> errorUserIDList = info.errorUserList.stream()
-                                    .map(zimErrorUserInfo -> zimErrorUserInfo.userID).collect(Collectors.toList());
-                                List<ZegoUIKitUser> errorUserList = invitees.stream()
-                                    .filter(zegoUIKitUser -> errorUserIDList.contains(zegoUIKitUser.userID))
-                                    .collect(Collectors.toList());
-                                result.put("errorInvitees", errorUserList);
-                            }
+                Map<String, Object> result = new HashMap<>();
+                result.put("code", errorInfo.code.value());
+                result.put("message", errorInfo.message);
+                result.put("invitationID", zimCallID);
+                List<String> errorUserIDList = info.errorUserList.stream()
+                    .map(zimErrorUserInfo -> zimErrorUserInfo.userID).collect(Collectors.toList());
+                List<ZegoUIKitUser> errorUserList = invitees.stream()
+                    .filter(zegoUIKitUser -> errorUserIDList.contains(zegoUIKitUser.userID))
+                    .collect(Collectors.toList());
+                result.put("errorInvitees", errorUserList);
 
-                            if (callbackListener != null) {
-                                callbackListener.callback(result);
-                            }
-                        }
-                    });
+                if (callbackListener != null) {
+                    callbackListener.callback(result);
                 }
             }
+        });
+    }
+
+    private void createAndSendNormalInvitation(List<String> idList, Data data,
+        ZegoSignalingPluginNotificationConfig pushConfig, PluginCallbackListener callbackListener, int timeout,
+        ZegoInvitationType invitationType, List<ZegoUIKitUser> invitees, String customData, String callID) {
+        // normal mode
+        if (getCallState() > 0) {
+            if (callbackListener != null) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("code", -3);
+                map.put("message", "You are not idle,cannot send invitation now");
+                map.put("invitationID", "");
+                callbackListener.callback(map);
+            }
+            return;
         }
+
+        // pre set to reject other call when sending call
+        setCallState(PrebuiltCallRepository.OUTGOING);
+        ZegoUIKit.getSignalingPlugin()
+            .sendInvitation(idList, timeout, invitationType.getValue(), gson.toJson(data), pushConfig, result -> {
+                int code = (int) result.get("code");
+                List<ZegoUIKitUser> errorInvitees = (List<ZegoUIKitUser>) result.get("errorInvitees");
+                String invitationID = (String) result.get("invitationID");
+                if (code == 0) {
+                    if (errorInvitees == null || errorInvitees.size() < invitees.size()) {
+                        onCallInvitationSentSucceed(invitees, invitationType, customData, invitationID, data);
+                    }
+                } else {
+                    setCallState(PrebuiltCallRepository.NONE);
+                }
+                HashMap<String, Object> hashMap = new HashMap<>();
+                hashMap.put("call_id", invitationID);
+                hashMap.put("room_id", callID);
+                hashMap.put("source", "");
+                ReportUtil.reportEvent("call/invite", hashMap);
+                if (callbackListener != null) {
+                    callbackListener.callback(result);
+                }
+            });
     }
 
     private void onCallInvitationSentSucceed(List<ZegoUIKitUser> invitees, ZegoInvitationType invitationType,
@@ -1044,7 +1095,7 @@ public class PrebuiltCallRepository {
         stopRingTone();
     }
 
-    private void callingInvite(List<String> invitees, String extendedData, String zimCallID,
+    private void callingInviteAdvanced(List<String> invitees, String extendedData, String zimCallID,
         ZegoSignalingPluginNotificationConfig notificationConfig, ZIMCallingInvitationSentCallback callback) {
         ZIMPushConfig pushConfig = new ZIMPushConfig();
         if (notificationConfig != null) {
